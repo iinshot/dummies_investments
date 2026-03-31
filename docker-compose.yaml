@@ -1,10 +1,11 @@
 name: dummies_investments
 services:
   front:
-    image: nginx:latest
+    #image: nginx:latest
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./front:/var/www/dummies_investments/html
+    #  - ./front:/var/www/dummies_investments/html
+    build: ./front
     ports:
       - "80:80"
       - "443:443"
