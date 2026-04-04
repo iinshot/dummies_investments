@@ -45,11 +45,20 @@ pnpm-debug.log*
 # Local development files
 # =========================================
 .git/
+.gitignore
 .vscode/
 .idea/
 *.swp
 .DS_Store
 Thumbs.db
+ 
+# =========================================
+# Docker-related files
+# =========================================
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.override.yml
  
 # =========================================
 # AI / LLM-related files
@@ -67,4 +76,3 @@ anthropic/
 chat_history/
 ai_logs/
 ai_cache/
-*.env
