@@ -1,8 +1,19 @@
-from fastapi import FastAPI, APIRouter
-from fastapi.openapi.utils import get_openapi
+from fastapi import FastAPI
 import uvicorn
 
-app = FastAPI(root_path="/api", openapi_url="/openapi.json")
+from db.session import engine, get_db
+from sqlalchemy import select
+from models import Base
+
+# Should use alembic for migrations but figured it'd be too much trouble to run migrations
+# by hand for all of us especially fronts who don't have anything to do with db so for now:
+# try statement for compatability with tests
+try:
+    Base.metadata.create_all(bind=engine)
+except:
+    ...
+
+app = FastAPI(root_path="/api")
 
 @app.get("/")
 async def root():
