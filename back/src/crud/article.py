@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from typing import Optional, List, Any, Dict
-from ..models.Article import Article
+from models.Article import Article
 
 async def create_article(
     session: AsyncSession,

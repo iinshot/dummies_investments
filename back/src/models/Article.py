@@ -24,5 +24,5 @@ class Article(Base):
         back_populates="article"
     )
     id_quiz: Mapped[Optional[int]] = mapped_column(ForeignKey("quizes.id_quiz"))
-    users_articles: Mapped[List["UserArticle"]] = relationship("UserArticle", back_populates='article')
+    users_articles: Mapped[List["UserArticle"]] = relationship("UserArticle", back_populates='article', lazy='selectin')
     users = association_proxy('users_articles', 'user', creator=lambda user: UserArticle(user=user))

@@ -65,7 +65,7 @@ cd back
 ```
 2. Build tests docker image:
 ```sh
-docker build -t tests Dockerfile.test .
+docker build -t tests -f Dockerfile.test .
 ```
 3. Run tests in a docker container:
 ```sh

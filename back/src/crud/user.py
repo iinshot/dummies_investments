@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from typing import Optional, List
 import bcrypt
-from ..models.User import User
+from models.User import User
 
 async def create_user(
     session: AsyncSession,

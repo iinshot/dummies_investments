@@ -22,8 +22,8 @@ class Quiz(Base):
         back_populates="quiz"
     )
     
-    quizes_questions: Mapped[List["QuizQuestion"]] = relationship("QuizQuestion", back_populates='quiz')
+    quizes_questions: Mapped[List["QuizQuestion"]] = relationship("QuizQuestion", back_populates='quiz', lazy='selectin')
     questions = association_proxy('quizes_questions', 'question', creator=lambda question: QuizQuestion(question=question))
-    users_quizes: Mapped[List["UserQuiz"]] = relationship("UserQuiz", back_populates='quiz')
+    users_quizes: Mapped[List["UserQuiz"]] = relationship("UserQuiz", back_populates='quiz', lazy='selectin')
     users = association_proxy('users_quizes', 'user', creator=lambda user: UserQuiz(user=user))
-    users_quizes_answers: Mapped[List["UserQuizAnswer"]] = relationship("UserQuizAnswer", back_populates='quiz')
+    users_quizes_answers: Mapped[List["UserQuizAnswer"]] = relationship("UserQuizAnswer", back_populates='quiz', lazy='selectin')

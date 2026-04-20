@@ -20,6 +20,6 @@ class Question(Base):
     question_text: Mapped[str] = mapped_column(String(1023))
     question_type: Mapped[QuestionType] = mapped_column(Enum(QuestionType), nullable=False)
     
-    quizes_questions: Mapped[List["QuizQuestion"]] = relationship("QuizQuestion", back_populates='question')
+    quizes_questions: Mapped[List["QuizQuestion"]] = relationship("QuizQuestion", back_populates='question', lazy='selectin')
     quizes = association_proxy('quizes_questions', 'quiz', creator=lambda quiz: QuizQuestion(quiz=quiz))
     answers: Mapped[List["Answer"]] = relationship(back_populates='question', cascade="all, delete-orphan")

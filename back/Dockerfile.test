@@ -2,7 +2,7 @@ FROM alpine:latest
 RUN apk update && apk add python3 py3-pip
 COPY ./src/requirements.txt /
 RUN pip install -r /requirements.txt --break-system-packages
-RUN pip install pytest httpx --break-system-packages
+RUN pip install pytest pytest-asyncio httpx aiosqlite --break-system-packages
 COPY ./src /app
 WORKDIR /app
 ENV PYTHONPATH=/app

@@ -21,5 +21,5 @@ class Module(Base):
         back_populates="module"
     )
     id_quiz: Mapped[Optional[int]] = mapped_column(ForeignKey("quizes.id_quiz"))
-    users_modules: Mapped[List["UserModule"]] = relationship("UserModule", back_populates='module')
+    users_modules: Mapped[List["UserModule"]] = relationship("UserModule", back_populates='module', lazy='selectin')
     users = association_proxy('users_modules', 'user', creator=lambda user: UserModule(user=user))
