@@ -30,7 +30,8 @@ async def db_session(engine) -> Generator[AsyncSession, None, None]:
             session = async_sessionmaker(bind=connection, expire_on_commit=False)()
             
             yield session
-            
+
+            await transaction.rollback()
             await session.close()
 
 @pytest.fixture(scope="function")
