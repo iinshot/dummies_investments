@@ -33,6 +33,13 @@ class TestUserCRUD:
     async def test_get_all_users(self, db_session):
         await user.create_user(
             session=db_session,
+            name="John Doe",
+            email="john@example.com",
+            password="secret123"
+        )
+
+        await user.create_user(
+            session=db_session,
             name="Jane Doe",
             email="jane@example.com",
             password="secret456"
