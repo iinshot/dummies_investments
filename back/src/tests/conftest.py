@@ -10,6 +10,7 @@ from main import app
 from models import Base, User, Module, Question, Article, Quiz, QuizQuestion, Answer
 from models import UserModule, UserArticle, UserQuiz, UserQuizAnswer
 from models.Question import QuestionType
+from crud import answer
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -78,3 +79,13 @@ async def test_question(db_session):
     await db_session.commit()
     await db_session.refresh(question)
     return question
+
+@pytest.fixture
+async def test_answer(db_session, test_question):
+    ans = await answer.create_answer(
+        db_session,
+        id_question=test_question.id_question,
+        answer_text="Test Answer",
+        is_correct=True
+    )
+    return ans
