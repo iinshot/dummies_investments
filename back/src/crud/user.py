@@ -41,6 +41,15 @@ async def get_user(
     result = await session.execute(query)
     return result.scalar_one_or_none()
 
+async def get_user_by_email(
+    session: AsyncSession,
+    email: str
+) -> Optional[User]:
+    """Получение пользователя по email"""
+    query = select(User).where(User.email == email)
+    result = await session.execute(query)
+    return result.scalar_one_or_none()
+
 
 async def get_all_users(
     session: AsyncSession,
