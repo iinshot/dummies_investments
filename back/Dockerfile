@@ -4,4 +4,4 @@ COPY ./src/requirements.txt /
 RUN pip install -r /requirements.txt --break-system-packages
 COPY ./src /app
 WORKDIR /app
-CMD ["python", "-u", "./main.py"]
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
