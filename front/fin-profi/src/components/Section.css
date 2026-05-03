@@ -1,0 +1,10 @@
+@import url('../constants/colors.css');
+
+section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--surface-white);
+    border-radius: 30px;
+    flex-shrink: 0;
+}

@@ -1,0 +1,16 @@
+@import url('../constants/colors.css');
+
+.content-container {
+    border-radius: 30px;
+    background-color: var(--background);
+    height: calc(100vh - 40px);
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+}
+
+.content-container::-webkit-scrollbar {
+    display: none;
+}

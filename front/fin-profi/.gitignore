@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# By Olegarhcik
+src/assets/rename.py
+
+# By Мишаня (если надо)

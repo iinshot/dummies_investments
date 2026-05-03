@@ -1,0 +1,94 @@
+@import url('../constants/colors.css');
+
+/* Navigation */
+
+.navbar-container {
+    width: 300px;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 32px 0;
+    margin: 0 auto;
+    border-radius: 30px;
+    background-color: var(--surface-white);
+}
+
+.navbar {
+    width: fit-content;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.divider {
+    height: 2px;
+    width: 100%;
+    background-color: var(--surface-light);
+}
+
+nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+/* Navigation Button */
+
+.nav-button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.nav-button svg {
+    opacity: 0.3;
+
+    transition: all 0.1s linear;
+}
+
+.nav-button {
+    padding: 16px 24px;
+    border-radius: 40px;
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+    color: var(--mid-gray);
+    background-color: var(--surface-light);
+    
+    font-variant-caps: all-small-caps;
+    font-size: 20px;
+    letter-spacing: 2%;
+    font-weight: 500;
+    
+    transition: all 0.1s linear;
+}
+
+.nav-button.active svg {
+    opacity: 1;
+}
+
+.nav-button.active {
+    background-color: var(--primary-yellow);
+    color: var(--text);
+    font-weight: 700;
+}
+
+.nav-button:not(.active):hover svg {
+    opacity: 0.7;
+}
+
+.nav-button:not(.active):hover {
+    background-color: var(--background);
+    color: var(--dark-gray)
+}
+
+.nav-button span {
+    text-box-trim: trim-both;
+    text-box-edge: cap alphabetic;
+    margin-top: -3px;
+}

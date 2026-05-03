@@ -1,0 +1,10 @@
+@import url('../constants/colors.css');
+
+.sidebar-container {
+    width: 300px;
+    border-radius: 30px;
+    background-color: var(--background);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
