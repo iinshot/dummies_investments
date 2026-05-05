@@ -1,9 +1,13 @@
 import React from 'react'
 import './Section.css'
+import clsx from 'clsx'
 
-export default function Section({ children, style }) {
+export default function Section({ children, shrink, padding }) {
   return (
-    <section style={style}>
+    <section
+      className={clsx({shrink})}
+      style={{ padding: padding ?? "32px 120px" }}
+    >
       { children }
     </section>
   )

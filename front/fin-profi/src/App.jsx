@@ -15,7 +15,7 @@ export default function App() {
   return (
     <div className="container">
       <AnimatePresence>
-        {show && <NavigationBar key="navbar" />}
+        {show && <NavigationBar />}
       </AnimatePresence>
 
       <AnimatePresence mode="wait">

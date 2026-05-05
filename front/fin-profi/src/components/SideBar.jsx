@@ -15,7 +15,7 @@ export default function SideBar({ children, animationProp }) {
       className="sidebar-container"
       {...animation}
     >
-        { children }
+      {children}
     </motion.div>
   )
 }

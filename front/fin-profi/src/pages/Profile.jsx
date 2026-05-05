@@ -2,7 +2,8 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../hooks'
 import { AUTH } from '../constants'
-import { Content, Section, SideBar } from '../components'
+import { Content, Section, NamedSection, SideBar } from '../components'
+import { Star } from '../assets/icons'
 
 export default function Profile() {
   const [auth, setAuth] = useAuth()
@@ -10,14 +11,14 @@ export default function Profile() {
   return (
     <>
       <Content>
-        <Section style={{ height: "500px" }}>Main</Section>
-        <Section style={{ height: "500px" }}>Main</Section>
-        <Section style={{ height: "500px" }}>Main</Section>
-        <Section style={{ height: "500px" }}>Main</Section>
+        <Section shrink>Main</Section>
+        <Section>Main</Section>
+        <Section>Main</Section>
+        <Section>Main</Section>
       </Content>
 
       <SideBar>
-        <Section style={{ height: "300px" }}>
+        <Section style={{ flex: 1 }}>
           <Link
             to="/"
             onClick={() => setAuth(AUTH.GUEST)}
@@ -25,7 +26,10 @@ export default function Profile() {
             Выйти
           </Link>
         </Section>
-        <Section style={{ flex: 1 }}>SideBar</Section>
+
+        <NamedSection>
+          SideBar
+        </NamedSection>
       </SideBar>
     </>
   )

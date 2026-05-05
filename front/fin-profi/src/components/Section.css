@@ -2,9 +2,72 @@
 
 section {
     display: flex;
+    border-radius: 30px;
+    background-color: var(--surface-white);
+}
+
+section:not(.named) {
     align-items: center;
     justify-content: center;
-    background-color: var(--surface-white);
-    border-radius: 30px;
-    flex-shrink: 0;
+    flex: 1;
+}
+
+section.shrink {
+    flex: 0;
+}
+
+/* NamedSection */
+
+section.named {
+    flex: 1;
+    flex-direction: column;
+    overflow-y: hidden;
+    gap: 16px;
+}
+
+section.named .header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    color: var(--mid-gray);
+}
+
+section.named .content {
+    overflow-y: auto;
+}
+
+section.named .content::-webkit-scrollbar {
+    display: none;
+}
+
+/* Icon Style */
+
+section.named .header .icon:has(svg) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-yellow);
+    border-radius: 50%;
+    height: 28px;
+    width: 28px;
+}
+
+section.named .header .icon:has(svg.corner) {
+    border-radius: 8px;
+}
+
+section.named .header:has(svg) {
+    justify-content: start;
+    color: var(--text);
+}
+
+/* Dark Style */
+
+section.named.dark {
+    background-color: var(--text);
+}
+
+section.named.dark .header {
+    color: var(--surface-white);
 }
