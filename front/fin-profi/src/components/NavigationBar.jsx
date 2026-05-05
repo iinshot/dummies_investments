@@ -7,7 +7,7 @@ import { Calc, Home, Login, Profile, Quiz } from '../assets/icons';
 import { motion } from 'framer-motion';
 import './Navigation.css'
 
-export default function NavigationBar({ animationProp, key }) {
+export default function NavigationBar({ animationProp }) {
   const [auth, setAuth] = useAuth()
 
   const animation = {
@@ -19,7 +19,6 @@ export default function NavigationBar({ animationProp, key }) {
 
   return (
     <motion.div
-      key={key}
       className="navbar-container"
       {...animation}
     >
