@@ -27,6 +27,10 @@ a {
     text-decoration: none;
 }
 
+button {
+    border: 0;
+}
+
 /* Типография */
 
 h1 {
