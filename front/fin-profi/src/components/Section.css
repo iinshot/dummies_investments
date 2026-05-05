@@ -13,15 +13,18 @@ section:not(.named) {
 }
 
 section.shrink {
-    flex: 0;
+    flex: 0 !important;
 }
 
 /* NamedSection */
 
+section.name:not(.shrink) {
+    overflow-y: hidden;
+}
+
 section.named {
     flex: 1;
     flex-direction: column;
-    overflow-y: hidden;
     gap: 16px;
 }
 
