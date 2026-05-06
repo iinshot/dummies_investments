@@ -1,0 +1,63 @@
+@import url("../constants/colors.css");
+
+/* До следующего места */
+
+.next-rank .content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.next-rank .content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.next-rank .content-header div {
+    display: flex;
+    flex-direction: column;
+}
+
+.next-rank .content-header .user {
+    align-items: end;
+}
+
+.next-rank .progress-bar {
+    background-color: var(--background);
+}
+
+/* Рейтинг */
+
+.ranking .content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ranking .rank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ranking .rank-list .divider {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px;
+    gap: 8px;
+}
+
+.ranking .rank-list .divider .dashed-line {
+    flex: 1;
+    height: 1px;
+    border-top: 1px var(--background) dashed;
+}
+
+.ranking .rank-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+}

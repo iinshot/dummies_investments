@@ -1,0 +1,70 @@
+@import url("../constants/colors.css");
+
+.rank-card {
+    padding: 10px 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background-color: var(--surface-light);
+    border-radius: 14px;
+}
+
+.rank-card .rank-number {
+    color: var(--mid-gray);
+}
+
+.rank-card svg {
+    fill: var(--mid-gray);
+}
+
+.rank-card .user-data {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.rank-card .user-data .username {
+    color: var(--text);
+    cursor: pointer;
+}
+
+.rank-card .user-data .username:hover {
+    text-decoration: underline;
+}
+
+/* Leader */
+
+.rank-card.leader {
+    background-color: var(--soft-yellow);
+}
+
+.rank-card.leader .rank-number {
+    color: var(--dark-yellow);
+}
+
+.rank-card.leader svg {
+    fill: var(--dark-yellow);
+}
+
+/* You */
+
+.rank-card.you {
+    background-color: var(--text);
+}
+
+.rank-card.you .rank-number {
+    color: var(--primary-yellow);
+}
+
+.rank-card.you svg {
+    fill: var(--primary-yellow);
+}
+
+.rank-card.you .user-data .username {
+    color: var(--surface-white);
+}
+
+.rank-card.you .user-data .username:hover {
+    text-decoration: none;
+    cursor: default;
+}

@@ -2,22 +2,22 @@ import clsx from 'clsx'
 import React from 'react'
 import './Section.css'
 
-export default function NamedSection({ children, icon, text, dark, shrink, padding, gap, className }) {
+export default function NamedSection(props) {
   return (
     <section
-        className={clsx("named", { shrink, dark }, className)}
+        className={clsx("named", { shrink: props.shrink, dark: props.dark }, props.className)}
         style={{
-            padding: padding ?? "24px",
-            gap: gap ?? "16px"
+            padding: props.padding ?? "24px",
+            gap: props.gap ?? "16px"
         }}
     >
         <div className="header">
-            <div className="icon">{icon}</div>
-            <span className="label">{text}</span>
+            <div className="icon">{props.icon}</div>
+            <span className="label">{props.text}</span>
         </div>
 
-        <div className="content">
-            {children}
+        <div className="content" ref={props.ref} >
+            {props.children}
         </div>
     </section>
   )
