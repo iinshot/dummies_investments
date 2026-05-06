@@ -1,4 +1,4 @@
-@import url('../constants/colors.css');
+@import url('../../constants/colors.css');
 
 section {
     display: flex;
@@ -13,15 +13,18 @@ section:not(.named) {
 }
 
 section.shrink {
-    flex: 0;
+    flex: 0 !important;
 }
 
 /* NamedSection */
 
+section.named:not(.shrink) {
+    overflow-y: hidden;
+}
+
 section.named {
     flex: 1;
     flex-direction: column;
-    overflow-y: hidden;
     gap: 16px;
 }
 
@@ -70,4 +73,22 @@ section.named.dark {
 
 section.named.dark .header {
     color: var(--surface-white);
+}
+
+/* Continue Section */
+
+section.named.continue .content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+section.named.continue .content-header {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+section.named.continue .content .completed {
+    color: var(--mid-gray);
 }

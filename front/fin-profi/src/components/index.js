@@ -1,9 +1,11 @@
 import Content from "./Content";
 import NavigationBar from "./NavigationBar";
 import NavigationButton from "./NavigationButton";
-import Section from "./Section";
+import Section from "./section/Section";
 import SideBar from "./SideBar";
 import Button from "./Button";
-import NamedSection from "./NamedSection";
+import NamedSection from "./section/NamedSection";
+import ContinueSection from "./section/ContinueSection";
+import ProgressBar from "./progress/ProgressBar";
 
-export { Content, NavigationBar, NavigationButton, Section, SideBar, Button, NamedSection }
+export { Content, NavigationBar, NavigationButton, Section, SideBar, Button, NamedSection, ContinueSection, ProgressBar }

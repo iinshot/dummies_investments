@@ -7,9 +7,10 @@ import { motion } from 'framer-motion'
 export default function Button({ left, text, right, to, replace, className }) {
   const navigate = useNavigate()
   const animation = {
-    initial: { scale: 0.8 },
-    whileInView: { scale: 1, transition: { delay: 0.33 } },
-    whileHover: { scale: 1.05 }
+    initial: { opacity: 0, scale: 0.5 },
+    whileInView: { opacity: 1, scale: 1 },
+    whileHover: { scale: 0.96 },
+    transition: { type: "ease" }
   }
 
   return (

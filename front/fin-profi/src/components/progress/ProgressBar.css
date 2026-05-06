@@ -1,0 +1,11 @@
+@import url("../../constants/colors.css");
+
+.progress-bar {
+    background-color: rgb(255, 255, 255, 0.1);
+}
+
+.progress-bar .progress {
+    background-color: var(--primary-yellow);
+    height: 100%;
+    border-radius: inherit;
+}
