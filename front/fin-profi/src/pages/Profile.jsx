@@ -1,9 +1,8 @@
-import React, { useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../hooks'
-import { AUTH, COLORS } from '../constants'
-import { Content, Section, NamedSection, SideBar, ContinueSection, ProgressBar, RankCard } from '../components'
-import { Cup, Invest, Play, Star } from '../assets/icons'
+import { AUTH, BASE_URL, COLORS } from '../constants'
+import { Content, Section, NamedSection, SideBar, ContinueSection, ProgressBar, RankCard, ExpandButton } from '../components'
+import { Cup, Invest, Pencil, Play, ProfileCircle, Star, Share, Check, X } from '../assets/icons'
 import { ranking } from "../assets/data"
 import "./Profile.css"
 import clsx from 'clsx'
@@ -11,12 +10,44 @@ import { delay } from 'framer-motion'
 
 export default function Profile() {
   const [auth, setAuth] = useAuth()
+  const [copied, setCopied] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [credentials, setCredentials] = useState({})
+  const scrollRef = useRef(null)
+
   const nextUser = ranking.at(-2)
   const user = ranking.at(-1)
 
-  const scrollRef = useRef(null)
+  async function loadCredentials(id) {
+    try {
+      const response = await fetch(`${BASE_URL}/api/users/${id}`)
+      const data = await response.json()
+
+      setCredentials(data)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  async function updateCredentials(id) {
+    try {
+      const params = new URLSearchParams(credentials).toString()
+      const response = await fetch(`${BASE_URL}/api/users/${id}?${params}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+
+      console.log(await response.json())
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   useEffect(() => {
+    loadCredentials(2)
+
     setTimeout(() => {
       const container = scrollRef.current
 
@@ -27,11 +58,103 @@ export default function Profile() {
     }, 333)
   }, [])
 
+  useEffect(() => {
+    if (isEditing == false) return
+
+    const handleEnterKey = async (event) => {
+      if (event.key === "Enter") {
+        await updateCredentials(2)
+        setIsEditing(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleEnterKey)
+
+    return () => window.removeEventListener('keydown', handleEnterKey)
+  }, [isEditing, credentials])
+
   return (
     <>
       <Content>
-        <Section padding="32px 40px" shrink>
+        <Section
+          padding="32px 40px"
+          shrink
+          className="user-info"
+        >
+          <ProfileCircle width={96} height={96} />
 
+          <div className="user-credentials">
+            <div className="username">
+              <input
+                name="username"
+                type="text"
+                value={credentials.name ?? ""}
+                className="h1"
+                readOnly={!isEditing}
+                onChange={(e) => setCredentials(prevCredentials => (
+                  { ...prevCredentials, name: e.target.value }
+                ))}
+              />
+            </div>
+
+            <div className="email">
+              <input
+                name="email"
+                type="text"
+                value={credentials.email ?? ""}
+                className="body"
+                readOnly={!isEditing}
+                onChange={(e) => setCredentials(prevCredentials => (
+                  { ...prevCredentials, email: e.target.value }
+                ))}
+              />
+            </div>
+          </div>
+
+          {isEditing ?
+            <div className="expand-button-group">
+              <ExpandButton
+                icon={<X />}
+                text="Отменить"
+                onClick={async () => {
+                  await loadCredentials(2)
+                  setIsEditing(false)
+                }}
+              />
+
+              <ExpandButton
+                icon={<Check />}
+                text="Принять"
+                primary
+                onClick={async () => {
+                  await updateCredentials(2)
+                  setIsEditing(false)
+                }}
+              />
+            </div>
+            :
+            <div className="expand-button-group">
+              <ExpandButton
+                icon={copied ? <Check /> : <Share />}
+                text={copied ? "Скопировано" : "Поделиться"}
+                onClick={async () => {
+                  await navigator.clipboard.writeText(`${BASE_URL}/profile/${user.id}`)
+
+                  setCopied(true)
+
+                  setTimeout(() => setCopied(false), 1000)
+                }}
+              />
+
+              <ExpandButton
+                icon={<Pencil />}
+                text="Редактировать"
+                delay={0.1}
+                onClick={() => setIsEditing(true)}
+                primary
+              />
+            </div>
+          }
         </Section>
 
         <Section padding="170px 200px" shrink>
@@ -62,7 +185,7 @@ export default function Profile() {
                 key={user.id}
                 highlight={
                   clsx(
-                    index === 0 && "leader", 
+                    index === 0 && "leader",
                     index === ranking.length - 1 && "you"
                   )
                 }

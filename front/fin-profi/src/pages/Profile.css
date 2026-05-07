@@ -61,3 +61,40 @@
     gap: 4px;
     align-items: center;
 }
+
+/* User Info */
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.user-info svg {
+    fill: var(--background);
+}
+
+.user-info .user-credentials {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+}
+
+.user-info .user-credentials input {
+    padding: 4px 8px;
+    border-radius: 10px;
+    background-color: var(--surface-light);
+    color: var(--text);
+
+    transition: all 0.05s linear;
+}
+
+.user-info .user-credentials input:read-only {
+    background-color: transparent;
+}
+
+.user-info .user-credentials .email input:read-only {
+    color: var(--mid-gray);
+}

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
-import NavigationBar from './components/NavigationBar'
+import { NavigationBar } from './components'
 import { Main, Calculators, Quizes, Profile } from './pages'
 import { AuthLayout, Login, Register } from './pages/auth'
 import { useAuth } from './hooks'

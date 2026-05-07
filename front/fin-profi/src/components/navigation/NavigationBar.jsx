@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks';
-import { AUTH } from '../constants';
-import Logo from "../assets/logo.svg?react"
+import { useAuth } from '../../hooks';
+import { AUTH } from '../../constants';
+import Logo from "../../assets/logo.svg?react"
 import NavigationButton from './NavigationButton';
-import { Calc, Home, Login, Profile, Quiz } from '../assets/icons';
+import { Calc, Home, Login, Profile, Quiz } from '../../assets/icons';
 import { motion } from 'framer-motion';
 import './Navigation.css'
 

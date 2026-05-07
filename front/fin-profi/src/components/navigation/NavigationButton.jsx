@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom';
 import clsx from 'clsx'
-import { COLORS } from '../constants';
+import { COLORS } from '../../constants';
 
 export default function NavigationButton({ to, text, icon, style }) {
   const location = useLocation();

@@ -3,7 +3,7 @@ import NamedSection from './NamedSection'
 import { ArrowRight, Play } from '../../assets/icons'
 import { COLORS } from '../../constants'
 import ProgressBar from '../progress/ProgressBar'
-import Button from '../Button'
+import Button from '../button/Button'
 
 export default function ContinueSection({ name, module, id, progress, articleLink }) {
   return (

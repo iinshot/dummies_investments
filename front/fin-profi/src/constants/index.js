@@ -1,4 +1,4 @@
 import { COLORS } from './colors'
-import { AUTH } from './names'
+import { AUTH, BASE_URL } from './names'
 
-export { COLORS, AUTH }
+export { COLORS, AUTH, BASE_URL }
