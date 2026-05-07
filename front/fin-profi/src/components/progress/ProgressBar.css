@@ -9,3 +9,39 @@
     height: 100%;
     border-radius: inherit;
 }
+
+/* Progress Circle */
+
+.progress-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    padding: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-circle .progress {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: var(--surface-white);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress-circle .progress span {
+    color: var(--text);
+    font-size: 64px;
+    font-weight: 500;
+}
+
+.progress-circle.large {
+    width: 180px;
+    height: 180px;
+    padding: 15px;
+}

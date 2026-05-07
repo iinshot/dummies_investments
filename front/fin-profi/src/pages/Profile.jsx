@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../hooks'
 import { AUTH, BASE_URL, COLORS } from '../constants'
-import { Content, Section, NamedSection, SideBar, ContinueSection, ProgressBar, RankCard, ExpandButton } from '../components'
-import { Cup, Invest, Pencil, Play, ProfileCircle, Star, Share, Check, X } from '../assets/icons'
-import { ranking } from "../assets/data"
+import { Content, Section, NamedSection, SideBar, ContinueSection, ProgressBar, RankCard, ExpandButton, ProgressCircle, StatisticsCard } from '../components'
+import { Cup, Invest, Pencil, Play, ProfileCircle, Star, Share, Check, X, CheckCircle, Article } from '../assets/icons'
+import { points, ranking, statistics } from "../assets/data"
 import "./Profile.css"
 import clsx from 'clsx'
 import { delay } from 'framer-motion'
@@ -157,8 +157,75 @@ export default function Profile() {
           }
         </Section>
 
-        <Section padding="170px 200px" shrink>
+        <Section
+          padding="0"
+          className="statistics"
+          shrink
+        >
+          <StatisticsCard
+            sectionProps={{
+              text: "Общий прогресс",
+              icon: <CheckCircle height={10} width={10} />,
+              className: "quizes"
+            }}
+            progress={(statistics.articles.progress + statistics.quizes.progress) / (statistics.articles.count + statistics.quizes.count) * 100}
+            value={statistics.articles.progress + statistics.quizes.progress}
+            data={[
+              {
+                text: "Всего очков",
+                value: statistics.articles.progress * points.points_per_article + statistics.quizes.progress * points.points_per_quiz
+              }
+            ]}
+            dark
+          />
 
+          <StatisticsCard
+            sectionProps={{
+              text: "Статьи",
+              icon: <Article height={10} width={10} />,
+              className: "articles" 
+            }}
+            progress={statistics.articles.progress / statistics.articles.count * 100}
+            value={statistics.articles.progress}
+            data={[
+              {
+                text: "Прочитано статей",
+                value: statistics.articles.progress
+              },
+              {
+                text: "Осталось статей",
+                value: statistics.articles.count - statistics.articles.progress
+              },
+              {
+                text: "Получено очков",
+                value: statistics.articles.progress * points.points_per_article
+              }
+            ]}
+          />
+
+          <StatisticsCard
+            sectionProps={{
+              text: "Викторины",
+              icon: <CheckCircle height={10} width={10} />,
+              className: "quizes"
+            }}
+            progress={statistics.quizes.progress / statistics.quizes.count * 100}
+            value={statistics.quizes.progress}
+            data={[
+              {
+                text: "Пройдено викторин",
+                value: statistics.quizes.progress
+              },
+              {
+                text: "Осталось викторин",
+                value: statistics.quizes.count - statistics.quizes.progress
+              },
+              {
+                text: "Получено очков",
+                value: statistics.quizes.progress * points.points_per_quiz
+              }
+            ]}
+          />
         </Section>
 
         <NamedSection

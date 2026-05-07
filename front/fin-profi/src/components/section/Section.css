@@ -73,6 +73,16 @@ section.named.dark .header {
     color: var(--surface-white);
 }
 
+/* Grayscale Style */
+
+section.named.grayscale .header .icon:has(svg) {
+    background-color: var(--surface-light);
+}
+
+section.named.grayscale .header {
+    color: var(--dark-gray);
+}
+
 /* Continue Section */
 
 section.named.continue .content {

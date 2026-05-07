@@ -98,3 +98,50 @@
 .user-info .user-credentials .email input:read-only {
     color: var(--mid-gray);
 }
+
+/* Statistics */
+
+.statistics {
+    background-color: transparent;
+    gap: 20px;
+}
+
+.statistics section .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    height: 100%;
+}
+
+.statistics section.dark .content > .progress {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.statistics section .content .divider {
+    height: 1px;
+    width: 100%;
+    border-bottom: 1px solid var(--surface-light);
+}
+
+.statistics section .content .row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    color: var(--text);
+}
+
+.statistics section.dark .content .progress {
+    flex: 1;
+}
+
+.statistics section.dark .content .divider {
+    border-bottom: 1px solid var(--dark-gray);
+    opacity: 0.25;
+}
+
+.statistics section.dark .content .row {
+    color: var(--surface-white);
+}

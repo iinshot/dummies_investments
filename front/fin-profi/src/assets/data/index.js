@@ -1,3 +1,5 @@
 import ranking from "./ranking";
+import statistics from "./statistics";
+import points from "./points";
 
-export { ranking }
+export { ranking, statistics, points }
