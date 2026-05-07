@@ -1,6 +1,6 @@
 import React from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
-import NavigationBar from './components/NavigationBar'
+import { NavigationBar } from './components'
 import { Main, Calculators, Quizes, Profile } from './pages'
 import { AuthLayout, Login, Register } from './pages/auth'
 import { useAuth } from './hooks'
@@ -28,7 +28,7 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
             </Route>
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:userId" element={<Profile />} />
           </Routes>
         </main>
       </AnimatePresence>

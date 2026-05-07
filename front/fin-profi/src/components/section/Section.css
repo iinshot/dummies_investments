@@ -1,4 +1,4 @@
-@import url('../constants/colors.css');
+@import url('../../constants/colors.css');
 
 section {
     display: flex;
@@ -7,8 +7,6 @@ section {
 }
 
 section:not(.named) {
-    align-items: center;
-    justify-content: center;
     flex: 1;
 }
 
@@ -18,7 +16,7 @@ section.shrink {
 
 /* NamedSection */
 
-section.name:not(.shrink) {
+section.named:not(.shrink) {
     overflow-y: hidden;
 }
 
@@ -56,6 +54,10 @@ section.named .header .icon:has(svg) {
     width: 28px;
 }
 
+section.named .header .icon:has(svg) svg {
+    fill: var(--text);
+}
+
 section.named .header .icon:has(svg.corner) {
     border-radius: 8px;
 }
@@ -73,4 +75,32 @@ section.named.dark {
 
 section.named.dark .header {
     color: var(--surface-white);
+}
+
+/* Grayscale Style */
+
+section.named.grayscale .header .icon:has(svg) {
+    background-color: var(--surface-light);
+}
+
+section.named.grayscale .header {
+    color: var(--dark-gray);
+}
+
+/* Continue Section */
+
+section.named.continue .content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+section.named.continue .content-header {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+section.named.continue .content .completed {
+    color: var(--mid-gray);
 }

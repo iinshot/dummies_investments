@@ -13,8 +13,6 @@ body::-webkit-scrollbar {
 
 body {
     margin: 0;
-    font-size: 14px;
-    line-height: 1.6;
     background-color: var(--background);
     overflow: hidden;
 }
@@ -31,11 +29,32 @@ button {
     border: 0;
 }
 
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+input {
+    border: none;
+    outline: none;
+    padding: 0;
+    field-sizing: content;
+}
+
+.truncated {
+    display: block;
+    max-width: 100%;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* Типография */
 
-h1 {
+h1, .h1 {
     font-size: 32px;
     line-height: 1.2;
+    font-weight: 700;
 }
 
 h2 {
@@ -43,7 +62,7 @@ h2 {
     line-height: 1.3;
 }
 
-h3 {
+h3, .h3 {
     font-weight: 600;
     font-size: 18px;
     line-height: 1.4;
@@ -53,6 +72,11 @@ h4, h5, h6 {
     font-weight: 500;
     font-size: 14px;
     line-height: 1.4;
+}
+
+.body {
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 .small {

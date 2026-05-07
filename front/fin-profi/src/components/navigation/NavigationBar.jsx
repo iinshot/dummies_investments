@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../hooks';
-import { AUTH } from '../constants';
-import Logo from "../assets/logo.svg?react"
+import { useAuth } from '../../hooks';
+import { AUTH } from '../../constants';
+import Logo from "../../assets/logo.svg?react"
 import NavigationButton from './NavigationButton';
-import { Calc, Home, Login, Profile, Quiz } from '../assets/icons';
+import { Calc, Home, Login, Profile, Quiz } from '../../assets/icons';
 import { motion } from 'framer-motion';
 import './Navigation.css'
 
@@ -16,6 +16,8 @@ export default function NavigationBar({ animationProp }) {
     exit: { y: "-50%", opacity: 0, scale: 0.95, transition: { duration: 0.33, delay: 0.1 }, ...animationProp?.exit },
     transition: { type: "spring", duration: 0.66, delay: 0.1, ...animationProp?.transition }
   }
+
+  const userId = localStorage.getItem("id")
 
   return (
     <motion.div
@@ -55,7 +57,7 @@ export default function NavigationBar({ animationProp }) {
               text="Войти"
             /> :
             <NavigationButton
-              to="profile"
+              to={`profile/${userId ?? ""}`}
               icon={<Profile />}
               text="Профиль"
             />

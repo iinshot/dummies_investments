@@ -1,0 +1,187 @@
+@import url("../constants/colors.css");
+
+/* До следующего места */
+
+.next-rank .content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.next-rank .content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.next-rank .content-header div {
+    display: flex;
+    flex-direction: column;
+}
+
+.next-rank .content-header .user {
+    align-items: end;
+}
+
+.next-rank .progress-bar {
+    background-color: var(--background);
+}
+
+/* Рейтинг */
+
+.ranking .content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ranking .rank-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ranking .rank-list .divider {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px;
+    gap: 8px;
+}
+
+.ranking .rank-list .divider .dashed-line {
+    flex: 1;
+    height: 1px;
+    border-top: 1px var(--background) dashed;
+}
+
+.ranking .rank-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+}
+
+/* User Info */
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.user-info svg {
+    fill: var(--background);
+}
+
+.user-info .user-credentials {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+}
+
+.user-info .user-credentials input {
+    padding: 4px 8px;
+    border-radius: 10px;
+    background-color: var(--surface-light);
+    color: var(--text);
+
+    transition: all 0.05s linear;
+}
+
+.user-info .user-credentials input:read-only {
+    background-color: transparent;
+}
+
+.user-info .user-credentials .email input:read-only {
+    color: var(--mid-gray);
+}
+
+/* Statistics */
+
+.statistics {
+    background-color: transparent;
+    gap: 20px;
+}
+
+.statistics section .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    height: 100%;
+}
+
+.statistics section.dark .content > .progress {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.statistics section .content .divider {
+    height: 1px;
+    width: 100%;
+    border-bottom: 1px solid var(--surface-light);
+}
+
+.statistics section .content .row {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    color: var(--text);
+}
+
+.statistics section.dark .content .progress {
+    flex: 1;
+}
+
+.statistics section.dark .content .divider {
+    border-bottom: 1px solid var(--dark-gray);
+    opacity: 0.25;
+}
+
+.statistics section.dark .content .row {
+    color: var(--surface-white);
+}
+
+/* Activity */
+
+.activity .content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.activity-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: 20px;
+    background-color: var(--surface-light);
+}
+
+.activity-card.quiz > svg {
+    padding: 11px;
+    border-radius: 50%;
+    background-color: var(--primary-yellow);
+}
+
+.activity-card.article > svg {
+    padding: 10px;
+    border-radius: 50%;
+    background-color: var(--background);
+    fill: var(--dark-gray);
+}
+
+.activity-card .points {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.activity-card .points > svg {
+    fill: var(--primary-yellow);
+}
