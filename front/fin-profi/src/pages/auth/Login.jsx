@@ -9,7 +9,10 @@ export default function Login() {
 
   return (
     <Link
-      onClick={() => setAuth(AUTH.AUTHORIZED)} to="/"
+      onClick={() => {
+        localStorage.setItem("id", 2)
+        setAuth(AUTH.AUTHORIZED)
+      }} to="/"
     >
       Войти
     </Link>

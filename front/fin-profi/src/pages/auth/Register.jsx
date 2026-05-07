@@ -8,7 +8,10 @@ export default function Register() {
 
   return (
     <Link
-      onClick={() => setAuth(AUTH.AUTHORIZED)}
+      onClick={() => {
+        localStorage.setItem("id", 2)
+        setAuth(AUTH.AUTHORIZED)
+      }}
       to="/"
     >Зарегистрироваться</Link>
   )
