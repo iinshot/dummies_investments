@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../hooks'
 import { AUTH, BASE_URL, COLORS } from '../constants'
-import { Content, Section, NamedSection, SideBar, ContinueSection, ProgressBar, RankCard, ExpandButton, ProgressCircle, StatisticsCard } from '../components'
-import { Cup, Invest, Pencil, Play, ProfileCircle, Star, Share, Check, X, CheckCircle, Article } from '../assets/icons'
-import { points, ranking, statistics } from "../assets/data"
+import { Content, Section, NamedSection, SideBar, ContinueSection, ProgressBar, RankCard, ExpandButton, ProgressCircle, StatisticsCard, ActivityCard } from '../components'
+import { Cup, Invest, Pencil, Play, ProfileCircle, Star, Share, Check, X, CheckCircle, Article, Energy } from '../assets/icons'
+import { points, ranking, statistics, activity } from "../assets/data"
 import "./Profile.css"
 import clsx from 'clsx'
 import { delay } from 'framer-motion'
@@ -165,7 +165,7 @@ export default function Profile() {
           <StatisticsCard
             sectionProps={{
               text: "Общий прогресс",
-              icon: <CheckCircle height={10} width={10} />,
+              icon: <Energy height={10} width={10} />,
               className: "quizes"
             }}
             progress={(statistics.articles.progress + statistics.quizes.progress) / (statistics.articles.count + statistics.quizes.count) * 100}
@@ -233,8 +233,16 @@ export default function Profile() {
           text="Недавняя активность"
           padding="32px 40px"
           gap="24px"
+          className="activity"
+          shrink
         >
-          <div style={{ height: "500px" }}>Activity</div>
+          {activity.map((activityObj, index) => (
+            <ActivityCard
+              key={index}
+              {...activityObj}
+              delay={0.05 * index}
+            />
+          ))}
         </NamedSection>
       </Content>
 

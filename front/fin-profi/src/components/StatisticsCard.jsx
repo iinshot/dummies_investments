@@ -24,8 +24,8 @@ export default function StatisticsCard({ progress, value, sectionProps, data, da
 
       <div className="divider"></div>
 
-      {data?.map(dataObj => (
-        <div className="row">
+      {data?.map((dataObj, index) => (
+        <div key={index} className="row">
           <span className={dark ? "h3" : "body"}>{dataObj.text}</span>
           <span className={dark ? "h3" : "body"}>{dataObj.value}</span>
         </div>

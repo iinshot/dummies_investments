@@ -54,6 +54,10 @@ section.named .header .icon:has(svg) {
     width: 28px;
 }
 
+section.named .header .icon:has(svg) svg {
+    fill: var(--text);
+}
+
 section.named .header .icon:has(svg.corner) {
     border-radius: 8px;
 }

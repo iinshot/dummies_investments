@@ -11,6 +11,7 @@ import RankCard from "./RankCard";
 import ExpandButton from "./button/ExpandButton";
 import ProgressCircle from "./progress/ProgressCircle";
 import StatisticsCard from "./StatisticsCard";
+import ActivityCard from "./ActivityCard";
 
 export {
     Content,
@@ -25,5 +26,6 @@ export {
     RankCard,
     ExpandButton,
     ProgressCircle,
-    StatisticsCard
+    StatisticsCard,
+    ActivityCard
 }
