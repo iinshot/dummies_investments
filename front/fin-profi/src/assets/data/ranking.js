@@ -205,7 +205,7 @@ export default [
         score: 1430
     },
     {
-        id: 42,
+        id: 2,
         name: "username",
         score: 1250
     },

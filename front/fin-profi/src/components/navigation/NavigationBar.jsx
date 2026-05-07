@@ -17,6 +17,8 @@ export default function NavigationBar({ animationProp }) {
     transition: { type: "spring", duration: 0.66, delay: 0.1, ...animationProp?.transition }
   }
 
+  const userId = localStorage.getItem("id")
+
   return (
     <motion.div
       className="navbar-container"
@@ -55,7 +57,7 @@ export default function NavigationBar({ animationProp }) {
               text="Войти"
             /> :
             <NavigationButton
-              to="profile"
+              to={`profile/${userId ?? ""}`}
               icon={<Profile />}
               text="Профиль"
             />

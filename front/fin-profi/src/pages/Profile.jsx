@@ -7,6 +7,7 @@ import { points, ranking, statistics, activity } from "../assets/data"
 import "./Profile.css"
 import clsx from 'clsx'
 import { delay } from 'framer-motion'
+import { useParams } from 'react-router-dom'
 
 export default function Profile() {
   const [auth, setAuth] = useAuth()
@@ -14,6 +15,7 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false)
   const [credentials, setCredentials] = useState({})
   const scrollRef = useRef(null)
+  const { userId } = useParams()
 
   const nextUser = ranking.at(-2)
   const user = ranking.at(-1)
@@ -46,7 +48,7 @@ export default function Profile() {
   }
 
   useEffect(() => {
-    loadCredentials(2)
+    loadCredentials(userId)
 
     setTimeout(() => {
       const container = scrollRef.current
@@ -97,7 +99,7 @@ export default function Profile() {
               />
             </div>
 
-            <div className="email">
+            {user.id == userId && <div className="email">
               <input
                 name="email"
                 type="text"
@@ -108,7 +110,7 @@ export default function Profile() {
                   { ...prevCredentials, email: e.target.value }
                 ))}
               />
-            </div>
+            </div>}
           </div>
 
           {isEditing ?
@@ -117,7 +119,7 @@ export default function Profile() {
                 icon={<X />}
                 text="Отменить"
                 onClick={async () => {
-                  await loadCredentials(2)
+                  await loadCredentials(user.id)
                   setIsEditing(false)
                 }}
               />
@@ -138,7 +140,7 @@ export default function Profile() {
                 icon={copied ? <Check /> : <Share />}
                 text={copied ? "Скопировано" : "Поделиться"}
                 onClick={async () => {
-                  await navigator.clipboard.writeText(`${BASE_URL}/profile/${user.id}`)
+                  await navigator.clipboard.writeText(`${BASE_URL}/profile/${userId}`)
 
                   setCopied(true)
 
@@ -146,13 +148,13 @@ export default function Profile() {
                 }}
               />
 
-              <ExpandButton
+              {user.id == userId && <ExpandButton
                 icon={<Pencil />}
                 text="Редактировать"
                 delay={0.1}
                 onClick={() => setIsEditing(true)}
                 primary
-              />
+              />}
             </div>
           }
         </Section>
