@@ -2,12 +2,12 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useAuth } from '../hooks'
 import { AUTH, BASE_URL, COLORS } from '../constants'
 import { Content, Section, NamedSection, SideBar, ContinueSection, ProgressBar, RankCard, ExpandButton, ProgressCircle, StatisticsCard, ActivityCard } from '../components'
-import { Cup, Invest, Pencil, Play, ProfileCircle, Star, Share, Check, X, CheckCircle, Article, Energy } from '../assets/icons'
+import { Cup, Invest, Pencil, Play, ProfileCircle, Star, Share, Check, X, CheckCircle, Article, Energy, Exit } from '../assets/icons'
 import { points, ranking, statistics, activity } from "../assets/data"
 import "./Profile.css"
 import clsx from 'clsx'
 import { delay } from 'framer-motion'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 export default function Profile() {
   const [auth, setAuth] = useAuth()
@@ -20,6 +20,7 @@ export default function Profile() {
   const [shouldShrink, setShouldShrink] = useState(false)
 
   const { userId } = useParams()
+  const navigate = useNavigate()
 
   const nextUser = ranking.at(-2)
   const user = ranking.at(-1)
@@ -44,8 +45,6 @@ export default function Profile() {
           "Content-Type": "application/json"
         }
       })
-
-      console.log(await response.json())
     } catch (e) {
       console.error(e)
     }
@@ -144,9 +143,20 @@ export default function Profile() {
             </div>
             :
             <div className="expand-button-group">
+              {user.id == userId && <ExpandButton
+                icon={<Exit />}
+                text="Выйти"
+                onClick={() => {
+                  localStorage.clear()
+                  setAuth(AUTH.GUEST)
+                  navigate("/")
+                }}
+              />}
+
               <ExpandButton
                 icon={copied ? <Check /> : <Share />}
                 text={copied ? "Скопировано" : "Поделиться"}
+                delay={0.1}
                 onClick={async () => {
                   await navigator.clipboard.writeText(`${BASE_URL}/profile/${userId}`)
 
@@ -159,7 +169,7 @@ export default function Profile() {
               {user.id == userId && <ExpandButton
                 icon={<Pencil />}
                 text="Редактировать"
-                delay={0.1}
+                delay={0.2}
                 onClick={() => setIsEditing(true)}
                 primary
               />}
