@@ -9,6 +9,7 @@ async def create_user(
     name: str,
     email: str,
     password: str,
+    points: Optional[int] = None,
     phone: Optional[str] = None,
     surname: Optional[str] = None,
     patronymic: Optional[str] = None,
@@ -21,6 +22,7 @@ async def create_user(
         name=name,
         surname=surname,
         patronymic=patronymic,
+        points=points,
         phone=phone,
         email=email,
         about=about,
@@ -81,3 +83,16 @@ async def delete_user(
     result = await session.execute(query)
     await session.commit()
     return result.rowcount > 0
+
+async def get_users_above(
+    session: AsyncSession,
+    points: int
+) -> List[User]:
+    """Получение пользователей с поинтами >= текущего, по убыванию"""
+    query = (
+        select(User)
+        .where(User.points >= points)
+        .order_by(User.points.desc())
+    )
+    result = await session.execute(query)
+    return result.scalars().all()
