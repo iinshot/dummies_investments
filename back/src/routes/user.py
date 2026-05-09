@@ -30,6 +30,7 @@ async def create_user(
         name: str,
         email: str,
         password: str,
+        points: Optional[int] = None,
         surname: Optional[str] = None,
         patronymic: Optional[str] = None,
         phone: Optional[str] = None,
@@ -41,6 +42,7 @@ async def create_user(
         name=name,
         email=email,
         password=password,
+        points=points,
         surname=surname,
         patronymic=patronymic,
         phone=phone,
@@ -126,7 +128,17 @@ async def get_progress(
     db: AsyncSession = Depends(get_db)
 ):
     user_article = await db.get(UserArticle, (user.id_user, id_article))
-    if(not user_article):
+    if not user_article:
         return {"id_article": id_article, "is_read": False, "last_checkpoint": 0 }
     
     return {"id_article": id_article, "is_read": user_article.is_read, "last_checkpoint": user_article.last_checkpoint }
+
+
+@router.get("/{id_user}/rating")
+async def get_rating(id_user: int, db: AsyncSession = Depends(get_db)):
+    user = await user_crud.get_user(db, id_user=id_user)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    users = await user_crud.get_users_above(db, points=user.points)
+    return users
