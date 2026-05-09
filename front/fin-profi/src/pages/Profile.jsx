@@ -15,6 +15,10 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false)
   const [credentials, setCredentials] = useState({})
   const scrollRef = useRef(null)
+
+  const activityContainerRef = useRef(null)
+  const [shouldShrink, setShouldShrink] = useState(false)
+
   const { userId } = useParams()
 
   const nextUser = ranking.at(-2)
@@ -58,6 +62,10 @@ export default function Profile() {
         behavior: "smooth"
       })
     }, 333)
+
+    const { scrollHeight, clientHeight } = activityContainerRef.current
+
+    setShouldShrink(scrollHeight > clientHeight)
   }, [])
 
   useEffect(() => {
@@ -236,7 +244,8 @@ export default function Profile() {
           padding="32px 40px"
           gap="24px"
           className="activity"
-          shrink
+          ref={activityContainerRef}
+          shrink={shouldShrink}
         >
           {activity.map((activityObj, index) => (
             <ActivityCard
