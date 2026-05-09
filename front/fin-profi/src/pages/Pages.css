@@ -1,0 +1,54 @@
+/* Общие стили для страниц */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+.page-container {
+  flex: 1;
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.page-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.page-title {
+  font-size: 32px;
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.page-description {
+  font-size: 16px;
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  color: #666666;
+  margin-bottom: 32px;
+}
+
+.page-placeholder {
+  background: #F8F8F8;
+  border-radius: 24px;
+  padding: 48px;
+  text-align: center;
+}
+
+.placeholder-icon {
+  font-size: 64px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.page-placeholder p {
+  font-size: 14px;
+  color: #999999;
+  font-family: 'Roboto', sans-serif;
+}

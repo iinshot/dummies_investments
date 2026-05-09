@@ -1,5 +1,5 @@
 import React from 'react'
-import { Outlet, useNavigate } from 'react-router'
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Content, Section } from '../../components'
 
 export default function AuthLayout() {

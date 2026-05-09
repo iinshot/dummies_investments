@@ -1,65 +1,82 @@
-#build stage
-ARG NODE_VERSION=24.14.0-alpine
-
-FROM node:${NODE_VERSION} AS builder
+# Development stage
+FROM node:20-alpine AS development
 
 WORKDIR /app
 
-COPY ./fin-profi/package*.json ./
+# Копируем package.json
+COPY package*.json ./
 
-# Install project dependencies using npm ci (ensures a clean, reproducible install)
-RUN --mount=type=cache,target=/root/.npm npm ci
+# Устанавливаем зависимости
+RUN npm install --legacy-peer-deps
 
-# Copy the rest of the application source code into the container
-COPY ./fin-profi .
+# Копируем исходники
+COPY . .
 
-# Build the React.js application (outputs to /app/dist)
-RUN npm run build 
+# Создаем vite.config.js
+RUN cat > vite.config.js << 'EOF'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
 
-# =========================================
-# Stage 2: Serve static files with Node.js + `serve`
-# =========================================
-FROM node:${NODE_VERSION} AS runner
- 
- 
-# Set the environment to production for smaller + optimized installs
-ENV NODE_ENV=production
- 
- 
-# Set the working directory inside the container
-WORKDIR /app
- 
- 
-# Copy only the production build output from the builder stage
-COPY --link --from=builder /app/dist ./dist
- 
- 
-# Install only the `serve` package (no global install, pinned version)
-RUN --mount=type=cache,target=/root/.npm npm install serve@^14.2.6 --omit=dev
- 
- 
-# Run the container as a non-root user for security best practices
-USER node
- 
- 
-# Expose port 3000 (the same port configured in "serve -l 3000")
+export default defineConfig({
+  plugins: [react(), svgr()],
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+  },
+  server: {
+    host: '0.0.0.0',
+    port: 3000,
+    watch: {
+      usePolling: true,
+    },
+  },
+});
+EOF
+
 EXPOSE 3000
- 
- 
-# Run `serve` directly to serve the built app
-CMD ["npx", "serve", "-s", "dist", "-l", "3000"]
- 
- 
-# Build Stage
-FROM node:24-alpine AS build
+
+# Используем dev вместо start (для Vite)
+CMD ["npm", "run", "dev"]
+
+# Build stage
+FROM node:20-alpine AS builder
+
 WORKDIR /app
-COPY ./fin-profi/package*.json ./
-RUN npm install
-COPY ./fin-profi .
+
+COPY package*.json ./
+
+RUN npm install --legacy-peer-deps
+
+COPY . .
+
+RUN cat > vite.config.js << 'EOF'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import svgr from 'vite-plugin-svgr';
+
+export default defineConfig({
+  plugins: [react(), svgr()],
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
+  },
+});
+EOF
+
 RUN npm run build
-  
-# Production Stage
-FROM nginx:stable-alpine AS production
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+
+# Production stage
+FROM node:20-alpine AS production
+
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+COPY --from=builder /app/dist ./dist
+
+RUN npm install serve@14.2.6 --omit=dev
+
+USER node
+
+EXPOSE 3000
+
+CMD ["npx", "serve", "-s", "dist", "-l", "3000"]
