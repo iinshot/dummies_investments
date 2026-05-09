@@ -140,5 +140,10 @@ async def get_rating(id_user: int, db: AsyncSession = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    users = await user_crud.get_users_above(db, points=user.points)
-    return users
+    top8 = await user_crud.get_users_above(db, points=0)
+    top8 = top8[:8]
+
+    if any(u.id_user == id_user for u in top8):
+        return top8
+
+    return await user_crud.get_users_above(db, points=user.points)
