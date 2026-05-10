@@ -240,12 +240,10 @@ const handleContinueClick = () => {
     return true;
   };
 
-  const handleArticleClick = (articleId) => {
-    if (canAccessArticle(articleId)) {
-      navigate(`/article/${articleId}`);
-    } else {
-      alert('Сначала необходимо полностью изучить предыдущую статью!');
-    }
+const handleArticleClick = (articleId) => {
+  if (canAccessArticle(articleId)) {
+    navigate(`/article/${articleId}`);
+  }
   };
 
   // Refs
