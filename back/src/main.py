@@ -11,6 +11,7 @@ from routes.quiz import router as module_quiz
 from routes.article import router as module_article
 from routes.user import router as module_user
 from routes.auth import router as module_auth
+from routes.calculator import router as calculator
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -46,6 +47,7 @@ app.include_router(module_quiz)
 app.include_router(module_article)
 app.include_router(module_user)
 app.include_router(module_auth)
+app.include_router(calculator)
 
 @app.get("/")
 async def root():
