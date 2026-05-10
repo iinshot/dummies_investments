@@ -1,5 +1,6 @@
 from typing import Optional, List
 from sqlalchemy import String
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
@@ -24,6 +25,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(100), unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     salt: Mapped[str] = mapped_column(String(127))
+    id_current_article: Mapped[Optional[int]] = mapped_column(ForeignKey("articles.id_article"))
 
     users_modules: Mapped[List["UserModule"]] = relationship("UserModule", back_populates='user')
     modules = association_proxy('users_modules', 'module', creator=lambda module: UserModule(module=module))
