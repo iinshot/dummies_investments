@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from crud import user as user_crud
+from crud import article as article_crud
 from db.session import get_db
 from typing import Optional
 from auth.dependencies import get_current_user
 from models.User import User
 from models.UserArticle import UserArticle
+from models.Article import Article
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -89,15 +91,18 @@ async def delete_user(id_user: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return {"detail": "User deleted"}
 
-@router.get("/get_total_progress/")
-async def get_total_progress(
+@router.get("/progress/get_progress")
+async def progress(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    stmt = select(UserArticle).where(UserArticle.id_user == user.id_user)
+    stmt = select(UserArticle).where(UserArticle.id_user == user.id_user, UserArticle.is_read == True)
     result = await db.execute(stmt)
     user_articles = result.scalars().all()
-    return {"articles": [user_articles]}
+    stmt = select(UserArticle).where(UserArticle.id_article == user.id_current_article)
+    result = await db.execute(stmt)
+    current_article = result.scalars().first()
+    return {"currentArticle": current_article, "articles": user_articles}
 
 @router.post("/set_progress/{id_article}")
 async def set_progress(
@@ -107,7 +112,7 @@ async def set_progress(
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    article = await user_crud.get_article(db, id_article=id_article)
+    article = await article_crud.get_article(db, id_article=id_article)
     if not article:
         raise HTTPException(status_code=404, detail=f"Article {id_article} not found")
     
@@ -118,6 +123,7 @@ async def set_progress(
     
     if last_checkpoint: user_article.last_checkpoint = last_checkpoint
     if is_read: user_article.is_read = is_read
+    user.id_current_article = id_article
     await db.commit()
     return {}
 
