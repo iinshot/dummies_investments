@@ -29,14 +29,12 @@
 }
 
 .article-header {
-  position: relative;
   display: flex;
   align-items: center;
-  justify-content: flex-start;  /* ← меняем с center на flex-start */
-  margin-bottom: 16px;
+  justify-content: space-between;  /* распределяет пространство */
   width: 100%;
+  position: relative;
   min-height: 56px;
-  gap: 80px;  /* добавляем отступ между кнопкой и заголовком */
 }
 
 /* Кнопка назад*/
@@ -58,6 +56,18 @@
   margin-right: 80px;
   flex-shrink: 0;
   z-index: 1;
+    position: relative;
+  transform: translateZ(0);
+  will-change: auto;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  
+  /* Запрещаем любые трансформации */
+  transform: none !important;
+  
+  /* Фиксируем размеры */
+  min-width: fit-content;
+  height: auto;
 }
 
 .article-back-button:hover {
@@ -81,7 +91,11 @@
   color: #1a1a1a;
   margin: 0;
   line-height: 1.2;
-  text-align: left;
+  text-align: center;
+  position: absolute;     /* абсолютное позиционирование */
+  left: 50%;
+  transform: translateX(-50%);  /* центрирование */
+  white-space: nowrap;    /* запрет переноса */
 }
 
 /* Тонкая полоса */

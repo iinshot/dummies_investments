@@ -43,31 +43,31 @@ const MainPage = () => {
 
   // Данные статей для каждого модуля с ID
   const articles1Data = [
-    { id: 1, number: '1', title: 'Что такое финансовая грамотность?', completed: userProgress.completedArticles.includes(1) },
-    { id: 2, number: '2', title: 'Основы бюджетирования', completed: userProgress.completedArticles.includes(2) }
+    { id: 1, number: '1', title: 'Что такое инвестиции?', completed: userProgress.completedArticles.includes(1) },
+    { id: 2, number: '2', title: 'Виды активов', completed: userProgress.completedArticles.includes(2) }
   ];
 
   const articles2Data = [
-    { id: 3, number: '3', title: 'Почему важно инвестировать?', completed: userProgress.completedArticles.includes(3) },
-    { id: 4, number: '4', title: 'Виды инвестиций', completed: userProgress.completedArticles.includes(4) },
-    { id: 5, number: '5', title: 'Как выбрать брокера?', completed: userProgress.completedArticles.includes(5) }
+    { id: 3, number: '3', title: 'Акции', completed: userProgress.completedArticles.includes(3) },
+    { id: 4, number: '4', title: 'Облигации', completed: userProgress.completedArticles.includes(4) },
+    { id: 5, number: '5', title: 'ETF и фонды', completed: userProgress.completedArticles.includes(5) }
   ];
 
   const articles3Data = [
-    { id: 6, number: '6', title: 'Виды кредитов', completed: userProgress.completedArticles.includes(6) },
-    { id: 7, number: '7', title: 'Налоговые вычеты', completed: userProgress.completedArticles.includes(7) }
+    { id: 6, number: '6', title: 'Инвестиционный портфель', completed: userProgress.completedArticles.includes(6) },
+    { id: 7, number: '7', title: 'Горизонт инвестирования', completed: userProgress.completedArticles.includes(7) }
   ];
 
   // Вспомогательная функция для получения названия модуля
 const getModuleTitle = (articleId) => {
   if (articleId >= 1 && articleId <= 2) {
-    return 'Модуль 1 - Введение в финансы';
+    return 'Модуль 1 - Основы инвестиций';
   } else if (articleId >= 3 && articleId <= 5) {
-    return 'Модуль 2 - Инвестиции';
+    return 'Модуль 2 - Инвестиционные инструменты';
   } else if (articleId >= 6 && articleId <= 7) {
-    return 'Модуль 3 - Кредиты и налоги';
+    return 'Модуль 3 - Принципы инвестирования';
   }
-  return 'Модуль 1 - Введение в финансы';
+  return 'Модуль 1 - Основы инвестиций';
 };
 
   // Функции для расчета прогресса
@@ -173,7 +173,7 @@ const handleContinueClick = () => {
   const moduleData1 = {
     id: 1,
     number: 1,
-    title: 'Введение в финансовую грамотность',
+    title: 'Основы инвестиций',
     description: 'Изучите базовые принципы управления деньгами, бюджетирование и первую финансовую подушку безопасности.',
     status: getModuleStatus(articles1Data, userProgress.completedArticles, userProgress.currentArticle),
     readCount: getReadCount(articles1Data, userProgress.completedArticles),
@@ -184,7 +184,7 @@ const handleContinueClick = () => {
   const moduleData2 = {
     id: 2,
     number: 2,
-    title: 'Инвестиции и сбережения',
+    title: 'Инвестиционные инструменты',
     description: 'Как заставить деньги работать: депозиты, облигации, накопления и стратегии.',
     status: getModuleStatus(articles2Data, userProgress.completedArticles, userProgress.currentArticle),
     readCount: getReadCount(articles2Data, userProgress.completedArticles),
@@ -195,7 +195,7 @@ const handleContinueClick = () => {
   const moduleData3 = {
     id: 3,
     number: 3,
-    title: 'Кредиты и налоги',
+    title: 'Принципы инвестирования',
     description: 'Разбираемся в кредитах, налоговых вычетах и умных займах без переплат.',
     status: getModuleStatus(articles3Data, userProgress.completedArticles, userProgress.currentArticle),
     readCount: getReadCount(articles3Data, userProgress.completedArticles),
@@ -214,17 +214,17 @@ const handleContinueClick = () => {
   const modules = [
     {
       id: 1,
-      title: 'Модуль 1 - Введение в финансы',
+      title: 'Модуль 1 - Основы инвестиций',
       articles: articles1.map(a => ({ id: a.id, title: a.title, completed: a.completed }))
     },
     {
       id: 2,
-      title: 'Модуль 2 - Инвестиции',
+      title: 'Модуль 2 - Инвестиционные инструменты',
       articles: articles2.map(a => ({ id: a.id, title: a.title, completed: a.completed }))
     },
     {
       id: 3,
-      title: 'Модуль 3 - Кредиты и налоги',
+      title: 'Модуль 3 - Принципы инвестирования',
       articles: articles3.map(a => ({ id: a.id, title: a.title, completed: a.completed }))
     }
   ];
@@ -519,7 +519,7 @@ const ModuleCardWithThree = ({ moduleData, articles, containerRefPass, circleRef
       <div className="module-info">
         <div className="module-header-row">
           <div className="module-meta">
-            <span className="module-number">Модуль {moduleData.number}</span>
+            <span className="module-number">МОДУЛЬ {moduleData.number}</span>
             <div className={getStatusBadgeClass(moduleData.status)}>
               <span className="status-text">{moduleData.status}</span>
             </div>
@@ -652,7 +652,7 @@ const ModuleCardWithTwo = ({ moduleData, articles, containerRefPass, circleRefs,
       <div className="module-info">
         <div className="module-header-row">
           <div className="module-meta">
-            <span className="module-number">Модуль {moduleData.number}</span>
+            <span className="module-number">МОДУЛЬ {moduleData.number}</span>
             <div className={getStatusBadgeClass(moduleData.status)}>
               <span className="status-text">{moduleData.status}</span>
             </div>

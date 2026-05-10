@@ -6,6 +6,7 @@ import PieIcon from '../assets/icons/pie.svg';
 import ArrowLeftIcon from '../assets/icons/arrow_left.svg';
 import ArrowRightIcon from '../assets/icons/arrow_right.svg';
 import CheckIcon from '../assets/icons/check.svg';
+import { useNavigate } from 'react-router-dom';
 
 const QuizPage = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -19,17 +20,69 @@ const QuizPage = () => {
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [activeQuizId, setActiveQuizId] = useState(null);
   
-  // Состояния для рейтинга и прогресса
-  const [userRating, setUserRating] = useState({
-    totalPoints: 0,
-    completedQuizzes: 0,
-    totalQuizzes: 6,
-    quizResults: {},
-    inProgressQuiz: null
-  });
+
   
+  // Состояния для рейтинга и прогресса
+const [userRating, setUserRating] = useState({
+  totalPoints: 0,
+  completedQuizzes: 0,
+  totalQuizzes: 13, 
+  quizResults: {},
+  inProgressQuiz: null,
+  quizProgress: {}
+});
+
+const [isContinueVisible, setIsContinueVisible] = useState(true); 
+  const articlesData = [
+    { id: 1, title: 'Что такое финансовая грамотность?', module: 'Модуль 1 — Введение в финансы' },
+    { id: 2, title: 'Основы бюджетирования', module: 'Модуль 1 — Введение в финансы' },
+    { id: 3, title: 'Почему важно инвестировать?', module: 'Модуль 2 — Инвестиции' },
+    { id: 4, title: 'Виды инвестиций', module: 'Модуль 2 — Инвестиции' },
+    { id: 5, title: 'Как выбрать брокера?', module: 'Модуль 2 — Инвестиции' },
+    { id: 6, title: 'Виды кредитов', module: 'Модуль 3 — Кредиты и налоги' },
+    { id: 7, title: 'Налоговые вычеты', module: 'Модуль 3 — Кредиты и налоги' }
+  ];
+
+  // ========= ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ ТЕКУЩЕЙ СТАТЬИ =========
+  const getCurrentArticleData = () => {
+    // Получаем прогресс статей из localStorage
+    const savedProgress = localStorage.getItem('articleProgress');
+    
+    if (savedProgress) {
+      const progressData = JSON.parse(savedProgress);
+      // Ищем первую незавершенную статью
+      for (let i = 1; i <= 7; i++) {
+        const articleProgress = progressData[i];
+        if (!articleProgress || articleProgress < 100) {
+          const article = articlesData.find(a => a.id === i);
+          if (article) {
+            return {
+              ...article,
+              progress: articleProgress || 0,
+              id: i
+            };
+          }
+        }
+      }
+    }
+    
+    // Если все статьи пройдены или нет прогресса, возвращаем первую
+    return { ...articlesData[0], progress: 0, id: 1 };
+  };
+
+   const handleCloseContinue = () => {  // ← СЮДА
+    setIsContinueVisible(false);
+  };
+
+  // ========= ДОБАВЬТЕ useNavigate ПОСЛЕ useState =========
+  const navigate = useNavigate();  // ← СЮДА (не забудьте импортировать useNavigate)
+
+  const handleContinueClick = (articleId) => {  // ← СЮДА
+    navigate(`/article/${articleId}`);
+  };
+
   // Все данные для викторин
-  const allQuizzes = {
+  const generalQuizzes = {
     1: {
       id: 1,
       title: 'Основы финансовой грамотности',
@@ -371,9 +424,435 @@ const QuizPage = () => {
           ]
         }
       ]
-    }
+      
+    },
   };
 
+const moduleQuizzes = {
+// МОДУЛЬ 1 - КАРТОЧКА 1
+101: {
+  id: 101,
+  title: 'Что такое финансовая грамотность?',
+  description: 'Базовые понятия и принципы',
+  maxPoints: 40,
+  totalQuestions: 4,
+  questions: [
+    {
+      id: 1,
+      text: 'Что такое финансовая грамотность?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Умение зарабатывать много денег', correct: false },
+        { id: 'b', text: 'Способность эффективно управлять личными финансами', correct: true },
+        { id: 'c', text: 'Знание всех банковских продуктов', correct: false },
+        { id: 'd', text: 'Умение экономить на всём', correct: false }
+      ]
+    },
+    {
+      id: 2,
+      text: 'Что из перечисленного является компонентом финансовой грамотности?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Умение вести учет доходов и расходов', correct: true },
+        { id: 'b', text: 'Умение быстро тратить деньги', correct: false },
+        { id: 'c', text: 'Игнорирование финансового планирования', correct: false },
+        { id: 'd', text: 'Использование только наличных денег', correct: false }
+      ]
+    },
+    {
+      id: 3,
+      text: 'Какой процент дохода рекомендуется откладывать на сбережения?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Нет правильного ответа', correct: false },
+        { id: 'b', text: '10-20% от дохода', correct: true },
+        { id: 'c', text: '50% от дохода', correct: false },
+        { id: 'd', text: 'Всё зависит от возраста', correct: false }
+      ]
+    },
+    {
+      id: 4,
+      text: 'Кто из перечисленных считается финансово грамотным человеком?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Тот, у кого много денег', correct: false },
+        { id: 'b', text: 'Тот, кто умеет планировать бюджет и создавать накопления', correct: true },
+        { id: 'c', text: 'Тот, кто никогда не берёт кредиты', correct: false },
+        { id: 'd', text: 'Тот, кто инвестирует все деньги в акции', correct: false }
+      ]
+    }
+  ]
+},
+
+// МОДУЛЬ 1 - КАРТОЧКА 2
+102: {
+  id: 102,
+  title: 'Основы бюджетирования',
+  description: 'Как планировать доходы и расходы',
+  maxPoints: 40,
+  totalQuestions: 4,
+  questions: [
+    {
+      id: 1,
+      text: 'Что такое бюджет?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'План доходов и расходов на определённый период', correct: true },
+        { id: 'b', text: 'Сумма всех налогов', correct: false },
+        { id: 'c', text: 'Банковский счёт', correct: false },
+        { id: 'd', text: 'Кредитный лимит', correct: false }
+      ]
+    },
+    {
+      id: 2,
+      text: 'Что означает правило 50/30/20?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: '50% на еду, 30% на одежду, 20% на развлечения', correct: false },
+        { id: 'b', text: '50% на обязательные расходы, 30% на желания, 20% на сбережения', correct: true },
+        { id: 'c', text: '50% на налоги, 30% на кредиты, 20% на жизнь', correct: false },
+        { id: 'd', text: '50% на инвестиции, 30% на недвижимость, 20% на бизнес', correct: false }
+      ]
+    },
+    {
+      id: 3,
+      text: 'Какой инструмент помогает вести учёт расходов?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Мобильные приложения для финансов', correct: true },
+        { id: 'b', text: 'Кредитная карта', correct: false },
+        { id: 'c', text: 'Потребительский кредит', correct: false },
+        { id: 'd', text: 'Депозит', correct: false }
+      ]
+    },
+    {
+      id: 4,
+      text: 'Что делать, если расходы превышают доходы?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Взять кредит', correct: false },
+        { id: 'b', text: 'Пересмотреть бюджет и сократить ненужные расходы', correct: true },
+        { id: 'c', text: 'Игнорировать проблему', correct: false },
+        { id: 'd', text: 'Уволиться с работы', correct: false }
+      ]
+    }
+  ]
+},
+
+// МОДУЛЬ 2 - КАРТОЧКА 1
+103: {
+  id: 103,
+  title: 'Почему важно инвестировать?',
+  description: 'Преимущества инвестирования',
+  maxPoints: 40,
+  totalQuestions: 4,
+  questions: [
+    {
+      id: 1,
+      text: 'Что такое инфляция?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Рост цен на товары и услуги', correct: true },
+        { id: 'b', text: 'Снижение курса валюты', correct: false },
+        { id: 'c', text: 'Увеличение налогов', correct: false },
+        { id: 'd', text: 'Рост зарплат', correct: false }
+      ]
+    },
+    {
+      id: 2,
+      text: 'Как инфляция влияет на сбережения?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Увеличивает их покупательную способность', correct: false },
+        { id: 'b', text: 'Снижает их покупательную способность', correct: true },
+        { id: 'c', text: 'Не влияет', correct: false },
+        { id: 'd', text: 'Делает их безопаснее', correct: false }
+      ]
+    },
+    {
+      id: 3,
+      text: 'Что такое сложный процент?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Процент на первоначальную сумму', correct: false },
+        { id: 'b', text: 'Процент на проценты', correct: true },
+        { id: 'c', text: 'Банковская комиссия', correct: false },
+        { id: 'd', text: 'Налог на доход', correct: false }
+      ]
+    },
+    {
+      id: 4,
+      text: 'Почему важно начинать инвестировать рано?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Больше времени для роста капитала', correct: true },
+        { id: 'b', text: 'Меньше налогов', correct: false },
+        { id: 'c', text: 'Меньше рисков', correct: false },
+        { id: 'd', text: 'Гарантированная доходность', correct: false }
+      ]
+    }
+  ]
+},
+
+// МОДУЛЬ 2 - КАРТОЧКА 2
+104: {
+  id: 104,
+  title: 'Виды инвестиций',
+  description: 'Какие бывают инвестиционные инструменты',
+  maxPoints: 40,
+  totalQuestions: 4,
+  questions: [
+    {
+      id: 1,
+      text: 'Что такое акции?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Долговая расписка компании', correct: false },
+        { id: 'b', text: 'Доля в компании', correct: true },
+        { id: 'c', text: 'Банковский депозит', correct: false },
+        { id: 'd', text: 'Государственная облигация', correct: false }
+      ]
+    },
+    {
+      id: 2,
+      text: 'Что такое облигации?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Долговые ценные бумаги', correct: true },
+        { id: 'b', text: 'Акции компании', correct: false },
+        { id: 'c', text: 'Страховой полис', correct: false },
+        { id: 'd', text: 'Кредитный договор', correct: false }
+      ]
+    },
+    {
+      id: 3,
+      text: 'Что менее рискованно?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Акции молодых компаний', correct: false },
+        { id: 'b', text: 'Государственные облигации', correct: true },
+        { id: 'c', text: 'Криптовалюта', correct: false },
+        { id: 'd', text: 'Форекс', correct: false }
+      ]
+    },
+    {
+      id: 4,
+      text: 'Что такое диверсификация?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Вложение всех денег в один актив', correct: false },
+        { id: 'b', text: 'Распределение инвестиций между разными активами', correct: true },
+        { id: 'c', text: 'Вывод всех денег из инвестиций', correct: false },
+        { id: 'd', text: 'Покупка только акций', correct: false }
+      ]
+    }
+  ]
+},
+
+// МОДУЛЬ 2 - КАРТОЧКА 3
+105: {
+  id: 105,
+  title: 'Как выбрать брокера?',
+  description: 'Критерии выбора надежного брокера',
+  maxPoints: 40,
+  totalQuestions: 4,
+  questions: [
+    {
+      id: 1,
+      text: 'Что такое брокер?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Посредник между инвестором и биржей', correct: true },
+        { id: 'b', text: 'Банк', correct: false },
+        { id: 'c', text: 'Страховая компания', correct: false },
+        { id: 'd', text: 'Инвестиционный фонд', correct: false }
+      ]
+    },
+    {
+      id: 2,
+      text: 'На что обратить внимание при выборе брокера?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Наличие лицензии', correct: true },
+        { id: 'b', text: 'Красивый сайт', correct: false },
+        { id: 'c', text: 'Яркая реклама', correct: false },
+        { id: 'd', text: 'Обещание 100% доходности', correct: false }
+      ]
+    },
+    {
+      id: 3,
+      text: 'Что такое комиссия брокера?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Плата за обслуживание счета', correct: true },
+        { id: 'b', text: 'Налог на прибыль', correct: false },
+        { id: 'c', text: 'Дивиденды по акциям', correct: false },
+        { id: 'd', text: 'Купон по облигациям', correct: false }
+      ]
+    },
+    {
+      id: 4,
+      text: 'Как проверить легальность брокера?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Посмотреть отзывы', correct: false },
+        { id: 'b', text: 'Проверить наличие лицензии на сайте ЦБ РФ', correct: true },
+        { id: 'c', text: 'Спросить у друзей', correct: false },
+        { id: 'd', text: 'Никак, все брокеры легальны', correct: false }
+      ]
+    }
+  ]
+},
+
+// МОДУЛЬ 3 - КАРТОЧКА 1
+106: {
+  id: 106,
+  title: 'Виды кредитов',
+  description: 'Потребительский, ипотека, автокредит',
+  maxPoints: 40,
+  totalQuestions: 4,
+  questions: [
+    {
+      id: 1,
+      text: 'Что такое ипотека?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Кредит на покупку жилья под залог', correct: true },
+        { id: 'b', text: 'Кредит на автомобиль', correct: false },
+        { id: 'c', text: 'Кредитная карта', correct: false },
+        { id: 'd', text: 'Микрозайм', correct: false }
+      ]
+    },
+    {
+      id: 2,
+      text: 'Что такое автокредит?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Кредит на покупку автомобиля', correct: true },
+        { id: 'b', text: 'Кредит на жильё', correct: false },
+        { id: 'c', text: 'Кредит на образование', correct: false },
+        { id: 'd', text: 'Кредит на лечение', correct: false }
+      ]
+    },
+    {
+      id: 3,
+      text: 'Что такое потребительский кредит?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Кредит на любые цели без залога', correct: true },
+        { id: 'b', text: 'Кредит под залог недвижимости', correct: false },
+        { id: 'c', text: 'Кредит под залог автомобиля', correct: false },
+        { id: 'd', text: 'Беспроцентный кредит', correct: false }
+      ]
+    },
+    {
+      id: 4,
+      text: 'Какой платёж уменьшается со временем?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Аннуитетный', correct: false },
+        { id: 'b', text: 'Дифференцированный', correct: true },
+        { id: 'c', text: 'Фиксированный', correct: false },
+        { id: 'd', text: 'Льготный', correct: false }
+      ]
+    }
+  ]
+},
+
+// МОДУЛЬ 3 - КАРТОЧКА 2
+107: {
+  id: 107,
+  title: 'Налоговые вычеты',
+  description: 'Как вернуть часть уплаченных налогов',
+  maxPoints: 40,
+  totalQuestions: 4,
+  questions: [
+    {
+      id: 1,
+      text: 'Что такое налоговый вычет?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Дополнительный налог', correct: false },
+        { id: 'b', text: 'Возврат части уплаченного налога', correct: true },
+        { id: 'c', text: 'Штраф за неуплату', correct: false },
+        { id: 'd', text: 'Налоговая льгота для бизнеса', correct: false }
+      ]
+    },
+    {
+      id: 2,
+      text: 'Какой максимальный возврат по имущественному вычету?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: '100 000 ₽', correct: false },
+        { id: 'b', text: '260 000 ₽', correct: true },
+        { id: 'c', text: '500 000 ₽', correct: false },
+        { id: 'd', text: '1 000 000 ₽', correct: false }
+      ]
+    },
+    {
+      id: 3,
+      text: 'На какие цели можно получить социальный вычет?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Лечение и обучение', correct: true },
+        { id: 'b', text: 'Покупка автомобиля', correct: false },
+        { id: 'c', text: 'Путешествия', correct: false },
+        { id: 'd', text: 'Покупка квартиры', correct: false }
+      ]
+    },
+    {
+      id: 4,
+      text: 'Что нужно сделать, чтобы получить вычет?',
+      subtext: '(выберите один вариант)',
+      points: 10,
+      options: [
+        { id: 'a', text: 'Подать декларацию 3-НДФЛ', correct: true },
+        { id: 'b', text: 'Ничего, вычет приходит автоматически', correct: false },
+        { id: 'c', text: 'Обратиться в банк', correct: false },
+        { id: 'd', text: 'Обратиться в страховую компанию', correct: false }
+      ]
+    }
+  ]
+}
+};
+const allQuizzes = { ...generalQuizzes, ...moduleQuizzes };
+// Функция для подсчета завершенных викторин (всех)
+const getTotalCompletedCount = () => {
+  const allQuizIds = [...Object.keys(generalQuizzes), ...Object.keys(moduleQuizzes)];
+  return allQuizIds.filter(id => userRating.quizResults[id]?.completed).length;
+};
+
+// Функция для подсчета общего количества викторин
+const getTotalQuizzesCount = () => {
+  return Object.keys(generalQuizzes).length + Object.keys(moduleQuizzes).length;
+};
   // Загрузка рейтинга из localStorage
   useEffect(() => {
     const loadRatingFromStorage = () => {
@@ -392,14 +871,14 @@ const QuizPage = () => {
           }
         }
       } else {
-        const initialRating = {
-          totalPoints: 0,
-          completedQuizzes: 0,
-          totalQuizzes: 6,
-          quizResults: {},
-          inProgressQuiz: null,
-          quizProgress: {}
-        };
+const initialRating = {
+  totalPoints: 0,
+  completedQuizzes: 0,
+  totalQuizzes: 13, // ← измените с 6 на 13
+  quizResults: {},
+  inProgressQuiz: null,
+  quizProgress: {}
+};
         localStorage.setItem('quizRating', JSON.stringify(initialRating));
         setUserRating(initialRating);
       }
@@ -437,35 +916,66 @@ const QuizPage = () => {
   }, [currentQuestion, userAnswers, selectedQuiz, quizCompleted]);
 
   // Функция для сохранения завершения викторины
-  const saveQuizProgress = (quizId, earnedPoints, totalPoints) => {
-    const newRating = {
-      ...userRating,
-      totalPoints: userRating.totalPoints + earnedPoints,
-      completedQuizzes: userRating.completedQuizzes + 1,
-      inProgressQuiz: null,
-      quizProgress: {
-        ...userRating.quizProgress,
-        [quizId]: {
-          completed: true,
-          points: earnedPoints,
-          maxPoints: totalPoints,
-          completedAt: new Date().toISOString()
-        }
-      },
-      quizResults: {
-        ...userRating.quizResults,
-        [quizId]: {
-          completed: true,
-          points: earnedPoints,
-          maxPoints: totalPoints,
-          completedAt: new Date().toISOString()
-        }
-      }
-    };
+const saveQuizProgress = (quizId, earnedPoints, totalPoints) => {
+  const existingResult = userRating.quizResults[quizId];
+  const wasAlreadyCompleted = existingResult?.completed === true;
+  const oldPoints = existingResult?.points || 0;
+  
+  let newTotalPoints = userRating.totalPoints;
+  let newCompletedQuizzes = userRating.completedQuizzes;
+  let bestPoints = earnedPoints;
+  
+  if (wasAlreadyCompleted) {
+    // Если викторина уже была пройдена, берем ЛУЧШИЙ результат
+    bestPoints = Math.max(oldPoints, earnedPoints);
+    const pointsDifference = bestPoints - oldPoints;
     
-    localStorage.setItem('quizRating', JSON.stringify(newRating));
-    setUserRating(newRating);
+    if (pointsDifference > 0) {
+      // Если новый результат лучше, добавляем разницу
+      newTotalPoints = userRating.totalPoints + pointsDifference;
+    } else {
+      // Если новый результат хуже или равен, очки не меняются
+      newTotalPoints = userRating.totalPoints;
+    }
+    newCompletedQuizzes = userRating.completedQuizzes; // счетчик не меняется
+  } else {
+    // Если викторина не была пройдена - просто добавляем очки
+    newTotalPoints = userRating.totalPoints + earnedPoints;
+    newCompletedQuizzes = userRating.completedQuizzes + 1;
+  }
+  
+  const newRating = {
+    ...userRating,
+    totalPoints: newTotalPoints,
+    completedQuizzes: newCompletedQuizzes,
+    inProgressQuiz: null,
+    quizProgress: {
+      ...userRating.quizProgress,
+      [quizId]: {
+        completed: true,
+        points: bestPoints,
+        maxPoints: totalPoints,
+        completedAt: new Date().toISOString(),
+        bestScore: true
+      }
+    },
+    quizResults: {
+      ...userRating.quizResults,
+      [quizId]: {
+        completed: true,
+        points: bestPoints,
+        maxPoints: totalPoints,
+        completedAt: new Date().toISOString()
+      }
+    }
   };
+  
+  localStorage.setItem('quizRating', JSON.stringify(newRating));
+  setUserRating(newRating);
+  
+  // Для отладки
+  console.log(`Викторина ${quizId}: старые очки=${oldPoints}, новые=${earnedPoints}, лучшие=${bestPoints}`);
+};
 
   // Список викторин для отображения
   const getQuizStatus = (quizId) => {
@@ -474,45 +984,48 @@ const QuizPage = () => {
     return 'Не пройдено';
   };
 
-  const getQuizPoints = (quizId) => {
-    return userRating.quizResults[quizId]?.points || 0;
-  };
+const getQuizPoints = (quizId) => {
+  return userRating.quizResults[quizId]?.points || 0;
+};
 
-  const quizzesList = Object.values(allQuizzes).map(quiz => ({
-    id: quiz.id,
-    title: quiz.title,
-    description: quiz.description,
-    status: getQuizStatus(quiz.id),
-    points: getQuizPoints(quiz.id),
-    maxPoints: quiz.maxPoints,
-    questions: `${quiz.totalQuestions} вопросов`,
-    theme: activeQuizId === quiz.id ? 'dark' : 'light',
-    isActive: activeQuizId === quiz.id,
-    isInProgress: userRating.inProgressQuiz === quiz.id && !userRating.quizResults[quiz.id]?.completed
-  }));
+const quizzesList = Object.values(generalQuizzes).map(quiz => ({
+  id: quiz.id,
+  title: quiz.title,
+  description: quiz.description,
+  status: getQuizStatus(quiz.id),
+  points: getQuizPoints(quiz.id),
+  maxPoints: quiz.maxPoints,
+  questions: `${quiz.totalQuestions} вопросов`,
+  theme: activeQuizId === quiz.id ? 'dark' : 'light',
+  isActive: activeQuizId === quiz.id,
+  isInProgress: userRating.inProgressQuiz === quiz.id && !userRating.quizResults[quiz.id]?.completed
+}));
 
   // Выбор викторины
-  const handleSelectQuiz = (quizId) => {
-    if (activeQuizId === quizId) return;
-    
-    const quiz = allQuizzes[quizId];
-    setSelectedQuiz(quiz);
-    setActiveQuizId(quizId);
-    
-    // Восстанавливаем прогресс, если есть
-    const savedProgress = userRating.quizProgress?.[quizId];
-    if (savedProgress && !savedProgress.completed) {
-      setCurrentQuestion(savedProgress.currentQuestion || 0);
-      setUserAnswers(savedProgress.userAnswers || {});
-    } else {
-      setCurrentQuestion(0);
-      setUserAnswers({});
-    }
-    
-    setQuizCompleted(false);
-    setQuizScore(0);
-    setResultsAnimation(false);
-  };
+const handleSelectQuiz = (quizId) => {
+  if (activeQuizId === quizId) return;
+  
+  // Ищем викторину в allQuizzes
+  const quiz = allQuizzes[quizId];
+  if (!quiz) return;
+  
+  setSelectedQuiz(quiz);
+  setActiveQuizId(quizId);
+  
+  // Восстанавливаем прогресс, если есть
+  const savedProgress = userRating.quizProgress?.[quizId];
+  if (savedProgress && !savedProgress.completed) {
+    setCurrentQuestion(savedProgress.currentQuestion || 0);
+    setUserAnswers(savedProgress.userAnswers || {});
+  } else {
+    setCurrentQuestion(0);
+    setUserAnswers({});
+  }
+  
+  setQuizCompleted(false);
+  setQuizScore(0);
+  setResultsAnimation(false);
+};
 
   const handleCloseQuiz = () => {
     if (selectedQuiz && !quizCompleted) {
@@ -526,18 +1039,22 @@ const QuizPage = () => {
     setQuizScore(0);
     setResultsAnimation(false);
   };
-
+const currentArticle = getCurrentArticleData();
   const currentQ = selectedQuiz?.questions[currentQuestion];
   
-  const quizStats = {
-    totalQuiz: userRating.totalQuizzes,
-    completedQuiz: userRating.completedQuizzes,
-    remainingQuiz: userRating.totalQuizzes - userRating.completedQuizzes,
-    points: userRating.totalPoints,
-    progressPercent: userRating.totalQuizzes > 0 
-      ? Math.round((userRating.completedQuizzes / userRating.totalQuizzes) * 100) 
-      : 0
-  };
+const totalCompleted = getTotalCompletedCount();
+const totalQuizzesCount = getTotalQuizzesCount();
+const remainingQuizzes = totalQuizzesCount - totalCompleted;
+
+const quizStats = {
+  totalQuiz: totalQuizzesCount,
+  completedQuiz: totalCompleted,
+  remainingQuiz: remainingQuizzes,
+  points: userRating.totalPoints,
+  progressPercent: totalQuizzesCount > 0 
+    ? Math.round((totalCompleted / totalQuizzesCount) * 100) 
+    : 0
+};
 
   const handleOptionSelect = (optionId) => {
     if (isAnimating) return;
@@ -670,19 +1187,19 @@ const QuizPage = () => {
   // Данные для модулей
 
 const module1Cards = [
-  { id: 1, title: 'Что такое финансовая грамотность?', description: 'Базовые понятия и принципы', status: getQuizStatus(1), questions: '10 вопросов', points: getQuizPoints(1), maxPoints: 40, quizId: 1, buttonLabel: getQuizStatus(1) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(1) === 'В процессе' ? 'Продолжить' : 'Пройти') },
-  { id: 2, title: 'Основы бюджетирования', description: 'Как планировать доходы и расходы', status: 'Не пройдено', questions: '10 вопросов', points: 0, maxPoints: 40, quizId: null, buttonLabel: 'Пройти' }
+  { id: 1, title: 'Что такое финансовая грамотность?', description: 'Базовые понятия и принципы', status: getQuizStatus(101), questions: '4 вопросов', points: getQuizPoints(101), maxPoints: 40, quizId: 101, buttonLabel: getQuizStatus(101) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(101) === 'В процессе' ? 'Продолжить' : 'Пройти') },
+  { id: 2, title: 'Основы бюджетирования', description: 'Как планировать доходы и расходы', status: getQuizStatus(102), questions: '4 вопросов', points: getQuizPoints(102), maxPoints: 40, quizId: 102, buttonLabel: getQuizStatus(102) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(102) === 'В процессе' ? 'Продолжить' : 'Пройти') }
 ];
 
 const module2Cards = [
-  { id: 1, title: 'Почему важно инвестировать?', description: 'Преимущества инвестирования', status: getQuizStatus(2), questions: '10 вопросов', points: getQuizPoints(2), maxPoints: 40, quizId: 2, buttonLabel: getQuizStatus(2) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(2) === 'В процессе' ? 'Продолжить' : 'Пройти') },
-  { id: 2, title: 'Виды инвестиций', description: 'Какие бывают инвестиционные инструменты', status: 'Не пройдено', questions: '10 вопросов', points: 0, maxPoints: 40, quizId: null, buttonLabel: 'Пройти' },
-  { id: 3, title: 'Как выбрать брокера?', description: 'Критерии выбора надежного брокера', status: 'Не пройдено', questions: '10 вопросов', points: 0, maxPoints: 40, quizId: null, buttonLabel: 'Пройти' }
+  { id: 1, title: 'Почему важно инвестировать?', description: 'Преимущества инвестирования', status: getQuizStatus(103), questions: '4 вопросов', points: getQuizPoints(103), maxPoints: 40, quizId: 103, buttonLabel: getQuizStatus(103) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(103) === 'В процессе' ? 'Продолжить' : 'Пройти') },
+  { id: 2, title: 'Виды инвестиций', description: 'Какие бывают инвестиционные инструменты', status: getQuizStatus(104), questions: '4 вопросов', points: getQuizPoints(104), maxPoints: 40, quizId: 104, buttonLabel: getQuizStatus(104) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(104) === 'В процессе' ? 'Продолжить' : 'Пройти') },
+  { id: 3, title: 'Как выбрать брокера?', description: 'Критерии выбора надежного брокера', status: getQuizStatus(105), questions: '4 вопросов', points: getQuizPoints(105), maxPoints: 40, quizId: 105, buttonLabel: getQuizStatus(105) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(105) === 'В процессе' ? 'Продолжить' : 'Пройти') }
 ];
 
 const module3Cards = [
-  { id: 1, title: 'Виды кредитов', description: 'Потребительский, ипотека, автокредит', status: getQuizStatus(3), questions: '10 вопросов', points: getQuizPoints(3), maxPoints: 40, quizId: 3, buttonLabel: getQuizStatus(3) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(3) === 'В процессе' ? 'Продолжить' : 'Пройти') },
-  { id: 2, title: 'Налоговые вычеты', description: 'Как вернуть часть уплаченных налогов', status: getQuizStatus(4), questions: '10 вопросов', points: getQuizPoints(4), maxPoints: 40, quizId: 4, buttonLabel: getQuizStatus(4) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(4) === 'В процессе' ? 'Продолжить' : 'Пройти') }
+  { id: 1, title: 'Виды кредитов', description: 'Потребительский, ипотека, автокредит', status: getQuizStatus(106), questions: '4 вопросов', points: getQuizPoints(106), maxPoints: 40, quizId: 106, buttonLabel: getQuizStatus(106) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(106) === 'В процессе' ? 'Продолжить' : 'Пройти') },
+  { id: 2, title: 'Налоговые вычеты', description: 'Как вернуть часть уплаченных налогов', status: getQuizStatus(107), questions: '4 вопросов', points: getQuizPoints(107), maxPoints: 40, quizId: 107, buttonLabel: getQuizStatus(107) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(107) === 'В процессе' ? 'Продолжить' : 'Пройти') }
 ];
 
   return (
@@ -882,7 +1399,10 @@ const module3Cards = [
     {module1Cards.map((card) => (
       <article 
         key={card.id} 
-        className={`module-item-card ${card.quizId ? 'clickable' : ''} ${card.status === 'Пройдено' ? 'card-completed' : card.status === 'В процессе' ? 'card-in-progress' : ''}`}
+        className={`module-item-card 
+          ${card.quizId ? 'clickable' : ''} 
+          ${activeQuizId === card.quizId ? 'active' : ''}
+          ${card.status === 'В процессе' && activeQuizId !== card.quizId ? 'in-progress' : ''}`}
         onClick={() => card.quizId && handleSelectQuiz(card.quizId)}
       >
         <div className="module-card-content">
@@ -906,6 +1426,7 @@ const module3Cards = [
         </div>
         <button className="module-action-btn">
           {card.buttonLabel}
+           {card.buttonLabel === 'Перепройти' && <span className="action-icon">↻</span>}
         </button>
       </article>
     ))}
@@ -919,7 +1440,10 @@ const module3Cards = [
     {module2Cards.map((card) => (
       <article 
         key={card.id} 
-        className={`module-item-card ${card.quizId ? 'clickable' : ''} ${card.status === 'Пройдено' ? 'card-completed' : card.status === 'В процессе' ? 'card-in-progress' : ''}`}
+        className={`module-item-card 
+          ${card.quizId ? 'clickable' : ''} 
+          ${activeQuizId === card.quizId ? 'active' : ''}
+          ${card.status === 'В процессе' && activeQuizId !== card.quizId ? 'in-progress' : ''}`}
         onClick={() => card.quizId && handleSelectQuiz(card.quizId)}
       >
         <div className="module-card-content">
@@ -943,6 +1467,7 @@ const module3Cards = [
         </div>
         <button className="module-action-btn">
           {card.buttonLabel}
+           {card.buttonLabel === 'Перепройти' && <span className="action-icon">↻</span>}
         </button>
       </article>
     ))}
@@ -956,7 +1481,10 @@ const module3Cards = [
     {module3Cards.map((card) => (
       <article 
         key={card.id} 
-        className={`module-item-card ${card.quizId ? 'clickable' : ''} ${card.status === 'Пройдено' ? 'card-completed' : card.status === 'В процессе' ? 'card-in-progress' : ''}`}
+        className={`module-item-card 
+          ${card.quizId ? 'clickable' : ''} 
+          ${activeQuizId === card.quizId ? 'active' : ''}
+          ${card.status === 'В процессе' && activeQuizId !== card.quizId ? 'in-progress' : ''}`}
         onClick={() => card.quizId && handleSelectQuiz(card.quizId)}
       >
         <div className="module-card-content">
@@ -980,6 +1508,7 @@ const module3Cards = [
         </div>
         <button className="module-action-btn">
           {card.buttonLabel}
+           {card.buttonLabel === 'Перепройти' && <span className="action-icon">↻</span>}
         </button>
       </article>
     ))}
@@ -1023,25 +1552,61 @@ const module3Cards = [
               />
             </svg>
             <div className="circular-progress-center">
-              <span className="progress-number">{userRating.completedQuizzes}</span>
+              <span className="progress-number">{totalCompleted}</span>
             </div>
           </div>
 
           <div className="stats-container-sidebar">
-  <div className="stat-card-sidebar">
-    <div className="stat-value-sidebar">{userRating.totalPoints}</div>
-    <div className="stat-label-sidebar">очков</div>
-  </div>
-  <div className="stat-card-sidebar">
-    <div className="stat-value-sidebar">{userRating.completedQuizzes}</div>
-    <div className="stat-label-sidebar">пройдено</div>
-  </div>
-  <div className="stat-card-sidebar">
-    <div className="stat-value-sidebar">{userRating.totalQuizzes - userRating.completedQuizzes}</div>
-    <div className="stat-label-sidebar">осталось</div>
-  </div>
-</div>
+            <div className="stat-card-sidebar">
+              <div className="stat-value-sidebar">{userRating.totalPoints}</div>
+              <div className="stat-label-sidebar">очков</div>
+            </div>
+            <div className="stat-card-sidebar">
+              <div className="stat-value-sidebar">{totalCompleted}</div>
+              <div className="stat-label-sidebar">пройдено</div>
+            </div>
+            <div className="stat-card-sidebar">
+              <div className="stat-value-sidebar">{totalQuizzesCount - totalCompleted}</div>
+              <div className="stat-label-sidebar">осталось</div>
+            </div>
+          </div>
         </div>
+
+        {/* Блок "Продолжить" - ВНУТРИ quiz-sidebar */}
+        {isContinueVisible && (
+          <div className="continue-block">
+            <div className="continue-close" onClick={handleCloseContinue}>
+              <div className="close-icon"></div>
+            </div>
+            <div className="continue-content">
+              <div className="continue-play">
+                <div className="play-button">
+                  <div className="play-triangle"></div>
+                </div>
+                <span className="continue-label">Продолжить</span>
+              </div>
+              <div className="continue-article">
+                <div className="continue-article-title">{currentArticle.title}</div>
+                <div className="continue-article-module">{currentArticle.module}</div>
+              </div>
+              <div className="progress-section">
+                <div className="progress-bar-bg">
+                  <div className="progress-bar-fill" style={{ width: `${currentArticle.progress}%` }}></div>
+                </div>
+                <div className="progress-stats">
+                  <span className="progress-completed">завершено</span>
+                  <span className="progress-percent">{currentArticle.progress}%</span>
+                </div>
+              </div>
+              <button 
+                className="continue-button" 
+                onClick={() => handleContinueClick(currentArticle.id)}
+              >
+                Продолжить <span className="arrow">→</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

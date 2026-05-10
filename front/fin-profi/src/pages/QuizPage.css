@@ -1188,3 +1188,235 @@
     width: 100%;
   }
 }
+/* ========= УНИВЕРСАЛЬНЫЕ СТИЛИ ДЛЯ КАРТОЧЕК ========= */
+
+/* Активная карточка (когда викторина открыта) */
+.quiz-card.active,
+.module-item-card.active {
+  border: 2px solid #F0F036;
+  background-color: #333333;
+  transform: scale(1.02);
+  transition: all 0.3s ease;
+}
+
+.quiz-card.active .quiz-card-title,
+.module-item-card.active .module-card-title {
+  color: #FFFFFF;
+}
+
+.quiz-card.active .quiz-card-description,
+.module-item-card.active .module-card-description {
+  color: #BDBDBD;
+}
+
+.quiz-card.active .quiz-status,
+.module-item-card.active .status-badge {
+  background-color: #F0F036;
+  border: 1px solid #F0F036;
+}
+
+.quiz-card.active .status-text,
+.module-item-card.active .status-badge span {
+  color: #333333;
+}
+
+.quiz-card.active .quiz-stat .stat-text,
+.module-item-card.active .module-stat span {
+  color: #BDBDBD;
+}
+
+.quiz-card.active .stat-icon-img,
+.module-item-card.active .stat-icon-img {
+  filter: brightness(0) invert(1);
+}
+
+/* Карточка в процессе (начата, но не выбрана) */
+.quiz-card.in-progress,
+.module-item-card.in-progress {
+  border: 2px solid #F0F036;
+  background-color: #F7F7F7;
+}
+
+.quiz-card.in-progress .quiz-status,
+.module-item-card.in-progress .status-badge {
+  background-color: #F0F036;
+  border: 1px solid #F0F036;
+}
+
+.quiz-card.in-progress .status-text,
+.module-item-card.in-progress .status-badge span {
+  color: #333333;
+}
+/* ========= БЛОК ПРОДОЛЖИТЬ ========= */
+.continue-block {
+  background-color: #333333;
+  border-radius: 20px;
+  padding: 20px 16px;
+  flex-shrink: 0;
+  margin-top: 16px;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.continue-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.continue-play {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.play-button {
+  width: 40px;
+  height: 40px;
+  background-color: #F0F036;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.play-triangle {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 8px 0 8px 14px;
+  border-color: transparent transparent transparent #1a1a1a;
+  margin-left: 3px;
+}
+
+.continue-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.continue-article-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+}
+
+.continue-article-module {
+  font-size: 12px;
+  color: #AAAAAA;
+}
+
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 6px;
+  background-color: #555555;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #F0F036;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.progress-percent {
+  color: #F0F036;
+  font-weight: 700;
+}
+
+.progress-completed {
+  color: #AAAAAA;
+}
+
+.continue-button {
+  background-color: #F7F7F7;
+  border: none;
+  border-radius: 40px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+  transition: all 0.2s ease;
+}
+
+.continue-button:hover {
+  background-color: #FFFFFF;
+  transform: translateX(4px);
+}
+
+.arrow {
+  font-size: 14px;
+}
+
+.continue-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  background-color: #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.continue-close:hover {
+  transform: scale(1.1);
+  background-color: #F0F036;
+}
+
+.close-icon {
+  position: relative;
+  width: 12px;
+  height: 12px;
+}
+
+.close-icon::before,
+.close-icon::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 2px;
+  background-color: #333333;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border-radius: 2px;
+}
+
+.close-icon::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.continue-close:hover .close-icon::before,
+.continue-close:hover .close-icon::after {
+  background-color: #FFFFFF;
+}
