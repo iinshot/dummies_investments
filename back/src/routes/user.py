@@ -153,3 +153,10 @@ async def delete_user(id_user: int, db: AsyncSession = Depends(get_db)):
     if not deleted:
         raise HTTPException(status_code=404, detail="User not found")
     return {"detail": "User deleted"}
+
+@router.get("/{id_user}/activity")
+async def get_user_activity(id_user: int, db: AsyncSession = Depends(get_db)):
+    user = await user_crud.get_user(db, id_user=id_user)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return await user_crud.get_user_activity(db, id_user=id_user)

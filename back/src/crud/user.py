@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete, func
+from sqlalchemy.orm import selectinload
 from typing import Optional, List
 import bcrypt
 from models.User import User
@@ -126,3 +127,40 @@ async def get_user_progress(session: AsyncSession, id_user: int) -> dict:
             "all_count": all_quizzes.scalar()
         }
     }
+
+async def get_user_activity(session: AsyncSession, id_user: int) -> list:
+    articles_query = (
+        select(UserArticle)
+        .where(UserArticle.id_user == id_user)
+        .options(selectinload(UserArticle.article))
+    )
+    quizzes_query = (
+        select(UserQuiz)
+        .where(UserQuiz.id_user == id_user)
+        .options(selectinload(UserQuiz.quiz))
+    )
+
+    articles_result = await session.execute(articles_query)
+    quizzes_result = await session.execute(quizzes_query)
+    user_articles = articles_result.scalars().all()
+    user_quizzes = quizzes_result.scalars().all()
+
+    activity = []
+
+    for ua in user_articles:
+        activity.append({
+            "type": "article",
+            "name": ua.article.name,
+            "created_at": ua.created_at
+        })
+
+    for uq in user_quizzes:
+        activity.append({
+            "type": "quiz",
+            "name": uq.quiz.name,
+            "created_at": uq.created_at
+        })
+
+    activity.sort(key=lambda x: x["created_at"])
+
+    return activity
