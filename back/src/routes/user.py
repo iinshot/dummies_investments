@@ -2,13 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from crud import user as user_crud
-from crud import article as article_crud
 from db.session import get_db
 from typing import Optional
 from auth.dependencies import get_current_user
 from models.User import User
 from models.UserArticle import UserArticle
-from models.Article import Article
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -51,6 +49,71 @@ async def create_user(
         about=about
     )
 
+@router.get("/get_total_progress/")
+async def get_total_progress(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    stmt = select(UserArticle).where(UserArticle.id_user == user.id_user)
+    result = await db.execute(stmt)
+    user_articles = result.scalars().all()
+    return {"articles": [user_articles]}
+
+@router.post("/set_progress/{id_article}")
+async def set_progress(
+    id_article: int,
+    last_checkpoint: int | None = None,
+    is_read: bool | None = None,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    article = await user_crud.get_article(db, id_article=id_article)
+    if not article:
+        raise HTTPException(status_code=404, detail=f"Article {id_article} not found")
+    
+    user_article = await db.get(UserArticle, (user.id_user, id_article))
+    if(not user_article):
+        user_article = UserArticle(id_user = user.id_user, id_article = id_article)
+        db.add(user_article)
+    
+    if last_checkpoint: user_article.last_checkpoint = last_checkpoint
+    if is_read: user_article.is_read = is_read
+    await db.commit()
+    return {}
+
+@router.get("/get_progress/{id_article}")
+async def get_progress(
+    id_article: Optional[int],
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    user_article = await db.get(UserArticle, (user.id_user, id_article))
+    if not user_article:
+        return {"id_article": id_article, "is_read": False, "last_checkpoint": 0 }
+    
+    return {"id_article": id_article, "is_read": user_article.is_read, "last_checkpoint": user_article.last_checkpoint }
+
+@router.get("/{id_user}/rating")
+async def get_rating(id_user: int, db: AsyncSession = Depends(get_db)):
+    user = await user_crud.get_user(db, id_user=id_user)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    top8 = await user_crud.get_users_above(db, points=0)
+    top8 = top8[:8]
+
+    if any(u.id_user == id_user for u in top8):
+        return top8
+
+    return await user_crud.get_users_above(db, points=user.points)
+
+@router.get("/{id_user}/statistics")
+async def get_user_progress(id_user: int, db: AsyncSession = Depends(get_db)):
+    user = await user_crud.get_user(db, id_user=id_user)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return await user_crud.get_user_progress(db, id_user=id_user)
+
 @router.put("/{id_user}")
 async def update_user(
         id_user: int,
@@ -90,66 +153,3 @@ async def delete_user(id_user: int, db: AsyncSession = Depends(get_db)):
     if not deleted:
         raise HTTPException(status_code=404, detail="User not found")
     return {"detail": "User deleted"}
-
-@router.get("/progress/get_progress")
-async def progress(
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    stmt = select(UserArticle).where(UserArticle.id_user == user.id_user, UserArticle.is_read == True)
-    result = await db.execute(stmt)
-    user_articles = result.scalars().all()
-    stmt = select(UserArticle).where(UserArticle.id_article == user.id_current_article)
-    result = await db.execute(stmt)
-    current_article = result.scalars().first()
-    return {"currentArticle": current_article, "articles": user_articles}
-
-@router.post("/set_progress/{id_article}")
-async def set_progress(
-    id_article: int,
-    last_checkpoint: int | None = None,
-    is_read: bool | None = None,
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    article = await article_crud.get_article(db, id_article=id_article)
-    if not article:
-        raise HTTPException(status_code=404, detail=f"Article {id_article} not found")
-    
-    user_article = await db.get(UserArticle, (user.id_user, id_article))
-    if(not user_article):
-        user_article = UserArticle(id_user = user.id_user, id_article = id_article)
-        db.add(user_article)
-    
-    if last_checkpoint: user_article.last_checkpoint = last_checkpoint
-    if is_read: user_article.is_read = is_read
-    user.id_current_article = id_article
-    await db.commit()
-    return {}
-
-@router.get("/get_progress/{id_article}")
-async def get_progress(
-    id_article: Optional[int],
-    user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    user_article = await db.get(UserArticle, (user.id_user, id_article))
-    if not user_article:
-        return {"id_article": id_article, "is_read": False, "last_checkpoint": 0 }
-    
-    return {"id_article": id_article, "is_read": user_article.is_read, "last_checkpoint": user_article.last_checkpoint }
-
-
-@router.get("/{id_user}/rating")
-async def get_rating(id_user: int, db: AsyncSession = Depends(get_db)):
-    user = await user_crud.get_user(db, id_user=id_user)
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    top8 = await user_crud.get_users_above(db, points=0)
-    top8 = top8[:8]
-
-    if any(u.id_user == id_user for u in top8):
-        return top8
-
-    return await user_crud.get_users_above(db, points=user.points)

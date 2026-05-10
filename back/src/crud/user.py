@@ -1,8 +1,12 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, func
 from typing import Optional, List
 import bcrypt
 from models.User import User
+from models.Article import Article
+from models.Quiz import Quiz
+from models.UserArticle import UserArticle
+from models.UserQuiz import UserQuiz
 
 async def create_user(
     session: AsyncSession,
@@ -96,3 +100,29 @@ async def get_users_above(
     )
     result = await session.execute(query)
     return result.scalars().all()
+
+async def get_user_progress(session: AsyncSession, id_user: int) -> dict:
+    all_articles = await session.execute(select(func.count()).select_from(Article))
+    all_quizzes = await session.execute(select(func.count()).select_from(Quiz))
+
+    user_articles = await session.execute(
+        select(func.count())
+        .select_from(UserArticle)
+        .where(UserArticle.id_user == id_user, UserArticle.is_read == True)
+    )
+    user_quizzes = await session.execute(
+        select(func.count())
+        .select_from(UserQuiz)
+        .where(UserQuiz.id_user == id_user, UserQuiz.is_completed == True)
+    )
+
+    return {
+        "articles": {
+            "user_progress": user_articles.scalar(),
+            "all_count": all_articles.scalar()
+        },
+        "quizzes": {
+            "user_progress": user_quizzes.scalar(),
+            "all_count": all_quizzes.scalar()
+        }
+    }
