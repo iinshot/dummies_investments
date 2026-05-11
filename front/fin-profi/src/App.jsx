@@ -6,12 +6,14 @@ import LoginPage from "./pages/auth/Login";
 import RegisterPage from "./pages/auth/RegisterPage";
 import CalculatorPage from './pages/CalculatorPage';
 import CircularArticleProgress from './components/CircularArticleProgress';
+import ProfilePage from './pages/Profile';
 import QuizPage from './pages/QuizPage';
 import ArticlePage from './pages/ArticlePage';
 import CircularProgress from './components/CircularProgress';
 import DynamicDottedLine from './components/DynamicDottedLine';
 import Logo from './components/Logo';
 import { Calc, Home, Login, Profile, Quiz } from '././assets/icons';
+import { getUserTotalProgress, setArticleProgress, syncLocalProgressToServer } from './services/api';
 
 
 // Компонент главной страницы 
@@ -263,6 +265,29 @@ const handleArticleClick = (articleId) => {
   const thirdContainerRef = useRef(null);
   const [thirdLinePath, setThirdLinePath] = useState('');
 
+
+  const articleRefs = {
+    1: useRef(null),
+    2: useRef(null),
+    3: useRef(null),
+    4: useRef(null),
+    5: useRef(null),
+    6: useRef(null),
+    7: useRef(null)
+  };
+  
+  // ========= ФУНКЦИЯ ПРОКРУТКИ К СТАТЬЕ =========
+  const scrollToArticle = (articleId) => {
+    const articleRef = articleRefs[articleId];
+    if (articleRef && articleRef.current) {
+      articleRef.current.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }
+  };
+
+
   const updateLinePath = () => {
     if (firstCircleRef.current && secondCircleRef.current && containerRef.current) {
       const firstRect = firstCircleRef.current.getBoundingClientRect();
@@ -511,8 +536,8 @@ useEffect(() => {
     </div>
   );
 
-const ModuleCardWithThree = ({ moduleData, articles, containerRefPass, circleRefs, progress1, progress2 }) => (
-  <div className="module-card">
+const ModuleCardWithThree = ({ moduleData, articles, containerRefPass, circleRefs, progress1, progress2, articleRefs }) => (
+  <div className="module-card" id={`module-${moduleData.number}`}>
     <div className="module-header-wrapper">
       <div className="module-info">
         <div className="module-header-row">
@@ -560,6 +585,7 @@ const ModuleCardWithThree = ({ moduleData, articles, containerRefPass, circleRef
       {/* ПЕРВЫЙ КРУЖОК */}
       <div 
         className="article-node-three article-node-left"
+        ref={articleRefs?.[articles[0]?.id]}
         onClick={() => handleArticleClick(articles[0].id)}
         style={{ cursor: 'pointer' }}
       >
@@ -588,6 +614,7 @@ const ModuleCardWithThree = ({ moduleData, articles, containerRefPass, circleRef
       {/* ВТОРОЙ КРУЖОК */}
       <div 
         className="article-node-three article-node-right"
+        ref={articleRefs?.[articles[1]?.id]}
         onClick={() => handleArticleClick(articles[1].id)}
         style={{ cursor: 'pointer' }}
       >
@@ -616,6 +643,7 @@ const ModuleCardWithThree = ({ moduleData, articles, containerRefPass, circleRef
       {/* ТРЕТИЙ КРУЖОК */}
       <div 
         className="article-node-three article-node-left-bottom"
+        ref={articleRefs?.[articles[2]?.id]}
         onClick={() => handleArticleClick(articles[2].id)}
         style={{ cursor: 'pointer' }}
       >
@@ -644,8 +672,8 @@ const ModuleCardWithThree = ({ moduleData, articles, containerRefPass, circleRef
   </div>
 );
 
-const ModuleCardWithTwo = ({ moduleData, articles, containerRefPass, circleRefs, linePathProp, progress1, progress2 }) => (
-  <div className="module-card">
+const ModuleCardWithTwo = ({ moduleData, articles, containerRefPass, circleRefs, linePathProp, progress1, progress2, articleRefs }) => (
+  <div className="module-card" id={`module-${moduleData.number}`}>
     <div className="module-header-wrapper">
       <div className="module-info">
         <div className="module-header-row">
@@ -682,9 +710,10 @@ const ModuleCardWithTwo = ({ moduleData, articles, containerRefPass, circleRefs,
         </svg>
       )}
       
-      {/* ПЕРВЫЙ КРУЖОК - клик на всей области при наведении */}
+      {/* ПЕРВЫЙ КРУЖОК */}
       <div 
         className="article-node article-node-first"
+        ref={articleRefs?.[articles[0]?.id]}
         onClick={() => handleArticleClick(articles[0].id)}
         style={{ cursor: 'pointer' }}
       >
@@ -719,9 +748,10 @@ const ModuleCardWithTwo = ({ moduleData, articles, containerRefPass, circleRefs,
         </div>
       </div>
 
-      {/* ВТОРОЙ КРУЖОК - клик на всей области при наведении */}
+      {/* ВТОРОЙ КРУЖОК */}
       <div 
         className="article-node article-node-second"
+        ref={articleRefs?.[articles[1]?.id]}
         onClick={() => handleArticleClick(articles[1].id)}
         style={{ cursor: 'pointer' }}
       >
@@ -764,35 +794,38 @@ const ModuleCardWithTwo = ({ moduleData, articles, containerRefPass, circleRefs,
   return (
     <>
       <div className="main-content-wrapper">
-        <ModuleCardWithTwo 
-          moduleData={moduleData1} 
-          articles={articles1} 
-          containerRefPass={containerRef}
-          circleRefs={{ first: firstCircleRef, second: secondCircleRef }}
-          linePathProp={linePath}
-          progress1={0}
-          progress2={getArticleProgressForLine(articles1[1]?.id)}
-        />
+<ModuleCardWithTwo 
+  moduleData={moduleData1} 
+  articles={articles1} 
+  containerRefPass={containerRef}
+  circleRefs={{ first: firstCircleRef, second: secondCircleRef }}
+  linePathProp={linePath}
+  progress1={0}
+  progress2={getArticleProgressForLine(articles1[1]?.id)}
+  articleRefs={articleRefs}
+/>
 
-        <ModuleCardWithThree 
-          moduleData={moduleData2} 
-          articles={articles2}
-          containerRefPass={secondContainerRef}
-          circleRefs={{ first: secondFirstCircleRef, second: secondSecondCircleRef, third: secondThirdCircleRef }}
-          linePaths={{ path1: secondLinePath1, path2: secondLinePath2 }}
-          progress1={getArticleProgressForLine(articles2[1]?.id)}
-          progress2={getArticleProgressForLine(articles2[2]?.id)}
-        />
+<ModuleCardWithThree 
+  moduleData={moduleData2} 
+  articles={articles2}
+  containerRefPass={secondContainerRef}
+  circleRefs={{ first: secondFirstCircleRef, second: secondSecondCircleRef, third: secondThirdCircleRef }}
+  linePaths={{ path1: secondLinePath1, path2: secondLinePath2 }}
+  progress1={getArticleProgressForLine(articles2[1]?.id)}
+  progress2={getArticleProgressForLine(articles2[2]?.id)}
+  articleRefs={articleRefs}
+/>
 
-        <ModuleCardWithTwo 
-          moduleData={moduleData3} 
-          articles={articles3} 
-          containerRefPass={thirdContainerRef}
-          circleRefs={{ first: thirdFirstCircleRef, second: thirdSecondCircleRef }}
-          linePathProp={thirdLinePath}
-          progress1={0}
-          progress2={getArticleProgressForLine(articles3[1]?.id)}
-        />
+<ModuleCardWithTwo 
+  moduleData={moduleData3} 
+  articles={articles3} 
+  containerRefPass={thirdContainerRef}
+  circleRefs={{ first: thirdFirstCircleRef, second: thirdSecondCircleRef }}
+  linePathProp={thirdLinePath}
+  progress1={0}
+  progress2={getArticleProgressForLine(articles3[1]?.id)}
+  articleRefs={articleRefs}
+/>
       </div>
 
       <div className="right-column">
@@ -806,49 +839,54 @@ const ModuleCardWithTwo = ({ moduleData, articles, containerRefPass, circleRefs,
           />
         </div>
 
-        <aside className={`right-sidebar ${!isContinueVisible ? 'expanded' : ''}`}>
-          <div className="articles-section">
-            <div className="articles-header">
-              <h3 className="articles-title">Список статей</h3>
-            </div>
-            <div className="modules-list">
-              {filteredModules.map(module => (
-                <div key={module.id} className="module-group">
-                  <div className="module-header">
-                    <span className="module-dot"></span>
-                    <span className="module-title">{module.title}</span>
+<aside className={`right-sidebar ${!isContinueVisible ? 'expanded' : ''}`}>
+  <div className="articles-section">
+    <div className="articles-header">
+      <h3 className="articles-title">Список статей</h3>
+    </div>
+    <div className="modules-list">
+      {filteredModules.map(module => (
+        <div key={module.id} className="module-group">
+          <div className="module-header">
+            <span className="module-dot"></span>
+            <span className="module-title">{module.title}</span>
+          </div>
+          <div className="module-articles">
+            {module.articles.map(article => {
+              const articleStatus = getArticleStatus(article.id, userProgress.completedArticles, userProgress.currentArticle);
+              return (
+                <div 
+                  key={article.id} 
+                  className="article-item"
+                  onClick={() => scrollToArticle(article.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="article-left">
+                    <div className="article-number">{article.id}</div>
+                    <div className="article-info">
+                      <div className="article-title-text">{article.title}</div>
+                    </div>
                   </div>
-                  <div className="module-articles">
-                    {module.articles.map(article => {
-                      const articleStatus = getArticleStatus(article.id, userProgress.completedArticles, userProgress.currentArticle);
-                      return (
-                        <div key={article.id} className="article-item">
-                          <div className="article-left">
-                            <div className="article-number">{article.id}</div>
-                            <div className="article-info">
-                              <div className="article-title-text">{article.title}</div>
-                            </div>
-                          </div>
-                          <div className="article-check-container">
-                            {articleStatus === 'completed' ? (
-                              <div className="article-check completed">
-                                <span className="check-icon">✓</span>
-                              </div>
-                            ) : articleStatus === 'in-progress' ? (
-                              <CircularProgress progress={userProgress.currentArticle.progress} size={20} />
-                            ) : (
-                              <div className="article-check"></div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <div className="article-check-container">
+                    {articleStatus === 'completed' ? (
+                      <div className="article-check completed">
+                        <span className="check-icon">✓</span>
+                      </div>
+                    ) : articleStatus === 'in-progress' ? (
+                      <CircularProgress progress={userProgress.currentArticle.progress} size={20} />
+                    ) : (
+                      <div className="article-check"></div>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-        </aside>
+        </div>
+      ))}
+    </div>
+  </div>
+</aside>
 
         {currentArticleData && currentArticleData.progress < 100 && (
 <div className={`continue-block ${!isContinueVisible ? 'hidden' : ''}`}>
@@ -900,21 +938,56 @@ const pageAnimation = {
 // Основной компонент App с роутингом
 const App = () => {
   const [activePage, setActivePage] = useState('Главная');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleNavClick = (pageName) => {
-    setActivePage(pageName);
-    if (pageName === 'Войти') {
-      navigate('/login');
-    } else if (pageName === 'Калькулятор') {
-      navigate('/calculator');
-    } else if (pageName === 'Викторина') {
-      navigate('/quiz');
-    } else {
-      navigate('/');
-    }
-  };
+  // Проверяем наличие токена при загрузке
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    setIsAuthenticated(!!token);
+  }, [location.pathname]); // Перепроверяем при смене страницы
+
+  useEffect(() => {
+    const handleAuthChange = (event) => {
+      setIsAuthenticated(event.detail.isAuthenticated);
+    };
+    
+    window.addEventListener('authChange', handleAuthChange);
+    
+    return () => {
+      window.removeEventListener('authChange', handleAuthChange);
+    };
+  }, []);
+useEffect(() => {
+  const path = location.pathname;
+  if (path === '/') {
+    setActivePage('Главная');
+  } else if (path === '/calculator') {
+    setActivePage('Калькулятор');
+  } else if (path === '/quiz') {
+    setActivePage('Викторина');
+  } else if (path === '/profile') {
+    setActivePage('Профиль');
+  } else if (path === '/login' || path === '/register') {
+    setActivePage('');
+  }
+}, [location.pathname]);
+const handleNavClick = (pageName) => {
+  setActivePage(pageName);
+  if (pageName === 'Войти' && !isAuthenticated) {
+    navigate('/login');
+  } else if (pageName === 'Профиль') {
+    navigate('/profile');
+  } else if (pageName === 'Калькулятор') {
+    navigate('/calculator');
+  } else if (pageName === 'Викторина') {
+    navigate('/quiz');
+  } else if (pageName === 'Главная') {
+    navigate('/');
+  }
+};
+
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
@@ -933,38 +1006,49 @@ const App = () => {
             <div className="project-name">
               <Logo />
             </div>
-            <div className="nav-menu">
-              <button 
-                className={`nav-btn ${activePage === 'Главная' ? 'nav-btn-active' : ''}`} 
-                onClick={() => handleNavClick('Главная')}
-              >
-                <Home width={20} height={20} className="nav-icon" />
-                <span>Главная</span>
-              </button>
-              <button 
-                className={`nav-btn ${activePage === 'Калькулятор' ? 'nav-btn-active' : ''}`} 
-                onClick={() => handleNavClick('Калькулятор')}
-              >
-                <Calc width={20} height={20} className="nav-icon" />
-                <span>Калькулятор</span>
-              </button>
-              <button 
-                className={`nav-btn ${activePage === 'Викторина' ? 'nav-btn-active' : ''}`} 
-                onClick={() => handleNavClick('Викторина')}
-              >
-                <Quiz width={20} height={20} className="nav-icon" />
-                <span>Викторина</span>
-              </button>
-            </div>
-            <div className="nav-footer">
-              <button 
-                className="nav-btn nav-btn-login"
-                onClick={() => handleNavClick('Войти')}
-              >
-                <Login width={20} height={20} className="nav-icon" />
-                <span>Войти</span>
-              </button>
-            </div>
+<div className="nav-menu">
+  <button 
+    className={`nav-btn ${activePage === 'Главная' ? 'nav-btn-active' : ''}`} 
+    onClick={() => handleNavClick('Главная')}
+  >
+    <Home width={20} height={20} className="nav-icon" />
+    <span>Главная</span>
+  </button>
+  <button 
+    className={`nav-btn ${activePage === 'Калькулятор' ? 'nav-btn-active' : ''}`} 
+    onClick={() => handleNavClick('Калькулятор')}
+  >
+    <Calc width={20} height={20} className="nav-icon" />
+    <span>Калькулятор</span>
+  </button>
+  <button 
+    className={`nav-btn ${activePage === 'Викторина' ? 'nav-btn-active' : ''}`} 
+    onClick={() => handleNavClick('Викторина')}
+  >
+    <Quiz width={20} height={20} className="nav-icon" />
+    <span>Викторина</span>
+  </button>
+</div>
+
+<div className="nav-footer">
+  {isAuthenticated ? (
+    <button 
+      className={`nav-btn nav-btn-profile ${activePage === 'Профиль' ? 'nav-btn-active' : ''}`}
+      onClick={() => handleNavClick('Профиль')}
+    >
+      <Profile width={20} height={20} className="nav-icon" />
+      <span>Профиль</span>
+    </button>
+  ) : (
+    <button 
+      className="nav-btn nav-btn-login"
+      onClick={() => handleNavClick('Войти')}
+    >
+      <Login width={20} height={20} className="nav-icon" />
+      <span>Войти</span>
+    </button>
+  )}
+</div>
           </motion.aside>
         )}
       </AnimatePresence>
@@ -1007,6 +1091,18 @@ const App = () => {
               <RegisterPage />
             </motion.div>
           } />
+          <Route path="/profile" element={
+  <motion.div
+    className="page-content"
+    initial={pageAnimation.initial}
+    animate={pageAnimation.animate}
+    exit={pageAnimation.exit}
+    transition={pageAnimation.transition}
+    style={{ flex: 1, display: 'flex', width: '100%' }}
+  >
+    <ProfilePage />
+  </motion.div>
+} />
           <Route path="/calculator" element={
             <motion.div
               className="page-content"

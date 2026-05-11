@@ -346,3 +346,20 @@
 .article-image-container img {
   pointer-events: none; /* Это полностью отключит любые эффекты при наведении */
 }
+.article-content {
+  max-width: 880px;
+  margin: 0 auto;
+  font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
+  white-space: pre-wrap;  /* ← сохраняет переносы строк */
+}
+
+.article-content p {
+  font-size: 18px;
+  line-height: 1.6;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  margin-bottom: 16px;
+  text-align: left;
+  font-weight: 400;
+  white-space: pre-wrap;  /* ← тоже добавляем */
+}

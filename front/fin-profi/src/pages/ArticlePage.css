@@ -96,6 +96,8 @@
   left: 50%;
   transform: translateX(-50%);  /* центрирование */
   white-space: nowrap;    /* запрет переноса */
+  word-break: break-word;  /* ← перенос длинных слов */
+  max-width: 70%;          /* ← ограничение ширины */
 }
 
 /* Тонкая полоса */
@@ -322,7 +324,7 @@
 /* Активный пункт (желтый фон) */
 .contents-item-active {
   background-color: #F0F036;
-  border-left: 3px solid #C8C800;
+
 }
 
 .contents-item-active .contents-dot {
@@ -337,7 +339,7 @@
 /* Ближайший к активному (фон F7F7F7) */
 .contents-item-default {
   background-color: #F7F7F7;
-  border-left: 3px solid #E0E0E0;
+
 }
 
 .contents-item-default .contents-dot {
@@ -352,7 +354,6 @@
 /* Неактивные пункты (без фона) */
 .contents-item-inactive {
   background-color: transparent;
-  border-left: 3px solid transparent;
 }
 
 .contents-item-inactive .contents-dot {
@@ -470,8 +471,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  
 }
 
+.quiz-icon .yellow-circle-icon img {
+  position: relative;
+  left: -2px;  /* отрицательное значение сдвигает влево */
+}
 .quiz-info {
   flex: 1;
 }

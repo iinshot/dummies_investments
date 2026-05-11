@@ -1121,3 +1121,61 @@ align-self: flex-end;
   min-height: 250px;
   z-index: 2;
 }
+/* Плавная прокрутка */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Добавьте отступ для фиксированной шапки при прокрутке (если есть фиксированные элементы) */
+.main-content-wrapper {
+  scroll-margin-top: 20px;
+}
+/* Добавьте в App.css */
+.article-node-first,
+.article-node-second,
+.article-node-left,
+.article-node-right,
+.article-node-left-bottom {
+  scroll-margin-top: 100px;
+}
+.nav-btn-profile {
+  background: #F5F5F5;
+  border-color: #F0F036;
+  width: 100%;
+}
+
+.nav-btn-profile:hover {
+  background: #FFFFFF;
+  transform: translateX(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #F0F036;
+}
+/* Стили для кнопки профиля */
+.nav-btn-profile {
+  background: #F5F5F5;
+  border: 1px solid #EEEEEE;
+  width: 100%;
+}
+
+.nav-btn-profile:hover {
+  background: #FFFFFF;
+  transform: translateX(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #F0F036;
+  color: #1a1a1a;
+}
+
+.nav-btn-profile:hover .nav-icon {
+  color: #1a1a1a;
+}
+
+/* Активное состояние для кнопки профиля */
+.nav-btn-profile.nav-btn-active {
+  background: #F0F036 !important;
+  color: #1a1a1a !important;
+  border-color: #E8E830 !important;
+}
+
+.nav-btn-profile.nav-btn-active .nav-icon {
+  color: #1a1a1a !important;
+}

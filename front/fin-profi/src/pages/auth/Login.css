@@ -68,6 +68,27 @@
   margin-bottom: 32px;
 }
 
+/* Обертка для логотипа */
+.login-logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.login-logo-wrapper .logo-container {
+  padding: 0;
+  border-bottom: none;
+  width: auto;
+  margin: 0;
+}
+
+.login-logo-wrapper .logo-group {
+  margin-left: 0;
+  transform: scale(1);
+}
+
 /* Контейнер заголовков с анимацией */
 .auth-header {
   position: relative;
@@ -96,8 +117,7 @@
   transform: translateY(0);
 }
 
-/* Подзаголовок */
-/* Приветственное сообщение */
+/* Подзаголовки */
 .welcome-message {
   font-size: 14px;
   font-weight: 400;
@@ -117,7 +137,6 @@
   opacity: 1;
 }
 
-/* Подзаголовок регистрации */
 .register-subtitle {
   font-size: 14px;
   font-weight: 400;
@@ -166,7 +185,6 @@
   opacity: 1;
 }
 
-/* Поле подтверждения пароля */
 .confirm-password-group {
   max-height: 0;
   opacity: 0;
@@ -222,7 +240,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Контейнер с иконкой */
+/* Контейнер с иконкой - ИСПРАВЛЕНО */
 .input-with-icon {
   position: relative;
   display: flex;
@@ -232,11 +250,31 @@
   background-color: #F8F8F8;
   border-radius: 20px;
   transition: all 0.2s ease;
+  border: 2px solid transparent;
 }
 
 .input-with-icon:focus-within {
   background-color: #FFFFFF;
-  box-shadow: 0 0 0 2px #F0F036;
+  border-color: #F0F036;
+  box-shadow: none;
+}
+
+/* Убираем синий фон у autofill */
+.input-with-icon input:-webkit-autofill,
+.input-with-icon input:-webkit-autofill:hover,
+.input-with-icon input:-webkit-autofill:focus,
+.input-with-icon input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #F8F8F8 inset !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+  background-color: #F8F8F8 !important;
+  caret-color: #1a1a1a;
+}
+
+.input-with-icon:focus-within input:-webkit-autofill,
+.input-with-icon:focus-within input:-webkit-autofill:hover,
+.input-with-icon:focus-within input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #FFFFFF inset !important;
+  background-color: #FFFFFF !important;
 }
 
 .input-with-icon input {
@@ -247,10 +285,29 @@
   border: none;
   background: transparent;
   outline: none;
+  width: 100%;
 }
 
 .input-with-icon input::placeholder {
   color: #BBBBBB;
+}
+
+/* Убираем стандартную подсветку браузера */
+.input-with-icon input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Убираем желто-синюю подсветку на мобильных устройствах */
+.input-with-icon input:focus-visible {
+  outline: none;
+}
+
+/* Для Safari */
+.input-with-icon input:focus {
+  outline: none;
+  ring: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Кнопка показа пароля */
@@ -262,6 +319,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+}
+
+.password-toggle:focus {
+  outline: none;
 }
 
 /* Кнопка отправки */
@@ -288,6 +350,28 @@
   background-color: #E8E830;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(240, 240, 54, 0.3);
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #1a1a1a;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Разделитель */
@@ -333,6 +417,19 @@
   color: #D8D820;
 }
 
+/* Ошибка */
+.error-message {
+  background-color: #FFEBEE;
+  color: #D32F2F;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  text-align: center;
+  border: 1px solid #FFCDD2;
+  font-family: 'Roboto', sans-serif;
+}
+
 /* Отключаем нативный глаз браузера */
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
@@ -342,24 +439,37 @@ input[type="password"]::-ms-clear {
 input[type="password"]::-webkit-credentials-auto-fill-button {
   display: none;
 }
-/* Обертка для логотипа */
-.login-logo-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 24px;
-  width: 100%;
-}
 
-/* Убедитесь, что компонент Logo отображается правильно */
-.login-logo-wrapper .logo-container {
-  padding: 0;
-  border-bottom: none;
-  width: auto;
-  margin: 0;
-}
-
-.login-logo-wrapper .logo-group {
-  margin-left: 0;
-  transform: scale(1);
-}
+/* Адаптация для мобильных */
+@media (max-width: 620px) {
+  .login-container {
+    padding: 32px 24px;
+    margin: 16px;
+  }
+  
+  .login-container.register-mode {
+    padding: 32px 24px 40px 24px;
+  }
+  
+  .login-logo {
+    font-size: 28px;
+  }
+  
+  .auth-title {
+    font-size: 20px;
+  }
+  
+  .login-back-button {
+    top: 27px;
+    left: 25px;
+  }
+  
+  .input-with-icon {
+    padding: 0 14px;
+  }
+  
+  .input-with-icon input {
+    padding: 12px 0;
+    font-size: 14px;
+  }
+} 

@@ -23,15 +23,12 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+const API_BASE_URL = '/api';
 
-
-  const API_BASE_URL = 'http://localhost:8000/api'; // Замените на ваш URL
-
-
+  // Функция для сохранения токенов
   const saveTokens = (accessToken, refreshToken) => {
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
-    
   };
 
   // Функция для очистки ошибки через 3 секунды
@@ -52,10 +49,10 @@ const LoginPage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: login,  // email или логин
+          email: login,
           password: password
         }),
-        credentials: 'include' // Для работы с cookie (refresh token)
+        credentials: 'include'
       });
 
       const data = await response.json();
@@ -63,7 +60,12 @@ const LoginPage = () => {
       if (response.ok) {
         saveTokens(data.access_token, data.refresh_token);
         console.log('✅ Вход выполнен успешно');
-        navigate('/'); // Перенаправляем на главную
+        
+        // Отправляем событие об успешной авторизации
+        window.dispatchEvent(new CustomEvent('authChange', { detail: { isAuthenticated: true } }));
+        window.dispatchEvent(new CustomEvent('syncProgress'));
+        
+        navigate('/');
       } else {
         setError(data.detail || 'Ошибка входа. Проверьте email и пароль');
         clearError();
@@ -119,6 +121,11 @@ const LoginPage = () => {
       if (response.ok) {
         saveTokens(data.access_token, data.refresh_token);
         console.log('✅ Регистрация выполнена успешно');
+        
+        // Отправляем событие об успешной авторизации
+        window.dispatchEvent(new CustomEvent('authChange', { detail: { isAuthenticated: true } }));
+        window.dispatchEvent(new CustomEvent('syncProgress'));
+        
         navigate('/');
       } else {
         setError(data.detail || 'Ошибка регистрации. Попробуйте другой email');
@@ -301,11 +308,6 @@ const LoginPage = () => {
             </div>
           </div>
           
-          <div className={`forgot-password-wrapper ${isLogin ? 'visible' : ''}`}>
-            <div className="forgot-password-link">
-              <a href="#">Забыли пароль?</a>
-            </div>
-          </div>
           
           <button 
             type="submit" 
