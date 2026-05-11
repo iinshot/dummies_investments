@@ -1,0 +1,926 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100..900;1,100..900&display=swap');
+/* Общий layout */
+.calculator-layout {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Центральный блок */
+.calculator-main {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-right: 4px;
+}
+
+/* Карточка как модуль на главной */
+.module-card {
+  background-color: #FFFFFF;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 36px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+/* Карточка калькулятора */
+.calculator-card {
+  width: 100%;
+}
+
+/* Карточка результатов */
+.results-card-block {
+  width: 100%;
+}
+
+/* Скрываем скролл для wrapper */
+.calculator-main::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  background: transparent;
+}
+
+.calculator-main::-webkit-scrollbar-track {
+  background: #EDEDED;
+  border-radius: 4px;
+}
+
+.calculator-main::-webkit-scrollbar-thumb {
+  background: #F0F036;
+  border-radius: 4px;
+}
+
+/* Результаты внутри карточки */
+.results-section {
+  width: 100%;
+}
+
+.results-section-title {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  margin-bottom: 24px;
+}
+.calculator-container {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Шапка калькулятора */
+.calculator-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.calculator-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.yellow-circle-icon {
+  width: 48px;
+  height: 48px;
+  background-color: #F0F036;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calculator-info {
+  flex: 1;
+}
+
+.calculator-title {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  margin-bottom: 4px;
+}
+
+.calculator-description {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  color: #BDBDBD;
+}
+
+/* Форма калькулятора */
+.calculator-form {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.form-left {
+  flex: 1;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-right {
+  width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Поля формы */
+.form-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 66px;
+  gap: 30px;
+}
+
+.field-label {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+}
+
+.field-value {
+  font-size: 24px;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  background-color: #F7F7F7;
+  padding: 12px 24px;
+  border-radius: 20px;
+  min-width: 200px;
+  text-align: center;
+}
+
+/* Range слайдер */
+.range-field {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.range-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.range-label-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.range-value {
+  background-color: #F0F036;
+  padding: 4px 12px;
+  border-radius: 40px;
+  font-size: 12px;
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+}
+
+.range-input {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  background: #EDEDED;
+  border-radius: 4px;
+  outline: none;
+}
+
+.range-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #333333;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 12px;
+  color: #999999;
+  opacity: 0.6;
+}
+
+/* Переключатель единиц */
+.unit-toggle {
+  display: flex;
+  background-color: #F7F7F7;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.unit-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666666;
+}
+
+.unit-btn.active {
+  background-color: #F0F036;
+  color: #333333;
+}
+
+/* Секции правой колонки */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-label {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+}
+
+/* Кнопки капитализации */
+.capitalization-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cap-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 40px;
+  background-color: #F7F7F7;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  color: #333333;
+}
+
+.cap-btn.active {
+  background-color: #F0F036;
+}
+
+.cap-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #EDEDED;
+}
+
+.cap-dot.active {
+  background-color: #333333;
+}
+
+/* Настройки */
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #EDEDED;
+  border-radius: 4px;
+  background-color: #FFFFFF;
+  display: inline-block;
+  position: relative;
+}
+
+.checkbox-label input:checked + .checkbox-custom {
+  background-color: #F0F036;
+  border-color: #F0F036;
+}
+
+.checkbox-label input:checked + .checkbox-custom::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  color: #333333;
+}
+
+.setting-text {
+  font-size: 16px;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+}
+
+.setting-input {
+  width: 80px;
+}
+
+.small-input {
+  width: 100%;
+  padding: 8px 12px;
+  background-color: #F7F7F7;
+  border: none;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+}
+
+.small-input:disabled {
+  opacity: 0.5;
+}
+
+/* Селект метода инвестирования */
+.method-select {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #F7F7F7;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+/* Кнопка рассчитать */
+.calculator-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.calculate-btn {
+  background-color: #F0F036;
+  border: none;
+  border-radius: 40px;
+  padding: 12px 32px;
+  font-size: 16px;
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calculate-btn:hover {
+  background-color: #E8E830;
+  transform: translateX(4px);
+}
+
+/* Правый сайдбар */
+.calculator-sidebar {
+  width: 380px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-results {
+  background-color: #FFFFFF;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  padding: 24px 20px;
+  gap: 24px;
+  flex: 1;
+}
+
+.results-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.yellow-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #F0F036;
+  border-radius: 50%;
+}
+
+.results-title {
+  color: #BDBDBD;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.results-placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.results-placeholder p {
+  font-size: 14px;
+  color: #999999;
+  text-align: center;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Адаптация */
+@media (max-width: 900px) {
+  .calculator-sidebar {
+    display: none;
+  }
+  
+  .form-right {
+    width: 100%;
+  }
+  
+  .form-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .field-value {
+    width: 100%;
+  }
+}
+
+@media (max-width: 620px) {
+  .calculator-container {
+    padding: 24px;
+  }
+  
+  .calculator-title {
+    font-size: 22px;
+  }
+  
+  .section-label,
+  .field-label {
+    font-size: 18px;
+  }
+}
+/* Секция результатов */
+
+.results-section {
+  margin-top: 32px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.results-section-title {
+  font-size: 28px;
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  margin-bottom: 24px;
+}
+
+.results-card {
+  background-color: #F7F7F7;
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.result-main {
+  background-color: #333333;
+  padding: 20px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0;
+}
+
+.result-icon {
+  width: 48px;
+  height: 48px;
+  background-color: #F0F036;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-yellow-circle {
+  width: 20px;
+  height: 18px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333333' stroke-width='2'%3E%3Cpath d='M3 6H21M5 6V20H19V6M12 10V16M9 13H15'/%3E%3Crect x='3' y='3' width='18' height='3' rx='1'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.result-main-content {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.result-main-label {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  color: #FFFFFF;
+}
+
+.result-main-value {
+  font-size: 24px;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  color: #F0F036;
+}
+
+.result-divider {
+  height: 1px;
+  background-color: #EDEDED;
+  margin: 0 20px;
+}
+
+.result-summary {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+}
+
+.result-row.bordered {
+  border-bottom: 1px solid #EDEDED;
+}
+
+.result-row dt {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  opacity: 0.7;
+}
+
+.result-row dd {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  margin: 0;
+}
+
+/* Адаптация */
+@media (max-width: 900px) {
+  .result-main-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .results-section-title {
+    font-size: 24px;
+  }
+  
+  .result-main-label {
+    font-size: 18px;
+  }
+  
+  .result-main-value {
+    font-size: 20px;
+  }
+}
+/* Правый сайдбар - список калькуляторов */
+.calculator-sidebar {
+  width: 380px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-calculators {
+  background-color: #FFFFFF;
+  border-radius: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex: 1;
+}
+
+.calculators-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #EEEEEE;
+  text-align: center;
+}
+
+.calculators-title {
+  color: #BDBDBD;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.calculators-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+  flex: 1;
+}
+
+/* Контент карточки - вертикальное расположение */
+.calculator-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Активная карточка калькулятора */
+.calculator-card-active {
+  display: flex;
+  padding: 20px;
+  border-radius: 24px;
+  background-color: #F0F036;
+  border: 2px solid #F0F036;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+/* Неактивная карточка калькулятора */
+.calculator-card-inactive {
+  display: flex;
+  padding: 20px;
+  border-radius: 24px;
+  background-color: #F7F7F7;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.calculator-card-inactive:hover {
+  background-color: #EFEFEF;
+  transform: translateX(4px);
+}
+
+.calculator-card-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+/* Активная иконка - черный кружок, желтая иконка */
+.active-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  background-color: #1a1a1a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* Неактивная иконка - серый кружок, серая точка */
+.inactive-icon-wrapper {
+  width: 32px;
+  height: 32px;
+  background-color: #EDEDED;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inactive-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #999999;
+  border-radius: 50%;
+}
+
+.calculator-card-info {
+  flex: 1;
+  width: 100%;
+  text-align: left;
+}
+
+.calculator-card-title {
+  font-size: 16px;
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
+.calculator-card-description {
+  font-size: 12px;
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  color: #666666;
+  margin: 0;
+  text-align: left;
+  opacity: 0.6;
+}
+
+.calculator-card-active .calculator-card-title,
+.calculator-card-active .calculator-card-description {
+  color: #333333;
+  opacity: 1;
+}
+/* Результаты расчета - отдельный блок с отступом */
+.results-wrapper {
+  margin-top: 24px;
+}
+
+.results-section {
+  background-color: #FFFFFF;
+  border-radius: 24px;
+  padding: 24px;
+}
+.invest-icon-active {
+  filter: invert(89%) sepia(54%) saturate(1234%) hue-rotate(18deg) brightness(103%) contrast(104%);
+}
+.invest-icon-inactive {
+  filter: brightness(0) saturate(100%) invert(0%) sepia(0%) saturate(0%) brightness(0%) contrast(100%);
+  opacity: 1;
+}
+
+/* Поля ввода для суммы */
+.field-value-input {
+  font-size: 18px;           /* уменьшили шрифт */
+  font-weight: 500;
+  font-family: 'Roboto', sans-serif;
+  color: #333333;
+  background-color: #F7F7F7;
+  padding: 8px 16px;         /* уменьшили отступы (было 12px 24px) */
+  border-radius: 16px;       /* чуть меньше скругление */
+  min-width: 150px;          /* уменьшили минимальную ширину (было 200px) */
+  width: 160px;              /* фиксированная ширина */
+  text-align: center;
+  border: none;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.field-value-input:focus {
+  background-color: #FFFFFF;
+  box-shadow: 0 0 0 2px #F0F036;
+}
+/* Контейнер для слайдера */
+.range-slider-container {
+  position: relative;
+  width: 100%;
+  height: 20px;  /* увеличили высоту контейнера */
+  margin: 0;
+}
+
+/* Фоновый трек (серый) */
+.range-track-bg {
+  position: absolute;
+  top: 50%;  /* центрируем по вертикали */
+  transform: translateY(-50%);
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background-color: #EDEDED;
+  border-radius: 4px;
+}
+
+/* Заполненный трек (желтый) */
+.range-track-fill {
+  position: absolute;
+  top: 50%;  /* центрируем по вертикали */
+  transform: translateY(-50%);
+  left: 0;
+  height: 8px;
+  background-color: #F0F036;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Ползунок */
+.range-input {
+  position: relative;
+  width: 100%;
+  height: 20px;  /* высота области клика */
+  -webkit-appearance: none;
+  background: transparent;
+  outline: none;
+  z-index: 2;
+  margin: 0;
+}
+
+/* Убираем стандартный трек у ползунка */
+.range-input::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 20px;
+  background: transparent;
+  border: none;
+}
+
+/* Круглый ползунок */
+.range-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #333333;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 0px;  /* убираем смещение */
+  position: relative;
+  z-index: 3;
+  transition: transform 0.1s ease;
+}
+
+.range-input::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+/* Для Firefox */
+.range-input::-moz-range-track {
+  height: 20px;
+  background: transparent;
+  border: none;
+}
+
+.range-input::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #333333;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #FFFFFF;
+  margin-top: 0;
+}
+
+/* Убираем отступы у range-input в Firefox */
+.range-input {
+  margin: 0;
+  padding: 0;
+}

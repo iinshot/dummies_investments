@@ -1,18 +1,24 @@
 name: dummies_investments
 services:
   front:
-    #image: nginx:latest
+    build:
+      context: ./front/fin-profi      # ← путь к папке с package.json
+      dockerfile: ../Dockerfile       # ← если Dockerfile в ./front/
+      target: development
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-    #  - ./front:/var/www/dummies_investments/html
-    build: ./front
+      - ./front/fin-profi:/app        # ← монтируем папку с React
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_PORT=0
+      - FAST_REFRESH=true
     ports:
-      - "${HOST_PORT}:80"
-      - "${HOST_PORT_HTTPS}:443"
+      - "3000:5173"
     networks:
       - app
     depends_on:
       - back
+    command: npm run dev -- --host
 
   back:
     build: ./back

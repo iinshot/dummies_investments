@@ -1,0 +1,475 @@
+/* ========= СТРАНИЦА ВХОДА/РЕГИСТРАЦИИ ========= */
+.login-fullscreen {
+  flex: 1;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.login-container {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  padding: 48px 40px;
+  background-color: #FFFFFF;
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  margin: 20px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-container.register-mode {
+  max-width: 520px;
+  padding: 48px 40px 56px 40px;
+}
+
+/* Кнопка назад */
+.login-back-button {
+  position: absolute;
+  top: 37px;
+  left: 35px;
+  width: 40px;
+  height: 40px;
+  background-color: #F0F036;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-back-button:hover {
+  background-color: #E8E830;
+  transform: scale(1.05);
+}
+
+/* Логотип */
+.login-logo {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+  margin-bottom: 24px;
+  letter-spacing: -0.5px;
+}
+
+.login-divider-line-thin {
+  width: 100%;
+  height: 1px;
+  background-color: #BDBDBD;
+  margin-bottom: 32px;
+}
+
+/* Обертка для логотипа */
+.login-logo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.login-logo-wrapper .logo-container {
+  padding: 0;
+  border-bottom: none;
+  width: auto;
+  margin: 0;
+}
+
+.login-logo-wrapper .logo-group {
+  margin-left: 0;
+  transform: scale(1);
+}
+
+/* Контейнер заголовков с анимацией */
+.auth-header {
+  position: relative;
+  height: 36px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.auth-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  color: #1a1a1a;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.auth-title.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Подзаголовки */
+.welcome-message {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  color: #999999;
+  text-align: center;
+  margin-bottom: 0;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.welcome-message.visible {
+  margin-bottom: 32px;
+  max-height: 50px;
+  opacity: 1;
+}
+
+.register-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Roboto', sans-serif;
+  color: #999999;
+  text-align: center;
+  margin-bottom: 0;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.register-subtitle.visible {
+  margin-bottom: 32px;
+  max-height: 50px;
+  opacity: 1;
+}
+
+/* Формы */
+.form-login,
+.form-register {
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-login {
+  max-height: 0;
+  opacity: 0;
+  margin-bottom: 0;
+}
+
+.form-login.active {
+  max-height: 120px;
+  opacity: 1;
+}
+
+.form-register {
+  max-height: 0;
+  opacity: 0;
+  margin-bottom: 0;
+}
+
+.form-register.active {
+  max-height: 220px;
+  opacity: 1;
+}
+
+.confirm-password-group {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.confirm-password-group.visible {
+  max-height: 120px;
+  opacity: 1;
+}
+
+/* Забыли пароль */
+.forgot-password-wrapper {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.forgot-password-wrapper.visible {
+  max-height: 60px;
+  opacity: 1;
+  margin-bottom: 32px;
+}
+
+.forgot-password-link {
+  text-align: right;
+}
+
+.forgot-password-link a {
+  font-size: 14px;
+  color: #999999;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.forgot-password-link a:hover {
+  color: #F0F036;
+}
+
+/* Группы полей ввода */
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666666;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+/* Контейнер с иконкой - ИСПРАВЛЕНО */
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  background-color: #F8F8F8;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.input-with-icon:focus-within {
+  background-color: #FFFFFF;
+  border-color: #F0F036;
+  box-shadow: none;
+}
+
+/* Убираем синий фон у autofill */
+.input-with-icon input:-webkit-autofill,
+.input-with-icon input:-webkit-autofill:hover,
+.input-with-icon input:-webkit-autofill:focus,
+.input-with-icon input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #F8F8F8 inset !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+  background-color: #F8F8F8 !important;
+  caret-color: #1a1a1a;
+}
+
+.input-with-icon:focus-within input:-webkit-autofill,
+.input-with-icon:focus-within input:-webkit-autofill:hover,
+.input-with-icon:focus-within input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #FFFFFF inset !important;
+  background-color: #FFFFFF !important;
+}
+
+.input-with-icon input {
+  flex: 1;
+  padding: 14px 0;
+  font-size: 16px;
+  font-family: 'Roboto', sans-serif;
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+}
+
+.input-with-icon input::placeholder {
+  color: #BBBBBB;
+}
+
+/* Убираем стандартную подсветку браузера */
+.input-with-icon input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Убираем желто-синюю подсветку на мобильных устройствах */
+.input-with-icon input:focus-visible {
+  outline: none;
+}
+
+/* Для Safari */
+.input-with-icon input:focus {
+  outline: none;
+  ring: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Кнопка показа пароля */
+.password-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.password-toggle:focus {
+  outline: none;
+}
+
+/* Кнопка отправки */
+.login-button {
+  width: 100%;
+  padding: 12px 20px;
+  background-color: #F0F036;
+  border: none;
+  border-radius: 32px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Roboto', sans-serif;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 8px 0 24px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  text-align: center;
+}
+
+.login-button:hover {
+  background-color: #E8E830;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(240, 240, 54, 0.3);
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #1a1a1a;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Разделитель */
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.login-divider-line {
+  flex: 1;
+  height: 1px;
+  background-color: #EEEEEE;
+}
+
+.login-divider-text {
+  font-size: 12px;
+  color: #999999;
+  font-weight: 500;
+}
+
+/* Ссылки переключения */
+.register-link {
+  text-align: center;
+  font-size: 14px;
+  color: #666666;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #F0F036;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'Roboto', sans-serif;
+  margin-left: 5px;
+}
+
+.link-button:hover {
+  text-decoration: underline;
+  color: #D8D820;
+}
+
+/* Ошибка */
+.error-message {
+  background-color: #FFEBEE;
+  color: #D32F2F;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  text-align: center;
+  border: 1px solid #FFCDD2;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Отключаем нативный глаз браузера */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 620px) {
+  .login-container {
+    padding: 32px 24px;
+    margin: 16px;
+  }
+  
+  .login-container.register-mode {
+    padding: 32px 24px 40px 24px;
+  }
+  
+  .login-logo {
+    font-size: 28px;
+  }
+  
+  .auth-title {
+    font-size: 20px;
+  }
+  
+  .login-back-button {
+    top: 27px;
+    left: 25px;
+  }
+  
+  .input-with-icon {
+    padding: 0 14px;
+  }
+  
+  .input-with-icon input {
+    padding: 12px 0;
+    font-size: 14px;
+  }
+} 

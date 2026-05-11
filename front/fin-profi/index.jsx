@@ -1,10 +1,5 @@
 import ReactDOM from "react-dom/client"
-import App from "./src/App"
-import { BrowserRouter } from "react-router-dom"
+import AppWrapper from "./src/App"
 
 const root = ReactDOM.createRoot(document.querySelector("#root"))
-root.render(
-    <BrowserRouter>
-        <App />
-    </BrowserRouter>
-)
+root.render(<AppWrapper />)
