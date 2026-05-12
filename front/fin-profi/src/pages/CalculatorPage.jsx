@@ -4,6 +4,7 @@ import './CalculatorPage.css';
 import { Invest } from '../assets/icons';  
 import investIcon from '../assets/icons/invest.svg'; // импорт как URL
 import cupIcon from '../assets/icons/cup.svg'; // импорт как URL
+import { calculatorAPI } from '../services/api';
 
 const CalculatorPage = () => {
   const [initialAmount, setInitialAmount] = useState(700000);
@@ -35,12 +36,12 @@ const [durationProgress, setDurationProgress] = useState(((20 - 1) / 49) * 100);
   const investmentMethods = ['НАДЕЖНЫЙ', 'УМЕРЕННЫЙ', 'РИСКОВАННЫЙ'];
 
   // Результаты расчета
-  const results = {
-    finalAmount: '1 221 495 ₽',
-    investedAmount: '700 000 ₽',
-    accruedInterest: '521 495 ₽',
-    capitalGrowth: '+74.5%'
-  };
+const [results, setResults] = useState({
+  finalAmount: '0 ₽',
+  investedAmount: '0 ₽',
+  accruedInterest: '0 ₽',
+  capitalGrowth: '0%'
+});
 
   const summaryRows = [
     { label: "Итоговая сумма", value: results.finalAmount, bordered: true },
@@ -83,9 +84,37 @@ const ColoredInvest = ({ color, ...props }) => (
     <Invest {...props} />
   </div>
 );
-  const handleCalculate = () => {
-    // Здесь будет логика расчета
+
+// Замените handleCalculate:
+const handleCalculate = async () => {
+  const params = {
+    initial_amount: initialAmount,
+    monthly_deposit: monthlyContribution,
+    annual_rate: interestRate,
+    period: duration,
+    period_type: durationUnit === 'year' ? 'years' : 'months',
+    capitalization: capitalization === 'ЕЖЕМЕСЯЧНО' ? 'monthly' : 
+                    capitalization === 'ЕЖЕКВАРТАЛЬНО' ? 'quarterly' : 'yearly',
+    investment_method: investmentMethod === 'НАДЕЖНЫЙ' ? 'reliable' : 
+                       investmentMethod === 'УМЕРЕННЫЙ' ? 'moderate' : 'risky',
+    inflation: inflationEnabled ? inflationRate : undefined,
+    tax: taxEnabled ? taxRate : undefined
   };
+
+  // Убираем undefined параметры
+  Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
+
+  const result = await calculatorAPI.calculate(params);
+  
+  if (result) {
+    setResults({
+      finalAmount: formatCurrency(result.total_amount),
+      investedAmount: formatCurrency(initialAmount + monthlyContribution * duration),
+      accruedInterest: formatCurrency(result.interest_earned),
+      capitalGrowth: `${result.capital_growth_percent}%`
+    });
+  }
+};
 
   const getCalculatorCardClass = (calculatorId) => {
     if (selectedCalculator === calculatorId) {
