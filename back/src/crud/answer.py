@@ -39,6 +39,19 @@ async def get_all_answers(
     result = await session.execute(query)
     return result.scalars().all()
 
+
+async def get_answers_by_question(
+    session: AsyncSession,
+    id_question: int,
+    skip: int = 0,
+    limit: int = 100
+) -> List[Answer]:
+    """Получение ответов по ID вопроса"""
+    query = select(Answer).where(Answer.id_question == id_question).offset(skip).limit(limit)
+    result = await session.execute(query)
+    return result.scalars().all()
+
+
 async def update_answer(
     session: AsyncSession,
     id_answer: int,

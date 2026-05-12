@@ -13,7 +13,7 @@ import CircularProgress from './components/CircularProgress';
 import DynamicDottedLine from './components/DynamicDottedLine';
 import Logo from './components/Logo';
 import { Calc, Home, Login, Profile, Quiz } from '././assets/icons';
-import { getUserTotalProgress, setArticleProgress, syncLocalProgressToServer } from './services/api';
+import { progressAPI } from './services/api';
 
 
 // Компонент главной страницы 
@@ -32,7 +32,8 @@ const MainPage = () => {
       progress: 0
     }
   });
-
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   // Делаем функцию доступной глобально для тестирования через консоль
   if (typeof window !== 'undefined') {
     window.updateProgress = (completedIds) => {
@@ -154,6 +155,22 @@ const handleContinueClick = () => {
     navigate(`/article/${currentData.id}`);
   }
 };
+
+// Функция загрузки прогресса с сервера
+const loadProgressFromServer = async () => {
+  const token = localStorage.getItem('access_token');
+  if (!token) return null;
+  
+  try {
+    const data = await progressAPI.getAllProgress();
+    return data;
+  } catch (error) {
+    console.error('Ошибка загрузки прогресса с сервера:', error);
+    return null;
+  }
+};
+
+
   const getArticleProgressForLine = (articleId) => {
     if (!articleId) return 0;
     if (userProgress.completedArticles.includes(articleId)) return 100;
@@ -366,66 +383,194 @@ const handleArticleClick = (articleId) => {
   };
 
   // Загрузка прогресса из localStorage
-  useEffect(() => {
-    const loadProgressFromStorage = () => {
-      const savedProgress = localStorage.getItem('articleProgress');
-      if (savedProgress) {
-        const progressData = JSON.parse(savedProgress);
+// Загрузка прогресса из localStorage и синхронизация с сервером
+useEffect(() => {
+  const loadProgress = async () => {
+    const token = localStorage.getItem('access_token');
+    console.log('🔍 Токен авторизации:', token ? 'Есть' : 'Нет');
+    
+    // 1. Сначала загружаем локальные данные
+    const savedProgress = localStorage.getItem('articleProgress');
+    let localProgressData = savedProgress ? JSON.parse(savedProgress) : {};
+    console.log('📁 Локальные данные:', localProgressData);
+    
+    let completedArticles = [];
+    let currentArticleId = null;
+    let currentProgress = 0;
+    
+    // Парсим локальные данные
+    for (let i = 1; i <= 7; i++) {
+      const progress = localProgressData[i];
+      if (progress >= 100) {
+        completedArticles.push(i);
+      } else if (progress > 0 && progress < 100) {
+        currentArticleId = i;
+        currentProgress = progress;
+      }
+    }
+    
+    // Если пользователь авторизован - загружаем данные с сервера
+    if (token) {
+      try {
+        console.log('🔄 Загружаем прогресс с сервера...');
+        const serverData = await progressAPI.getAllProgress();
+        console.log('📦 Данные с сервера:', serverData);
         
-        let lastArticleId = null;
-        let lastProgress = 0;
+        // Парсим серверные данные
+        const serverProgress = {};
+        if (serverData && serverData.articles && serverData.articles[0]) {
+          serverData.articles[0].forEach(article => {
+            if (article.is_read) {
+              serverProgress[article.id_article] = 100;
+            } else if (article.last_checkpoint > 0) {
+              serverProgress[article.id_article] = article.last_checkpoint;
+            }
+          });
+        }
+        console.log('📊 Распарсенный серверный прогресс:', serverProgress);
         
-        for (const [articleId, progress] of Object.entries(progressData)) {
-          if (progress > 0 && progress < 100) {
-            lastArticleId = parseInt(articleId);
-            lastProgress = progress;
-          } else if (progress >= 100) {
-            setUserProgress(prev => ({
-              ...prev,
-              completedArticles: [...prev.completedArticles, parseInt(articleId)]
-            }));
+        // СЕРВЕРНЫЕ ДАННЫЕ ИМЕЮТ ПРИОРИТЕТ (перекрывают локальные)
+        const mergedProgress = { ...localProgressData, ...serverProgress };
+        console.log('🔄 Объединенный прогресс (сервер приоритетнее):', mergedProgress);
+        
+        // Сохраняем объединенные данные в localStorage
+        localStorage.setItem('articleProgress', JSON.stringify(mergedProgress));
+        
+        // Пересчитываем прогресс на основе объединенных данных
+        completedArticles = [];
+        currentArticleId = null;
+        currentProgress = 0;
+        
+        for (let i = 1; i <= 7; i++) {
+          const progress = mergedProgress[i];
+          if (progress >= 100) {
+            completedArticles.push(i);
+          } else if (progress > 0 && progress < 100) {
+            // Берем первую незавершенную статью как текущую
+            if (currentArticleId === null) {
+              currentArticleId = i;
+              currentProgress = progress;
+            }
           }
         }
         
-        if (lastArticleId && lastProgress > 0) {
-          setUserProgress(prev => ({
-            ...prev,
-            currentArticle: {
-              id: lastArticleId,
-              progress: lastProgress
+        // Если нет текущей статьи (все пройдены), ищем первую непройденную
+        if (currentArticleId === null) {
+          for (let i = 1; i <= 7; i++) {
+            if (!completedArticles.includes(i)) {
+              currentArticleId = i;
+              currentProgress = 0;
+              break;
             }
-          }));
+          }
+        }
+        
+      } catch (error) {
+        console.error('❌ Ошибка загрузки прогресса с сервера:', error);
+        // В случае ошибки используем только локальные данные
+      }
+    } else {
+      // Если пользователь не авторизован, ищем первую незавершенную статью
+      if (currentArticleId === null) {
+        for (let i = 1; i <= 7; i++) {
+          if (!completedArticles.includes(i)) {
+            currentArticleId = i;
+            currentProgress = 0;
+            break;
+          }
         }
       }
-    };
+    }
     
-    loadProgressFromStorage();
-    window.addEventListener('focus', loadProgressFromStorage);
-    return () => {
-      window.removeEventListener('focus', loadProgressFromStorage);
-    };
-  }, []);
+    // Устанавливаем состояние
+    setUserProgress({
+      userId: 123,
+      completedArticles: completedArticles,
+      currentArticle: {
+        id: currentArticleId || 1,
+        progress: currentProgress || 0
+      }
+    });
+    
+    console.log('✅ Итоговый прогресс:', {
+      completedArticles,
+      currentArticle: currentArticleId,
+      currentProgress
+    });
+  };
+  
+  loadProgress();
+  
+  // Слушаем фокус окна для обновления при возврате
+  const handleFocus = () => {
+    loadProgress();
+  };
+  
+  window.addEventListener('focus', handleFocus);
+  return () => {
+    window.removeEventListener('focus', handleFocus);
+  };
+}, []);
 
-  // Обработчик обновления прогресса
-// В MainPage, найдите этот useEffect и замените его:
+// Загружаем прогресс при монтировании и при смене авторизации
+useEffect(() => {
+  const initProgress = async () => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      await syncProgressWithServer();
+    } else {
+      const savedProgress = localStorage.getItem('articleProgress');
+      if (savedProgress) {
+        const progressData = JSON.parse(savedProgress);
+        const completedArticles = [];
+        let lastArticleId = null;
+        let lastProgress = 0;
+        
+        for (let i = 1; i <= 7; i++) {
+          const progress = progressData[i];
+          if (progress >= 100) {
+            completedArticles.push(i);
+          } else if (progress > 0 && progress < 100) {
+            lastArticleId = i;
+            lastProgress = progress;
+          }
+        }
+        
+        setUserProgress({
+          userId: 123,
+          completedArticles: completedArticles,
+          currentArticle: {
+            id: lastArticleId || 1,
+            progress: lastProgress || 0
+          }
+        });
+      }
+    }
+  };
+  
+  initProgress();
+}, []);
 
 // Обработчик обновления прогресса
 useEffect(() => {
-  const handleProgressUpdate = (event) => {
+  const handleProgressUpdate = async (event) => {
     const { articleId, progress } = event.detail;
     
+    // Сохраняем в localStorage
+    const savedProgress = localStorage.getItem('articleProgress') || '{}';
+    const progressData = JSON.parse(savedProgress);
+    progressData[articleId] = progress;
+    localStorage.setItem('articleProgress', JSON.stringify(progressData));
+    
+    // Отправляем на сервер, если пользователь авторизован
+    await saveProgressToServer(articleId, progress);
+    
+    // Обновляем состояние
     if (progress >= 100) {
-      // Если статья достигла 100%, добавляем в completedArticles
       setUserProgress(prev => {
-        // Проверяем, не добавлена ли уже статья
-        if (prev.completedArticles.includes(articleId)) {
-          return prev;
-        }
+        if (prev.completedArticles.includes(articleId)) return prev;
         
         const newCompleted = [...prev.completedArticles, articleId];
-        
-        // Находим следующую незавершенную статью
-        const allArticles = [...articles1Data, ...articles2Data, ...articles3Data];
         let nextArticleId = null;
         
         for (let i = articleId + 1; i <= 7; i++) {
@@ -435,39 +580,18 @@ useEffect(() => {
           }
         }
         
-        
-        if (nextArticleId) {
-          // Если есть следующая незавершенная статья
-          return {
-            ...prev,
-            completedArticles: newCompleted,
-            currentArticle: {
-              id: nextArticleId,
-              progress: 0
-            }
-          };
-        } else {
-          // Все статьи пройдены
-          return {
-            ...prev,
-            completedArticles: newCompleted,
-            currentArticle: {
-              id: null,
-              progress: 0
-            }
-          };
-        }
+        return {
+          ...prev,
+          completedArticles: newCompleted,
+          currentArticle: nextArticleId ? { id: nextArticleId, progress: 0 } : { id: null, progress: 0 }
+        };
       });
     } else {
-      // Обновляем прогресс текущей статьи
       setUserProgress(prev => {
         if (prev.currentArticle.id === articleId) {
           return {
             ...prev,
-            currentArticle: {
-              id: articleId,
-              progress: progress
-            }
+            currentArticle: { id: articleId, progress: progress }
           };
         }
         return prev;
@@ -477,9 +601,24 @@ useEffect(() => {
   
   window.addEventListener('articleProgressUpdate', handleProgressUpdate);
   return () => window.removeEventListener('articleProgressUpdate', handleProgressUpdate);
-}, [articles1Data, articles2Data, articles3Data]);
-    
+}, []);
 
+ useEffect(() => {
+    const handleResetProgress = () => {
+      console.log('🔄 Сброс прогресса при выходе');
+      setUserProgress({
+        userId: 123,
+        completedArticles: [],
+        currentArticle: {
+          id: 1,
+          progress: 0
+        }
+      });
+    };
+    
+    window.addEventListener('resetProgress', handleResetProgress);
+    return () => window.removeEventListener('resetProgress', handleResetProgress);
+  }, []);
 
   useEffect(() => {
     updateLinePath();
@@ -502,6 +641,52 @@ useEffect(() => {
       updateThirdLinePath();
     });
   }, [userProgress]);
+useEffect(() => {
+    const handleProgressSync = (event) => {
+      const syncedProgress = event.detail;
+      console.log('🔄 Получены синхронизированные данные:', syncedProgress);
+      
+      // Обновляем состояние на основе синхронизированных данных
+      const completedArticles = [];
+      let currentArticleId = null;
+      let currentProgress = 0;
+      
+      for (let i = 1; i <= 7; i++) {
+        const progress = syncedProgress[i];
+        if (progress >= 100) {
+          completedArticles.push(i);
+        } else if (progress > 0 && progress < 100) {
+          if (currentArticleId === null) {
+            currentArticleId = i;
+            currentProgress = progress;
+          }
+        }
+      }
+      
+      // Если нет текущей статьи, находим первую непройденную
+      if (currentArticleId === null) {
+        for (let i = 1; i <= 7; i++) {
+          if (!completedArticles.includes(i)) {
+            currentArticleId = i;
+            currentProgress = 0;
+            break;
+          }
+        }
+      }
+      
+      setUserProgress({
+        userId: 123,
+        completedArticles: completedArticles,
+        currentArticle: {
+          id: currentArticleId || 1,
+          progress: currentProgress || 0
+        }
+      });
+    };
+    
+    window.addEventListener('progressSyncCompleted', handleProgressSync);
+    return () => window.removeEventListener('progressSyncCompleted', handleProgressSync);
+  }, []);
 
   const handleCloseContinue = () => {
     setIsContinueVisible(false);
@@ -939,55 +1124,152 @@ const pageAnimation = {
 const App = () => {
   const [activePage, setActivePage] = useState('Главная');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false); // ← ДОБАВЬТЕ ЭТУ СТРОКУ
+
   const navigate = useNavigate();
   const location = useLocation();
+
+  const syncProgressWithServer = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      console.log('ℹ️ Пользователь не авторизован, синхронизация не требуется');
+      return;
+    }
+    
+    setIsSyncing(true);
+    
+    try {
+      // 1. Получаем локальный прогресс
+      const savedProgress = localStorage.getItem('articleProgress');
+      const localProgress = savedProgress ? JSON.parse(savedProgress) : {};
+      console.log('📁 Локальный прогресс:', localProgress);
+      
+      // 2. Получаем серверный прогресс
+      const serverData = await progressAPI.getAllProgress();
+      console.log('📦 Серверный прогресс (raw):', serverData);
+      
+      // 3. Парсим серверный прогресс
+      const serverProgress = {};
+      let hasServerData = false;
+      
+      if (serverData && serverData.articles && serverData.articles[0]) {
+        hasServerData = serverData.articles[0].length > 0;
+        serverData.articles[0].forEach(article => {
+          if (article.is_read) {
+            serverProgress[article.id_article] = 100;
+          } else if (article.last_checkpoint > 0) {
+            serverProgress[article.id_article] = article.last_checkpoint;
+          }
+        });
+      }
+      console.log('📊 Распарсенный серверный прогресс:', serverProgress);
+      console.log('🔍 Есть ли данные на сервере:', hasServerData);
+      
+      let finalProgress = {};
+      
+      if (hasServerData && Object.keys(serverProgress).length > 0) {
+        console.log('🔄 На сервере есть данные, используем их (приоритет сервера)');
+        finalProgress = serverProgress;
+        localStorage.setItem('articleProgress', JSON.stringify(finalProgress));
+        
+      } else if (Object.keys(localProgress).length > 0) {
+        console.log('🔄 Сервер пуст, отправляем локальный прогресс на сервер...');
+        
+        for (const [articleId, progress] of Object.entries(localProgress)) {
+          const isRead = progress >= 100;
+          await progressAPI.setArticleProgress(parseInt(articleId), progress, isRead);
+          console.log(`✅ Статья ${articleId} отправлена на сервер: ${progress}%`);
+        }
+        finalProgress = localProgress;
+        
+      } else {
+        console.log('ℹ️ Нет данных ни на сервере, ни локально, создаем дефолтный прогресс');
+        finalProgress = {};
+        for (let i = 1; i <= 7; i++) {
+          finalProgress[i] = 0;
+        }
+        localStorage.setItem('articleProgress', JSON.stringify(finalProgress));
+      }
+      
+      // Отправляем событие обновления прогресса
+      const event = new CustomEvent('progressSyncCompleted', { detail: finalProgress });
+      window.dispatchEvent(event);
+      
+      console.log('✅ Синхронизация прогресса завершена');
+      
+    } catch (error) {
+      console.error('❌ Ошибка синхронизации:', error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   // Проверяем наличие токена при загрузке
   useEffect(() => {
     const token = localStorage.getItem('access_token');
     setIsAuthenticated(!!token);
-  }, [location.pathname]); // Перепроверяем при смене страницы
+  }, [location.pathname]);
 
+  // Синхронизация с сервером при загрузке приложения
   useEffect(() => {
-    const handleAuthChange = (event) => {
-      setIsAuthenticated(event.detail.isAuthenticated);
-    };
-    
-    window.addEventListener('authChange', handleAuthChange);
-    
-    return () => {
-      window.removeEventListener('authChange', handleAuthChange);
-    };
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      console.log('🔄 Пользователь уже авторизован, синхронизируем прогресс');
+      syncProgressWithServer();
+    }
   }, []);
-useEffect(() => {
-  const path = location.pathname;
-  if (path === '/') {
-    setActivePage('Главная');
-  } else if (path === '/calculator') {
-    setActivePage('Калькулятор');
-  } else if (path === '/quiz') {
-    setActivePage('Викторина');
-  } else if (path === '/profile') {
-    setActivePage('Профиль');
-  } else if (path === '/login' || path === '/register') {
-    setActivePage('');
-  }
-}, [location.pathname]);
-const handleNavClick = (pageName) => {
-  setActivePage(pageName);
-  if (pageName === 'Войти' && !isAuthenticated) {
-    navigate('/login');
-  } else if (pageName === 'Профиль') {
-    navigate('/profile');
-  } else if (pageName === 'Калькулятор') {
-    navigate('/calculator');
-  } else if (pageName === 'Викторина') {
-    navigate('/quiz');
-  } else if (pageName === 'Главная') {
-    navigate('/');
-  }
-};
 
+  // Слушатель события авторизации
+useEffect(() => {
+  const handleAuthChange = (event) => {
+    setIsAuthenticated(event.detail.isAuthenticated);
+    
+    if (event.detail.isAuthenticated) {
+      console.log('🔐 Пользователь авторизовался, синхронизируем прогресс');
+      syncProgressWithServer();
+    } else {
+      // При выходе очищаем локальный прогресс
+      console.log('🚪 Пользователь вышел, очищаем localStorage');
+      localStorage.removeItem('articleProgress');
+      // Также можно сбросить состояние userProgress в MainPage через событие
+      window.dispatchEvent(new CustomEvent('resetProgress'));
+    }
+  };
+  
+  window.addEventListener('authChange', handleAuthChange);
+  return () => window.removeEventListener('authChange', handleAuthChange);
+}, []);
+
+  // Обновление активной страницы
+  useEffect(() => {
+    const path = location.pathname;
+    if (path === '/') {
+      setActivePage('Главная');
+    } else if (path === '/calculator') {
+      setActivePage('Калькулятор');
+    } else if (path === '/quiz') {
+      setActivePage('Викторина');
+    } else if (path === '/profile') {
+      setActivePage('Профиль');
+    } else if (path === '/login' || path === '/register') {
+      setActivePage('');
+    }
+  }, [location.pathname]);
+
+  const handleNavClick = (pageName) => {
+    setActivePage(pageName);
+    if (pageName === 'Войти' && !isAuthenticated) {
+      navigate('/login');
+    } else if (pageName === 'Профиль') {
+      navigate('/profile');
+    } else if (pageName === 'Калькулятор') {
+      navigate('/calculator');
+    } else if (pageName === 'Викторина') {
+      navigate('/quiz');
+    } else if (pageName === 'Главная') {
+      navigate('/');
+    }
+  };
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 

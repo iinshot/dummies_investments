@@ -2,11 +2,11 @@ name: dummies_investments
 services:
   front:
     build:
-      context: ./front/fin-profi      # ← путь к папке с package.json
-      dockerfile: ../Dockerfile       # ← если Dockerfile в ./front/
+      context: ./front/fin-profi
+      dockerfile: ../Dockerfile
       target: development
     volumes:
-      - ./front/fin-profi:/app        # ← монтируем папку с React
+      - ./front/fin-profi:/app
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
@@ -22,6 +22,8 @@ services:
 
   back:
     build: ./back
+    ports:                      # ← ДОБАВЬТЕ ЭТУ СЕКЦИЮ
+      - "8000:80"               # ← пробрасываем порт 80 контейнера на 8000 хоста
     depends_on:
       db:
         condition: service_healthy

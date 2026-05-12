@@ -57,3 +57,14 @@ async def delete_question(
     result = await session.execute(query)
     await session.commit()
     return result.rowcount > 0
+
+async def get_questions_by_article(
+    session: AsyncSession,
+    id_article: int,
+    skip: int = 0,
+    limit: int = 100
+) -> List[Question]:
+    """Получение вопросов по ID статьи"""
+    query = select(Question).where(Question.id_article == id_article).offset(skip).limit(limit)
+    result = await session.execute(query)
+    return result.scalars().all()

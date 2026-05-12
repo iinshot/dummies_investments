@@ -1,3 +1,4 @@
+from typing import Optional  # ← ДОБАВЬТЕ ЭТУ СТРОКУ
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from crud import answer as answer_crud
@@ -12,13 +13,18 @@ async def get_answer(id_answer: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Answer not found")
     return answer
 
+
 @router.get("/")
-async def get_all_answers(
-        skip: int = Query(0, ge=0),
-        limit: int = Query(100, ge=1, le=1000),
-        db: AsyncSession = Depends(get_db)
+async def get_answers(
+    id_question: Optional[int] = None, 
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    db: AsyncSession = Depends(get_db)
 ):
-    answers = await answer_crud.get_all_answers(db, skip=skip, limit=limit)
+    if id_question:
+        answers = await answer_crud.get_answers_by_question(db, id_question=id_question, skip=skip, limit=limit)
+    else:
+        answers = await answer_crud.get_all_answers(db, skip=skip, limit=limit)
     return answers
 
 @router.post("/")

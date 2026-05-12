@@ -19,33 +19,34 @@ async def lifespan(app: FastAPI):
     yield
 
 origins = [
-    "http://localhost:3000",   # React, Next.js
-    "http://localhost:5173",   # Vite
-    "http://localhost:8080",   # Vue CLI
-    "http://localhost:4200",   # Angular
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:8080",
+    "http://localhost:4200",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:8080",
     "http://127.0.0.1:4200",
 ]
 
-app = FastAPI(root_path="/api", lifespan=lifespan)
+app = FastAPI(lifespan=lifespan)  # Уберите root_path="/api"
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,            # Allows specific origins (or ["*"] for all)
-    allow_credentials=True,         # Allows cookies to be included in requests
-    allow_methods=["*"],            # Allows all HTTP methods (GET, POST, etc.)
-    allow_headers=["*"],            # Allows all headers
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-app.include_router(module_module)
-app.include_router(module_answer)
-app.include_router(module_question)
-app.include_router(module_quiz)
-app.include_router(module_article)
-app.include_router(module_user)
-app.include_router(module_auth)
+# ДОБАВЬТЕ ПРЕФИКС /api КО ВСЕМ РОУТЕРАМ
+app.include_router(module_module, prefix="/api")
+app.include_router(module_answer, prefix="/api")
+app.include_router(module_question, prefix="/api")
+app.include_router(module_quiz, prefix="/api")
+app.include_router(module_article, prefix="/api")
+app.include_router(module_user, prefix="/api")
+app.include_router(module_auth, prefix="/api")
 
 @app.get("/")
 async def root():

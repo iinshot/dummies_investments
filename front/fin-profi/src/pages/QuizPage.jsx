@@ -7,6 +7,7 @@ import ArrowLeftIcon from '../assets/icons/arrow_left.svg';
 import ArrowRightIcon from '../assets/icons/arrow_right.svg';
 import CheckIcon from '../assets/icons/check.svg';
 import { useNavigate } from 'react-router-dom';
+import { authAPI } from '../services/api';
 
 const QuizPage = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -34,13 +35,13 @@ const [userRating, setUserRating] = useState({
 
 const [isContinueVisible, setIsContinueVisible] = useState(true); 
   const articlesData = [
-    { id: 1, title: 'Что такое финансовая грамотность?', module: 'Модуль 1 — Введение в финансы' },
-    { id: 2, title: 'Основы бюджетирования', module: 'Модуль 1 — Введение в финансы' },
-    { id: 3, title: 'Почему важно инвестировать?', module: 'Модуль 2 — Инвестиции' },
-    { id: 4, title: 'Виды инвестиций', module: 'Модуль 2 — Инвестиции' },
-    { id: 5, title: 'Как выбрать брокера?', module: 'Модуль 2 — Инвестиции' },
-    { id: 6, title: 'Виды кредитов', module: 'Модуль 3 — Кредиты и налоги' },
-    { id: 7, title: 'Налоговые вычеты', module: 'Модуль 3 — Кредиты и налоги' }
+    { id: 1, title: 'Что такое инвестиции?', module: 'Модуль 1 — Основы инвестиций' },
+    { id: 2, title: 'Виды активов?', module: 'Модуль 1 — Основы инвестиций' },
+    { id: 3, title: 'Акции', module: 'Модуль 2 — Инвестиционные инструменты' },
+    { id: 4, title: 'Облигации', module: 'Модуль 2 — Инвестиционные инструменты' },
+    { id: 5, title: 'ETF и фонды', module: 'Модуль 2 — Инвестиционные инструменты' },
+    { id: 6, title: 'Инвестиционный портфель', module: 'Модуль 3 — Принципы инвестирования' },
+    { id: 7, title: 'Горизонт инвестирования', module: 'Модуль 3 — Принципы инвестирования' }
   ];
 
   // ========= ФУНКЦИЯ ДЛЯ ПОЛУЧЕНИЯ ТЕКУЩЕЙ СТАТЬИ =========
@@ -82,766 +83,1102 @@ const [isContinueVisible, setIsContinueVisible] = useState(true);
   };
 
   // Все данные для викторин
-  const generalQuizzes = {
-    1: {
-      id: 1,
-      title: 'Основы финансовой грамотности',
-      description: 'Проверьте базовые знания о деньгах и финансах',
-      maxPoints: 40,
-      totalQuestions: 4,
-      questions: [
-        {
-          id: 1,
-          text: 'Что из перечисленного является компонентом финансовой грамотности?',
-          subtext: '(выберите все верные)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Умение вести учет доходов и расходов', correct: true },
-            { id: 'b', text: 'Понимание принципов кредитования', correct: true },
-            { id: 'c', text: 'Умение быстро тратить деньги', correct: false },
-            { id: 'd', text: 'Способность планировать финансовые цели', correct: true }
-          ]
-        },
-        {
-          id: 2,
-          text: 'Какой процент россиян имеют высокий уровень финансовой грамотности?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Около 50%', correct: false },
-            { id: 'b', text: 'Около 38%', correct: true },
-            { id: 'c', text: 'Около 70%', correct: false },
-            { id: 'd', text: 'Около 25%', correct: false }
-          ]
-        },
-        {
-          id: 3,
-          text: 'Что такое финансовая подушка безопасности?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Сумма на кредитной карте', correct: false },
-            { id: 'b', text: 'Накопления на 3-6 месяцев расходов', correct: true },
-            { id: 'c', text: 'Инвестиции в акции', correct: false },
-            { id: 'd', text: 'Страховка автомобиля', correct: false }
-          ]
-        },
-        {
-          id: 4,
-          text: 'Какие факторы влияют на финансовую грамотность?',
-          subtext: '(выберите все верные)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Семейное воспитание', correct: true },
-            { id: 'b', text: 'Образование', correct: true },
-            { id: 'c', text: 'Место рождения', correct: false },
-            { id: 'd', text: 'Личный опыт', correct: true }
-          ]
-        }
-      ]
-    },
-    2: {
-      id: 2,
-      title: 'Инвестиции для начинающих',
-      description: 'Как начать инвестировать и не потерять деньги',
-      maxPoints: 40,
-      totalQuestions: 4,
-      questions: [
-        {
-          id: 1,
-          text: 'Что такое сложный процент?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Процент на первоначальную сумму', correct: false },
-            { id: 'b', text: 'Процент на проценты', correct: true },
-            { id: 'c', text: 'Банковская комиссия', correct: false },
-            { id: 'd', text: 'Налог на доход', correct: false }
-          ]
-        },
-        {
-          id: 2,
-          text: 'Почему важно начинать инвестировать рано?',
-          subtext: '(выберите все верные)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Больше времени для роста капитала', correct: true },
-            { id: 'b', text: 'Эффект сложного процента работает дольше', correct: true },
-            { id: 'c', text: 'Меньше налогов', correct: false },
-            { id: 'd', text: 'Можно инвестировать меньшие суммы', correct: true }
-          ]
-        },
-        {
-          id: 3,
-          text: 'Какой доход в долгосрочной перспективе приносит фондовый рынок?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: '2-4% годовых', correct: false },
-            { id: 'b', text: '8-12% годовых', correct: true },
-            { id: 'c', text: '15-20% годовых', correct: false },
-            { id: 'd', text: '1-3% годовых', correct: false }
-          ]
-        },
-        {
-          id: 4,
-          text: 'Что нужно сделать перед началом инвестирования?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Взять кредит', correct: false },
-            { id: 'b', text: 'Создать финансовую подушку', correct: true },
-            { id: 'c', text: 'Купить дорогую вещь', correct: false },
-            { id: 'd', text: 'Уволиться с работы', correct: false }
-          ]
-        }
-      ]
-    },
-    3: {
-      id: 3,
-      title: 'Кредиты и займы',
-      description: 'Разбираемся в кредитных продуктах',
-      maxPoints: 40,
-      totalQuestions: 4,
-      questions: [
-        {
-          id: 1,
-          text: 'Что такое ипотека?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Кредит на покупку жилья под залог', correct: true },
-            { id: 'b', text: 'Кредит на автомобиль', correct: false },
-            { id: 'c', text: 'Кредитная карта', correct: false },
-            { id: 'd', text: 'Микрозайм', correct: false }
-          ]
-        },
-        {
-          id: 2,
-          text: 'Какой платеж уменьшается со временем?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Аннуитетный', correct: false },
-            { id: 'b', text: 'Дифференцированный', correct: true },
-            { id: 'c', text: 'Фиксированный', correct: false },
-            { id: 'd', text: 'Льготный', correct: false }
-          ]
-        },
-        {
-          id: 3,
-          text: 'Какие бывают виды кредитов?',
-          subtext: '(выберите все верные)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Потребительский', correct: true },
-            { id: 'b', text: 'Ипотечный', correct: true },
-            { id: 'c', text: 'Автокредит', correct: true },
-            { id: 'd', text: 'Инвестиционный', correct: false }
-          ]
-        },
-        {
-          id: 4,
-          text: 'Что такое полная стоимость кредита (ПСК)?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Только процентная ставка', correct: false },
-            { id: 'b', text: 'Все затраты на обслуживание кредита', correct: true },
-            { id: 'c', text: 'Сумма основного долга', correct: false },
-            { id: 'd', text: 'Комиссия за открытие счета', correct: false }
-          ]
-        }
-      ]
-    },
-    4: {
-      id: 4,
-      title: 'Налоговая грамотность',
-      description: 'Как платить налоги и получать вычеты',
-      maxPoints: 40,
-      totalQuestions: 4,
-      questions: [
-        {
-          id: 1,
-          text: 'Что такое налоговый вычет?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Дополнительный налог', correct: false },
-            { id: 'b', text: 'Возврат части уплаченного налога', correct: true },
-            { id: 'c', text: 'Штраф за неуплату', correct: false },
-            { id: 'd', text: 'Налоговая льгота для бизнеса', correct: false }
-          ]
-        },
-        {
-          id: 2,
-          text: 'Какой максимальный возврат по имущественному вычету?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: '260 000 ₽', correct: true },
-            { id: 'b', text: '100 000 ₽', correct: false },
-            { id: 'c', text: '500 000 ₽', correct: false },
-            { id: 'd', text: '1 000 000 ₽', correct: false }
-          ]
-        },
-        {
-          id: 3,
-          text: 'На какие цели можно получить социальный вычет?',
-          subtext: '(выберите все верные)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Лечение', correct: true },
-            { id: 'b', text: 'Обучение', correct: true },
-            { id: 'c', text: 'Покупка автомобиля', correct: false },
-            { id: 'd', text: 'Благотворительность', correct: true }
-          ]
-        },
-        {
-          id: 4,
-          text: 'Что такое инвестиционный вычет?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Вычет на доход от инвестиций', correct: true },
-            { id: 'b', text: 'Вычет на покупку акций', correct: false },
-            { id: 'c', text: 'Вычет на брокерские услуги', correct: false },
-            { id: 'd', text: 'Вычет на аренду жилья', correct: false }
-          ]
-        }
-      ]
-    },
-    5: {
-      id: 5,
-      title: 'Пенсионное планирование',
-      description: 'Как накопить на достойную пенсию',
-      maxPoints: 40,
-      totalQuestions: 4,
-      questions: [
-        {
-          id: 1,
-          text: 'Что такое индивидуальный пенсионный план (ИПП)?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Государственная пенсия', correct: false },
-            { id: 'b', text: 'Добровольные пенсионные накопления', correct: true },
-            { id: 'c', text: 'Социальное пособие', correct: false },
-            { id: 'd', text: 'Страхование жизни', correct: false }
-          ]
-        },
-        {
-          id: 2,
-          text: 'Почему важно начинать копить на пенсию рано?',
-          subtext: '(выберите все верные)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Меньше ежемесячный взнос', correct: true },
-            { id: 'b', text: 'Больше времени для накопления', correct: true },
-            { id: 'c', text: 'Гарантированная доходность', correct: false },
-            { id: 'd', text: 'Эффект сложного процента', correct: true }
-          ]
-        },
-        {
-          id: 3,
-          text: 'Какой процент дохода рекомендуется откладывать на пенсию?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: '5-7%', correct: false },
-            { id: 'b', text: '10-15%', correct: true },
-            { id: 'c', text: '20-25%', correct: false },
-            { id: 'd', text: '30-40%', correct: false }
-          ]
-        },
-        {
-          id: 4,
-          text: 'Что такое негосударственный пенсионный фонд (НПФ)?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Государственный пенсионный фонд', correct: false },
-            { id: 'b', text: 'Частная пенсионная компания', correct: true },
-            { id: 'c', text: 'Страховая компания', correct: false },
-            { id: 'd', text: 'Банковский вклад', correct: false }
-          ]
-        }
-      ]
-    },
-    6: {
-      id: 6,
-      title: 'Финансовая безопасность',
-      description: 'Как защитить себя от мошенников',
-      maxPoints: 40,
-      totalQuestions: 4,
-      questions: [
-        {
-          id: 1,
-          text: 'Что нельзя сообщать по телефону незнакомцам?',
-          subtext: '(выберите все верные)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Номер карты', correct: true },
-            { id: 'b', text: 'CVV-код', correct: true },
-            { id: 'c', text: 'Срок действия карты', correct: true },
-            { id: 'd', text: 'Имя владельца', correct: false }
-          ]
-        },
-        {
-          id: 2,
-          text: 'Что делать, если вы стали жертвой мошенников?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Ничего не делать', correct: false },
-            { id: 'b', text: 'Заблокировать карту и обратиться в банк', correct: true },
-            { id: 'c', text: 'Ждать, пока вернут деньги', correct: false },
-            { id: 'd', text: 'Снять все деньги с карты', correct: false }
-          ]
-        },
-        {
-          id: 3,
-          text: 'Как определить мошеннический сайт?',
-          subtext: '(выберите все верные)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Неправильное написание адреса', correct: true },
-            { id: 'b', text: 'Отсутствие HTTPS-сертификата', correct: true },
-            { id: 'c', text: 'Слишком выгодные предложения', correct: true },
-            { id: 'd', text: 'Красивый дизайн', correct: false }
-          ]
-        },
-        {
-          id: 4,
-          text: 'Что такое фишинг?',
-          subtext: '(выберите один вариант)',
-          points: 10,
-          options: [
-            { id: 'a', text: 'Вид рыбной ловли', correct: false },
-            { id: 'b', text: 'Вид мошенничества для кражи данных', correct: true },
-            { id: 'c', text: 'Способ шифрования', correct: false },
-            { id: 'd', text: 'Банковская операция', correct: false }
-          ]
-        }
-      ]
-      
-    },
-  };
+const generalQuizzes = {
+  1: {
+    id: 1,
+    title: 'Введение в инвестиции',
+    description: 'Проверьте базовые знания о начале инвестирования',
+    maxPoints: 40,
+    totalQuestions: 4,
+    questions: [
+      {
+        id: 1,
+        text: 'Какая минимальная сумма нужна, чтобы начать инвестировать на бирже?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: '100 рублей, можно купить пай в фонде', correct: true },
+          { id: 'b', text: 'Минимум 10 000 рублей', correct: false },
+          { id: 'c', text: 'Нужно ждать зарплату', correct: false },
+          { id: 'd', text: 'Минимум 100 000 рублей', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Что из перечисленного является преимуществом долгосрочных инвестиций?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Снижается влияние краткосрочных колебаний', correct: true },
+          { id: 'b', text: 'Можно выйти в любой момент без потерь', correct: false },
+          { id: 'c', text: 'Сложный процент работает дольше', correct: true },
+          { id: 'd', text: 'Гарантированная доходность', correct: false }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Какой временной горизонт считается долгосрочным в инвестициях?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'До 1 года', correct: false },
+          { id: 'b', text: 'От 3 до 5 лет', correct: false },
+          { id: 'c', text: 'Более 7-10 лет', correct: true },
+          { id: 'd', text: '1-2 года', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Что такое "усреднение цены" (DCA)?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Покупка акций на пике роста', correct: false },
+          { id: 'b', text: 'Регулярная покупка активов на фиксированную сумму', correct: true },
+          { id: 'c', text: 'Продажа активов при падении', correct: false },
+          { id: 'd', text: 'Покупка только облигаций', correct: false }
+        ]
+      }
+    ]
+  },
+  2: {
+    id: 2,
+    title: 'Риски и доходность',
+    description: 'Понимание рисков и потенциальной доходности инвестиций',
+    maxPoints: 40,
+    totalQuestions: 4,
+    questions: [
+      {
+        id: 1,
+        text: 'Какой актив исторически приносит самую высокую доходность в долгосрочной перспективе?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Банковский вклад', correct: false },
+          { id: 'b', text: 'Акции', correct: true },
+          { id: 'c', text: 'Облигации', correct: false },
+          { id: 'd', text: 'Наличные деньги', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Что такое волатильность?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Стабильность цены', correct: false },
+          { id: 'b', text: 'Степень колебания цены актива', correct: true },
+          { id: 'c', text: 'Скорость продажи актива', correct: false },
+          { id: 'd', text: 'Размер дивидендов', correct: false }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Какие риски существуют при инвестировании?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Инфляционный риск', correct: true },
+          { id: 'b', text: 'Рыночный риск', correct: true },
+          { id: 'c', text: 'Риск банкротства эмитента', correct: true },
+          { id: 'd', text: 'Риск загара брокера', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Золото на фондовом рынке — это...',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Товарный актив и "тихая гавань"', correct: true },
+          { id: 'b', text: 'Акция золотодобывающей компании', correct: false },
+          { id: 'c', text: 'Вид облигации', correct: false },
+          { id: 'd', text: 'Криптовалюта', correct: false }
+        ]
+      }
+    ]
+  },
+  3: {
+    id: 3,
+    title: 'Акции и дивиденды',
+    description: 'Как работают акции и дивиденды',
+    maxPoints: 40,
+    totalQuestions: 4,
+    questions: [
+      {
+        id: 1,
+        text: 'Что такое дивидендная доходность?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Сумма всех дивидендов за год', correct: false },
+          { id: 'b', text: 'Отношение дивиденда на акцию к цене акции', correct: true },
+          { id: 'c', text: 'Рост цены акции в процентах', correct: false },
+          { id: 'd', text: 'Налог на дивиденды', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Какие компании чаще всего платят дивиденды?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Зрелые компании со стабильной прибылью', correct: true },
+          { id: 'b', text: 'Молодые растущие компании', correct: false },
+          { id: 'c', text: 'Компании из сектора потребительских товаров', correct: true },
+          { id: 'd', text: 'Стартапы', correct: false }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Что такое сплит акций?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Разделение акций на более мелкие без изменения капитализации', correct: true },
+          { id: 'b', text: 'Объединение акций', correct: false },
+          { id: 'c', text: 'Выплата дивидендов акциями', correct: false },
+          { id: 'd', text: 'Дополнительная эмиссия', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Какой показатель помогает оценить переоцененность акции?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'P/E (цена/прибыль)', correct: true },
+          { id: 'b', text: 'ROE', correct: false },
+          { id: 'c', text: 'EPS', correct: false },
+          { id: 'd', text: 'EBITDA', correct: false }
+        ]
+      }
+    ]
+  },
+  4: {
+    id: 4,
+    title: 'Облигации и фонды',
+    description: 'Как работают облигации и биржевые фонды',
+    maxPoints: 40,
+    totalQuestions: 4,
+    questions: [
+      {
+        id: 1,
+        text: 'Что такое НКД по облигациям?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Налог на купонный доход', correct: false },
+          { id: 'b', text: 'Накопленный купонный доход при покупке', correct: true },
+          { id: 'c', text: 'Номинальная стоимость облигации', correct: false },
+          { id: 'd', text: 'Норма купонной доходности', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Чем ETF отличается от ПИФа?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'ETF торгуется на бирже в реальном времени', correct: true },
+          { id: 'b', text: 'ПИФ можно купить только в банке', correct: false },
+          { id: 'c', text: 'Комиссии ETF обычно ниже', correct: true },
+          { id: 'd', text: 'ПИФ торгуется как акция', correct: false }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Что такое дюрация облигации?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Дата погашения облигации', correct: false },
+          { id: 'b', text: 'Средневзвешенный срок возврата инвестиций', correct: true },
+          { id: 'c', text: 'Размер купона', correct: false },
+          { id: 'd', text: 'Кредитный рейтинг эмитента', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Какой фонд подходит для пассивного инвестора?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Активный ПИФ', correct: false },
+          { id: 'b', text: 'Индексный ETF, копирующий рынок', correct: true },
+          { id: 'c', text: 'Венчурный фонд', correct: false },
+          { id: 'd', text: 'Хедж-фонд', correct: false }
+        ]
+      }
+    ]
+  },
+  5: {
+    id: 5,
+    title: 'Диверсификация и управление рисками',
+    description: 'Как распределять инвестиции и снижать риски',
+    maxPoints: 40,
+    totalQuestions: 4,
+    questions: [
+      {
+        id: 1,
+        text: 'Что такое диверсификация?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Вложение всех денег в одну акцию', correct: false },
+          { id: 'b', text: 'Распределение инвестиций между разными активами', correct: true },
+          { id: 'c', text: 'Продажа активов при падении', correct: false },
+          { id: 'd', text: 'Покупка только государственных облигаций', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Как снизить риски инвестиционного портфеля?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Инвестировать в разные классы активов', correct: true },
+          { id: 'b', text: 'Инвестировать в разные страны и валюты', correct: true },
+          { id: 'c', text: 'Купить акции одной компании', correct: false },
+          { id: 'd', text: 'Использовать ETF и фонды', correct: true }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Что такое ребалансировка портфеля?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Полная замена всех активов', correct: false },
+          { id: 'b', text: 'Возврат портфеля к целевым пропорциям', correct: true },
+          { id: 'c', text: 'Вывод всех денег с рынка', correct: false },
+          { id: 'd', text: 'Покупка только выросших активов', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Какая корреляция между акциями и облигациями в кризис?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Положительная (растут вместе)', correct: false },
+          { id: 'b', text: 'Отрицательная или низкая (облигации держатся)', correct: true },
+          { id: 'c', text: 'Идеальная положительная', correct: false },
+          { id: 'd', text: 'Акции растут, облигации падают', correct: false }
+        ]
+      }
+    ]
+  },
+  6: {
+    id: 6,
+    title: 'Долгосрочное инвестирование',
+    description: 'Стратегии для долгосрочного накопления капитала',
+    maxPoints: 40,
+    totalQuestions: 4,
+    questions: [
+      {
+        id: 1,
+        text: 'Что важнее при долгосрочном инвестировании?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Время в рынке', correct: true },
+          { id: 'b', text: 'Попытка угадать дно', correct: false },
+          { id: 'c', text: 'Ежедневная торговля', correct: false },
+          { id: 'd', text: 'Использование кредитного плеча', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Как часто нужно проверять свой портфель, чтобы не поддаваться эмоциям?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Каждый час', correct: false },
+          { id: 'b', text: 'Раз в день', correct: false },
+          { id: 'c', text: 'Раз в квартал или реже', correct: true },
+          { id: 'd', text: 'Только при новостях', correct: false }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Что такое "снежный ком"?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Пирамида в трейдинге', correct: false },
+          { id: 'b', text: 'Эффект сложного процента', correct: true },
+          { id: 'c', text: 'Схема быстрого обогащения', correct: false },
+          { id: 'd', text: 'Продажа активов', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Какая стратегия подходит для долгосрочного накопления капитала?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Регулярное пополнение портфеля', correct: true },
+          { id: 'b', text: 'Реинвестирование дивидендов', correct: true },
+          { id: 'c', text: 'Попытка предсказать курс', correct: false },
+          { id: 'd', text: 'Покупка и удержание на годы', correct: true }
+        ]
+      }
+    ]
+  }
+};
 
 const moduleQuizzes = {
-// МОДУЛЬ 1 - КАРТОЧКА 1
-101: {
-  id: 101,
-  title: 'Что такое финансовая грамотность?',
-  description: 'Базовые понятия и принципы',
-  maxPoints: 40,
-  totalQuestions: 4,
-  questions: [
-    {
-      id: 1,
-      text: 'Что такое финансовая грамотность?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Умение зарабатывать много денег', correct: false },
-        { id: 'b', text: 'Способность эффективно управлять личными финансами', correct: true },
-        { id: 'c', text: 'Знание всех банковских продуктов', correct: false },
-        { id: 'd', text: 'Умение экономить на всём', correct: false }
-      ]
-    },
-    {
-      id: 2,
-      text: 'Что из перечисленного является компонентом финансовой грамотности?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Умение вести учет доходов и расходов', correct: true },
-        { id: 'b', text: 'Умение быстро тратить деньги', correct: false },
-        { id: 'c', text: 'Игнорирование финансового планирования', correct: false },
-        { id: 'd', text: 'Использование только наличных денег', correct: false }
-      ]
-    },
-    {
-      id: 3,
-      text: 'Какой процент дохода рекомендуется откладывать на сбережения?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Нет правильного ответа', correct: false },
-        { id: 'b', text: '10-20% от дохода', correct: true },
-        { id: 'c', text: '50% от дохода', correct: false },
-        { id: 'd', text: 'Всё зависит от возраста', correct: false }
-      ]
-    },
-    {
-      id: 4,
-      text: 'Кто из перечисленных считается финансово грамотным человеком?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Тот, у кого много денег', correct: false },
-        { id: 'b', text: 'Тот, кто умеет планировать бюджет и создавать накопления', correct: true },
-        { id: 'c', text: 'Тот, кто никогда не берёт кредиты', correct: false },
-        { id: 'd', text: 'Тот, кто инвестирует все деньги в акции', correct: false }
-      ]
-    }
-  ]
-},
+  // СТАТЬЯ 1 - Введение в инвестиции
+  101: {
+    id: 101,
+    title: 'Введение в инвестиции',
+    description: 'Базовые понятия и принципы инвестирования',
+    maxPoints: 80,
+    totalQuestions: 8,
+    questions: [
+      {
+        id: 1,
+        text: 'Что такое инвестиции простыми словами?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Это способ быстро разбогатеть, вложив 100 рублей', correct: false },
+          { id: 'b', text: 'Это вложение денег сегодня с целью получить больше денег в будущем', correct: true },
+          { id: 'c', text: 'Это хранение денег дома под подушкой', correct: false },
+          { id: 'd', text: 'Это покупка товаров по скидке', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Почему деньги со временем теряют свою покупательную способность?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Из-за дефляции', correct: false },
+          { id: 'b', text: 'Из-за инфляции', correct: true },
+          { id: 'c', text: 'Из-за роста курса доллара', correct: false },
+          { id: 'd', text: 'Из-за экономического кризиса 2008 года', correct: false }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Какой процент годовой инфляции в России считается средним?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: '1–2%', correct: false },
+          { id: 'b', text: '4–7%', correct: true },
+          { id: 'c', text: '10–15%', correct: false },
+          { id: 'd', text: '20–25%', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Благодаря какому эффекту разница между накоплениями и инвестициями становится заметной через 10 лет?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Эффект домино', correct: false },
+          { id: 'b', text: 'Сложный процент (процент на процент)', correct: true },
+          { id: 'c', text: 'Эффект Вавилонской башни', correct: false },
+          { id: 'd', text: 'Линейный процент', correct: false }
+        ]
+      },
+      {
+        id: 5,
+        text: 'Чем, согласно тексту, НЕ являются инвестиции?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Способом быстро разбогатеть', correct: true },
+          { id: 'b', text: 'Азартной игрой или казино', correct: true },
+          { id: 'c', text: 'Гарантией прибыли (в отличие от вклада)', correct: true },
+          { id: 'd', text: 'Инструментом для защиты от инфляции', correct: false }
+        ]
+      },
+      {
+        id: 6,
+        text: 'С чего, по мнению автора, должен начинаться путь инвестора?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'С открытия брокерского счета и покупки первых акций', correct: false },
+          { id: 'b', text: 'С покупки дорогого костюма трейдера', correct: false },
+          { id: 'c', text: 'С понимания собственных финансов, погашения долгов и создания финансовой подушки', correct: true },
+          { id: 'd', text: 'С поиска мошенников, которые обещают 30% годовых', correct: false }
+        ]
+      },
+      {
+        id: 7,
+        text: 'Какой размер финансовой подушки безопасности рекомендуется иметь?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Запас на 1 месяц', correct: false },
+          { id: 'b', text: 'Запас на 3-6 месяцев', correct: true },
+          { id: 'c', text: 'Запас на 5 лет', correct: false },
+          { id: 'd', text: 'Сумму, равную стоимости квартиры', correct: false }
+        ]
+      },
+      {
+        id: 8,
+        text: 'Какая реальная доходность сбалансированного портфеля указана в тексте?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: '20–30% годовых', correct: false },
+          { id: 'b', text: '50% годовых', correct: false },
+          { id: 'c', text: '8–12% годовых', correct: true },
+          { id: 'd', text: '1–3% годовых', correct: false }
+        ]
+      }
+    ]
+  },
 
-// МОДУЛЬ 1 - КАРТОЧКА 2
-102: {
-  id: 102,
-  title: 'Основы бюджетирования',
-  description: 'Как планировать доходы и расходы',
-  maxPoints: 40,
-  totalQuestions: 4,
-  questions: [
-    {
-      id: 1,
-      text: 'Что такое бюджет?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'План доходов и расходов на определённый период', correct: true },
-        { id: 'b', text: 'Сумма всех налогов', correct: false },
-        { id: 'c', text: 'Банковский счёт', correct: false },
-        { id: 'd', text: 'Кредитный лимит', correct: false }
-      ]
-    },
-    {
-      id: 2,
-      text: 'Что означает правило 50/30/20?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: '50% на еду, 30% на одежду, 20% на развлечения', correct: false },
-        { id: 'b', text: '50% на обязательные расходы, 30% на желания, 20% на сбережения', correct: true },
-        { id: 'c', text: '50% на налоги, 30% на кредиты, 20% на жизнь', correct: false },
-        { id: 'd', text: '50% на инвестиции, 30% на недвижимость, 20% на бизнес', correct: false }
-      ]
-    },
-    {
-      id: 3,
-      text: 'Какой инструмент помогает вести учёт расходов?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Мобильные приложения для финансов', correct: true },
-        { id: 'b', text: 'Кредитная карта', correct: false },
-        { id: 'c', text: 'Потребительский кредит', correct: false },
-        { id: 'd', text: 'Депозит', correct: false }
-      ]
-    },
-    {
-      id: 4,
-      text: 'Что делать, если расходы превышают доходы?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Взять кредит', correct: false },
-        { id: 'b', text: 'Пересмотреть бюджет и сократить ненужные расходы', correct: true },
-        { id: 'c', text: 'Игнорировать проблему', correct: false },
-        { id: 'd', text: 'Уволиться с работы', correct: false }
-      ]
-    }
-  ]
-},
+  // СТАТЬЯ 2 - Основные виды активов
+  102: {
+    id: 102,
+    title: 'Основные виды активов',
+    description: 'Какие бывают инвестиционные инструменты',
+    maxPoints: 80,
+    totalQuestions: 8,
+    questions: [
+      {
+        id: 1,
+        text: 'Что такое актив в контексте инвестиций?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Это всё, что забирает деньги из кармана', correct: false },
+          { id: 'b', text: 'Это финансовый инструмент, который вы покупаете в расчёте на рост стоимости или регулярные выплаты', correct: true },
+          { id: 'c', text: 'Это только наличные деньги', correct: false },
+          { id: 'd', text: 'Это квартира, в которой вы живёте и платите за коммунальные услуги', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Чем акции отличаются от облигаций?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Акции дают долю (совладение) в компании', correct: true },
+          { id: 'b', text: 'Облигации — это долг, который нужно вернуть с процентами', correct: true },
+          { id: 'c', text: 'Акции гарантируют фиксированный доход, а облигации — нет', correct: false },
+          { id: 'd', text: 'Облигации считаются более консервативным инструментом, чем акции', correct: true }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Какими двумя способами акции приносят доход?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Рост цены (продал дороже, чем купил)', correct: true },
+          { id: 'b', text: 'Купоны (регулярные процентные выплаты)', correct: false },
+          { id: 'c', text: 'Дивиденды (часть прибыли компании)', correct: true },
+          { id: 'd', text: 'Дисконт при погашении', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Что такое инвестиционные фонды (ETF) и в чём их главное преимущество?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Это инструмент, дающий гарантию 20% годовых', correct: false },
+          { id: 'b', text: 'Это готовый набор активов, который обеспечивает диверсификацию (риск снижается)', correct: true },
+          { id: 'c', text: 'Это вклад в банке со страховкой АСВ', correct: false },
+          { id: 'd', text: 'Это замена паспорту инвестора', correct: false }
+        ]
+      },
+      {
+        id: 5,
+        text: 'Для чего в инвестиционном портфеле обычно используют покупку валюты?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Для получения высоких дивидендов и купонов', correct: false },
+          { id: 'b', text: 'Для защиты сбережений от ослабления национальной валюты (рубля)', correct: true },
+          { id: 'c', text: 'Для спекуляций и быстрого обогащения за неделю', correct: false },
+          { id: 'd', text: 'Чтобы получать процентный доход как по облигациям', correct: false }
+        ]
+      },
+      {
+        id: 6,
+        text: 'Какой драгоценный металл считается самой популярной "безопасной гаванью" в периоды кризисов?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Серебро', correct: false },
+          { id: 'b', text: 'Платина', correct: false },
+          { id: 'c', text: 'Золото', correct: true },
+          { id: 'd', text: 'Бронза', correct: false }
+        ]
+      },
+      {
+        id: 7,
+        text: 'Какие недостатки есть у недвижимости как актива?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Низкая ликвидность (сложно быстро продать без потери цены)', correct: true },
+          { id: 'b', text: 'Нужен большой стартовый капитал', correct: true },
+          { id: 'c', text: 'Всегда падает в цене при любом кризисе', correct: false },
+          { id: 'd', text: 'Есть дополнительные расходы (налоги, коммунальные платежи, ремонт)', correct: true }
+        ]
+      },
+      {
+        id: 8,
+        text: 'Какой совет даётся новичкам про криптовалюты?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Вложить в криптовалюту все сбережения, так как это самый надёжный актив', correct: false },
+          { id: 'b', text: 'Не вкладывать в криптовалюты больше, чем вы готовы потерять', correct: true },
+          { id: 'c', text: 'Криптовалюта гарантирует стабильный доход, как облигации', correct: false },
+          { id: 'd', text: 'Криптовалюты не подвержены волатильности', correct: false }
+        ]
+      }
+    ]
+  },
 
-// МОДУЛЬ 2 - КАРТОЧКА 1
-103: {
-  id: 103,
-  title: 'Почему важно инвестировать?',
-  description: 'Преимущества инвестирования',
-  maxPoints: 40,
-  totalQuestions: 4,
-  questions: [
-    {
-      id: 1,
-      text: 'Что такое инфляция?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Рост цен на товары и услуги', correct: true },
-        { id: 'b', text: 'Снижение курса валюты', correct: false },
-        { id: 'c', text: 'Увеличение налогов', correct: false },
-        { id: 'd', text: 'Рост зарплат', correct: false }
-      ]
-    },
-    {
-      id: 2,
-      text: 'Как инфляция влияет на сбережения?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Увеличивает их покупательную способность', correct: false },
-        { id: 'b', text: 'Снижает их покупательную способность', correct: true },
-        { id: 'c', text: 'Не влияет', correct: false },
-        { id: 'd', text: 'Делает их безопаснее', correct: false }
-      ]
-    },
-    {
-      id: 3,
-      text: 'Что такое сложный процент?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Процент на первоначальную сумму', correct: false },
-        { id: 'b', text: 'Процент на проценты', correct: true },
-        { id: 'c', text: 'Банковская комиссия', correct: false },
-        { id: 'd', text: 'Налог на доход', correct: false }
-      ]
-    },
-    {
-      id: 4,
-      text: 'Почему важно начинать инвестировать рано?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Больше времени для роста капитала', correct: true },
-        { id: 'b', text: 'Меньше налогов', correct: false },
-        { id: 'c', text: 'Меньше рисков', correct: false },
-        { id: 'd', text: 'Гарантированная доходность', correct: false }
-      ]
-    }
-  ]
-},
+  // СТАТЬЯ 3 - Акции — подробный разбор
+  103: {
+    id: 103,
+    title: 'Акции — подробный разбор',
+    description: 'Как работают акции и дивиденды',
+    maxPoints: 80,
+    totalQuestions: 8,
+    questions: [
+      {
+        id: 1,
+        text: 'Что происходит, когда инвестор покупает обыкновенную акцию?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Он даёт компании деньги в долг под фиксированный процент', correct: false },
+          { id: 'b', text: 'Он становится совладельцем (акционером) компании', correct: true },
+          { id: 'c', text: 'Он получает право на гарантированный купонный доход', correct: false },
+          { id: 'd', text: 'Он становится кредитором первой очереди', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Какими двумя основными способами акции приносят доход инвестору?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Рост цены (продал дороже, чем купил)', correct: true },
+          { id: 'b', text: 'Дивиденды (часть прибыли компании)', correct: true },
+          { id: 'c', text: 'Купонные выплаты', correct: false },
+          { id: 'd', text: 'Тело вклада', correct: false }
+        ]
+      },
+      {
+        id: 3,
+        text: 'В чём главное отличие growth-компаний от dividend-компаний?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Growth-компании не платят дивиденды, реинвестируя прибыль в развитие', correct: true },
+          { id: 'b', text: 'Dividend-компании всегда обанкрочиваются, а growth-компании — нет', correct: false },
+          { id: 'c', text: 'Growth-компании платят дивиденды каждый месяц', correct: false },
+          { id: 'd', text: 'Dividend-компании нельзя покупать новичкам', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Почему цена акций может постоянно меняться?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Из-за ожиданий инвесторов относительно будущего', correct: true },
+          { id: 'b', text: 'Из-за новостей о компании и экономики в целом', correct: true },
+          { id: 'c', text: 'Из-за настроений (страха или жадности) на рынке', correct: true },
+          { id: 'd', text: 'Потому что компания каждый день меняет цену на свои товары', correct: false }
+        ]
+      },
+      {
+        id: 5,
+        text: 'Что показывает показатель P/E (цена/прибыль)?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Сколько компания должна банкам', correct: false },
+          { id: 'b', text: 'За сколько лет компания окупит свою стоимость при текущей прибыли', correct: true },
+          { id: 'c', text: 'Размер дивидендов в процентах', correct: false },
+          { id: 'd', text: 'Количество акций в обращении', correct: false }
+        ]
+      },
+      {
+        id: 6,
+        text: 'Чем привилегированные акции отличаются от обыкновенных?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'По префам часто платят более высокие дивиденды', correct: true },
+          { id: 'b', text: 'Выплаты дивидендов по префам приоритетны', correct: true },
+          { id: 'c', text: 'Префы обычно дают право голоса на собрании акционеров, а обыкновенные — нет', correct: false },
+          { id: 'd', text: 'Префы — это долг, а обыкновенные акции — доля', correct: false }
+        ]
+      },
+      {
+        id: 7,
+        text: 'Что такое "голубые фишки" на фондовом рынке?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Акции крупнейших, самых надёжных и ликвидных компаний', correct: true },
+          { id: 'b', text: 'Самые дешёвые акции на рынке', correct: false },
+          { id: 'c', text: 'Акции компаний третьего эшелона с низкой ликвидностью', correct: false },
+          { id: 'd', text: 'Акции технологических стартапов', correct: false }
+        ]
+      },
+      {
+        id: 8,
+        text: 'Какой совет даётся новичкам при покупке первых акций?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Начинать с небольшой суммы и не вкладывать всё сразу', correct: true },
+          { id: 'b', text: 'Выбирать компанию, бизнес которой вам понятен', correct: true },
+          { id: 'c', text: 'Пытаться угадать идеальный момент для покупки (войти в рынок на самом дне)', correct: false },
+          { id: 'd', text: 'Не паниковать при падениях и смотреть на компанию, а не только на график', correct: true }
+        ]
+      }
+    ]
+  },
 
-// МОДУЛЬ 2 - КАРТОЧКА 2
-104: {
-  id: 104,
-  title: 'Виды инвестиций',
-  description: 'Какие бывают инвестиционные инструменты',
-  maxPoints: 40,
-  totalQuestions: 4,
-  questions: [
-    {
-      id: 1,
-      text: 'Что такое акции?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Долговая расписка компании', correct: false },
-        { id: 'b', text: 'Доля в компании', correct: true },
-        { id: 'c', text: 'Банковский депозит', correct: false },
-        { id: 'd', text: 'Государственная облигация', correct: false }
-      ]
-    },
-    {
-      id: 2,
-      text: 'Что такое облигации?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Долговые ценные бумаги', correct: true },
-        { id: 'b', text: 'Акции компании', correct: false },
-        { id: 'c', text: 'Страховой полис', correct: false },
-        { id: 'd', text: 'Кредитный договор', correct: false }
-      ]
-    },
-    {
-      id: 3,
-      text: 'Что менее рискованно?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Акции молодых компаний', correct: false },
-        { id: 'b', text: 'Государственные облигации', correct: true },
-        { id: 'c', text: 'Криптовалюта', correct: false },
-        { id: 'd', text: 'Форекс', correct: false }
-      ]
-    },
-    {
-      id: 4,
-      text: 'Что такое диверсификация?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Вложение всех денег в один актив', correct: false },
-        { id: 'b', text: 'Распределение инвестиций между разными активами', correct: true },
-        { id: 'c', text: 'Вывод всех денег из инвестиций', correct: false },
-        { id: 'd', text: 'Покупка только акций', correct: false }
-      ]
-    }
-  ]
-},
+  // СТАТЬЯ 4 - Облигации — подробный разбор
+  104: {
+    id: 104,
+    title: 'Облигации — подробный разбор',
+    description: 'Как работают облигации и купоны',
+    maxPoints: 80,
+    totalQuestions: 8,
+    questions: [
+      {
+        id: 1,
+        text: 'Чем облигация принципиально отличается от акции?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Облигация даёт право голоса в компании', correct: false },
+          { id: 'b', text: 'Облигация — это долг, а акция — доля в бизнесе', correct: true },
+          { id: 'c', text: 'Облигации можно купить только в валюте', correct: false },
+          { id: 'd', text: 'Облигация не имеет срока погашения, в отличие от акции', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Что такое купон по облигации и номинал?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Купон — это процент, который эмитент платит за пользование деньгами', correct: true },
+          { id: 'b', text: 'Номинал — это сумма, которую эмитент обязуется вернуть при погашении', correct: true },
+          { id: 'c', text: 'Купон — это сумма, которую эмитент возвращает в конце срока', correct: false },
+          { id: 'd', text: 'Номинал — это регулярная выплата процентов', correct: false }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Какие облигации считаются самыми надёжными в России?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Корпоративные облигации небольших компаний', correct: false },
+          { id: 'b', text: 'Муниципальные облигации', correct: false },
+          { id: 'c', text: 'Государственные облигации (ОФЗ)', correct: true },
+          { id: 'd', text: 'Валютные облигации', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Почему цена облигации на бирже может снизиться, если ключевая ставка выросла?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Потому что компания-эмитент сразу теряет прибыль', correct: false },
+          { id: 'b', text: 'Обратная зависимость: новые облигации с более высоким купоном делают старые менее привлекательными', correct: true },
+          { id: 'c', text: 'Потому что при росте ставок государство отзывает все старые облигации', correct: false },
+          { id: 'd', text: 'Потому что это прямое указание закона', correct: false }
+        ]
+      },
+      {
+        id: 5,
+        text: 'Что такое НКД (накопленный купонный доход) при покупке облигации?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Это дополнительная комиссия брокера', correct: false },
+          { id: 'b', text: 'Это часть купона, которая уже "набежала" с прошлой выплаты, и её платят продавцу', correct: true },
+          { id: 'c', text: 'Это штраф за досрочную продажу', correct: false },
+          { id: 'd', text: 'Это налог на прибыль', correct: false }
+        ]
+      },
+      {
+        id: 6,
+        text: 'На какой показатель доходности стоит ориентироваться при сравнении разных облигаций?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Только на размер купона в процентах', correct: false },
+          { id: 'b', text: 'На доходность к погашению (учитывает купоны, цену покупки и номинал)', correct: true },
+          { id: 'c', text: 'На цвет облигации в приложении брокера', correct: false },
+          { id: 'd', text: 'На объём торгов за последний час', correct: false }
+        ]
+      },
+      {
+        id: 7,
+        text: 'Что такое кредитный риск при инвестировании в облигации?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Риск того, что цена облигации упадёт из-за роста ставок', correct: false },
+          { id: 'b', text: 'Риск того, что эмитент не сможет выплатить долг или купон', correct: true },
+          { id: 'c', text: 'Риск колебаний валютного курса', correct: false },
+          { id: 'd', text: 'Риск того, что облигацию нельзя быстро продать', correct: false }
+        ]
+      },
+      {
+        id: 8,
+        text: 'Кому в первую очередь подойдут инвестиции в облигации?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Консервативным инвесторам, кто не готов к резким колебаниям стоимости', correct: true },
+          { id: 'b', text: 'Тем, кто копит на конкретную цель с известным сроком', correct: true },
+          { id: 'c', text: 'Тем, кто ищет способ быстро удвоить капитал за месяц', correct: false },
+          { id: 'd', text: 'Новичкам, которые хотят привыкнуть к рынку без лишнего стресса', correct: true }
+        ]
+      }
+    ]
+  },
 
-// МОДУЛЬ 2 - КАРТОЧКА 3
-105: {
-  id: 105,
-  title: 'Как выбрать брокера?',
-  description: 'Критерии выбора надежного брокера',
-  maxPoints: 40,
-  totalQuestions: 4,
-  questions: [
-    {
-      id: 1,
-      text: 'Что такое брокер?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Посредник между инвестором и биржей', correct: true },
-        { id: 'b', text: 'Банк', correct: false },
-        { id: 'c', text: 'Страховая компания', correct: false },
-        { id: 'd', text: 'Инвестиционный фонд', correct: false }
-      ]
-    },
-    {
-      id: 2,
-      text: 'На что обратить внимание при выборе брокера?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Наличие лицензии', correct: true },
-        { id: 'b', text: 'Красивый сайт', correct: false },
-        { id: 'c', text: 'Яркая реклама', correct: false },
-        { id: 'd', text: 'Обещание 100% доходности', correct: false }
-      ]
-    },
-    {
-      id: 3,
-      text: 'Что такое комиссия брокера?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Плата за обслуживание счета', correct: true },
-        { id: 'b', text: 'Налог на прибыль', correct: false },
-        { id: 'c', text: 'Дивиденды по акциям', correct: false },
-        { id: 'd', text: 'Купон по облигациям', correct: false }
-      ]
-    },
-    {
-      id: 4,
-      text: 'Как проверить легальность брокера?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Посмотреть отзывы', correct: false },
-        { id: 'b', text: 'Проверить наличие лицензии на сайте ЦБ РФ', correct: true },
-        { id: 'c', text: 'Спросить у друзей', correct: false },
-        { id: 'd', text: 'Никак, все брокеры легальны', correct: false }
-      ]
-    }
-  ]
-},
+  // СТАТЬЯ 5 - Инвестиционные фонды (ETF и ПИФы)
+  105: {
+    id: 105,
+    title: 'Инвестиционные фонды (ETF и ПИФы)',
+    description: 'Как работают фонды и их преимущества',
+    maxPoints: 80,
+    totalQuestions: 8,
+    questions: [
+      {
+        id: 1,
+        text: 'Как работает инвестиционный фонд простыми словами?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Это "общий котёл", куда инвесторы складывают деньги, а управляющие вкладывают их в активы', correct: true },
+          { id: 'b', text: 'Это брокерский счёт, на котором лежат только наличные', correct: false },
+          { id: 'c', text: 'Это объединение спекулянтов для игры на бирже', correct: false },
+          { id: 'd', text: 'Это гарантированный способ получить 20% годовых без риска', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'В чём главное отличие ETF от обычного ПИФа?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'ETF торгуются на бирже как обычные акции (цена меняется в реальном времени)', correct: true },
+          { id: 'b', text: 'ETF обычно пассивно копируют индекс (не пытаются его обыграть)', correct: true },
+          { id: 'c', text: 'У ETF обычно комиссия ниже, чем у активных ПИФов', correct: true },
+          { id: 'd', text: 'ETF можно купить только раз в день по цене закрытия', correct: false }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Какое главное преимущество даёт покупка фонда вместо отдельных акций?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Гарантия сохранения капитала', correct: false },
+          { id: 'b', text: 'Диверсификация — вы вкладываетесь в десятки компаний одной покупкой, снижая риск', correct: true },
+          { id: 'c', text: 'Освобождение от уплаты налогов', correct: false },
+          { id: 'd', text: 'Возможность заработать 100% за месяц', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Почему комиссия фонда так важна на длинной дистанции?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Потому что она платится один раз при входе в фонд', correct: false },
+          { id: 'b', text: 'Потому что она ежегодно вычитается из стоимости активов и снижает итоговый капитал за счёт сложного процента', correct: true },
+          { id: 'c', text: 'Потому что без неё нельзя торговать фондом', correct: false },
+          { id: 'd', text: 'Потому что комиссия идёт напрямую инвесторам', correct: false }
+        ]
+      },
+      {
+        id: 5,
+        text: 'Что такое пассивный фонд (фонд, следующий за индексом)?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Фонд, где управляющий активно выбирает лучшие акции', correct: false },
+          { id: 'b', text: 'Фонд, который копирует состав индекса (например, S&P 500) по алгоритму, без попыток его обыграть', correct: true },
+          { id: 'c', text: 'Фонд, который даёт отрицательную доходность', correct: false },
+          { id: 'd', text: 'Фонд, который инвестирует только в наличные деньги', correct: false }
+        ]
+      },
+      {
+        id: 6,
+        text: 'Какой тип фонда подойдёт новичку для самого первого шага?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Широкий фонд акций с низкой комиссией', correct: true },
+          { id: 'b', text: 'Смешанный фонд (акции + облигации) с понятной логикой', correct: true },
+          { id: 'c', text: 'Узкоспециализированный фонд на искусственный интеллект с высокой комиссией', correct: false },
+          { id: 'd', text: 'Фонд с плечом (кредитным рычагом) 5x', correct: false }
+        ]
+      },
+      {
+        id: 7,
+        text: 'Что такое риск отслеживания (tracking error) для ETF?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Вероятность того, что эмитент фонда обанкротится', correct: false },
+          { id: 'b', text: 'Ситуация, когда фонд не точно повторяет свой индекс из-за комиссий, задержек в ребалансировке и других факторов', correct: true },
+          { id: 'c', text: 'Риск того, что фонд заблокирует вывод средств', correct: false },
+          { id: 'd', text: 'Шанс того, что цена фонда упадёт на 50% за день', correct: false }
+        ]
+      },
+      {
+        id: 8,
+        text: 'Какие риски НЕ устраняются покупкой диверсифицированного фонда?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Рыночный риск (если падает весь рынок — падает и фонд)', correct: true },
+          { id: 'b', text: 'Валютный риск (если фонд в долларах, а расходы в рублях)', correct: true },
+          { id: 'c', text: 'Риск банкротства одной конкретной компании', correct: false },
+          { id: 'd', text: 'Риск того, что фонд окажется мошенническим и в него лучше не вкладывать', correct: true }
+        ]
+      }
+    ]
+  },
 
-// МОДУЛЬ 3 - КАРТОЧКА 1
-106: {
-  id: 106,
-  title: 'Виды кредитов',
-  description: 'Потребительский, ипотека, автокредит',
-  maxPoints: 40,
-  totalQuestions: 4,
-  questions: [
-    {
-      id: 1,
-      text: 'Что такое ипотека?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Кредит на покупку жилья под залог', correct: true },
-        { id: 'b', text: 'Кредит на автомобиль', correct: false },
-        { id: 'c', text: 'Кредитная карта', correct: false },
-        { id: 'd', text: 'Микрозайм', correct: false }
-      ]
-    },
-    {
-      id: 2,
-      text: 'Что такое автокредит?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Кредит на покупку автомобиля', correct: true },
-        { id: 'b', text: 'Кредит на жильё', correct: false },
-        { id: 'c', text: 'Кредит на образование', correct: false },
-        { id: 'd', text: 'Кредит на лечение', correct: false }
-      ]
-    },
-    {
-      id: 3,
-      text: 'Что такое потребительский кредит?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Кредит на любые цели без залога', correct: true },
-        { id: 'b', text: 'Кредит под залог недвижимости', correct: false },
-        { id: 'c', text: 'Кредит под залог автомобиля', correct: false },
-        { id: 'd', text: 'Беспроцентный кредит', correct: false }
-      ]
-    },
-    {
-      id: 4,
-      text: 'Какой платёж уменьшается со временем?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Аннуитетный', correct: false },
-        { id: 'b', text: 'Дифференцированный', correct: true },
-        { id: 'c', text: 'Фиксированный', correct: false },
-        { id: 'd', text: 'Льготный', correct: false }
-      ]
-    }
-  ]
-},
+  // СТАТЬЯ 6 - Как собрать инвестиционный портфель
+  106: {
+    id: 106,
+    title: 'Как собрать инвестиционный портфель',
+    description: 'Принципы формирования портфеля',
+    maxPoints: 80,
+    totalQuestions: 8,
+    questions: [
+      {
+        id: 1,
+        text: 'Что такое инвестиционный портфель?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Это случайный набор акций, которые понравились инвестору', correct: false },
+          { id: 'b', text: 'Это продуманная комбинация активов, где каждый элемент подобран под определённую цель', correct: true },
+          { id: 'c', text: 'Это брокерский счёт с минимальным остатком', correct: false },
+          { id: 'd', text: 'Это гарантированный способ получить 50% годовых', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Зачем нужен портфель, а не просто покупка отдельных активов?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Чтобы сгладить колебания: когда один инструмент падает, другой может расти или оставаться стабильным', correct: true },
+          { id: 'b', text: 'Чтобы согласовать инвестиции с финансовыми целями', correct: true },
+          { id: 'c', text: 'Чтобы полностью исключить любые риски потерь', correct: false },
+          { id: 'd', text: 'Чтобы не зависеть от поведения одного типа активов', correct: true }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Какую роль в портфеле обычно выполняют акции?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Обеспечивают стабильность и регулярный купонный доход', correct: false },
+          { id: 'b', text: 'Отвечают за рост, но несут наибольшую волатильность', correct: true },
+          { id: 'c', text: 'Защищают от кризисов и падения рынка', correct: false },
+          { id: 'd', text: 'Являются аналогом денег на чёрный день', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Какую роль в портфеле выполняют облигации?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Обеспечивают стабильность и регулярный доход через купоны', correct: true },
+          { id: 'b', text: 'Меньше колеблются в цене по сравнению с акциями', correct: true },
+          { id: 'c', text: 'Выполняют роль "подушки" при падении акций', correct: true },
+          { id: 'd', text: 'Дают самый высокий потенциал роста среди всех активов', correct: false }
+        ]
+      },
+      {
+        id: 5,
+        text: 'Какой портфель считается агрессивным?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: '70% облигаций и 30% акций', correct: false },
+          { id: 'b', text: '50% акций и 50% облигаций', correct: false },
+          { id: 'c', text: '80% акций и 20% остальных инструментов', correct: true },
+          { id: 'd', text: '100% банковского вклада', correct: false }
+        ]
+      },
+      {
+        id: 6,
+        text: 'Что такое ребалансировка портфеля?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Полная замена всех активов на новые раз в месяц', correct: false },
+          { id: 'b', text: 'Продажа подорожавших активов и покупка отставших для возврата к исходным пропорциям', correct: true },
+          { id: 'c', text: 'Вывод всех денег с брокерского счёта', correct: false },
+          { id: 'd', text: 'Вложение дополнительных средств без изменения структуры', correct: false }
+        ]
+      },
+      {
+        id: 7,
+        text: 'Какая частота ребалансировки считается разумной для большинства инвесторов?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Каждый день (для максимальной точности)', correct: false },
+          { id: 'b', text: 'Раз в год или при значительном отклонении от целевых пропорций', correct: true },
+          { id: 'c', text: 'Раз в месяц обязательно', correct: false },
+          { id: 'd', text: 'Ребалансировка не нужна вообще', correct: false }
+        ]
+      },
+      {
+        id: 8,
+        text: 'Какие ошибки часто допускают новички при формировании портфеля?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Перегрузка одним активом или одной отраслью (недостаточная диверсификация)', correct: true },
+          { id: 'b', text: 'Погоня за прошлой доходностью без понимания логики', correct: true },
+          { id: 'c', text: 'Эмоциональные решения (продать всё при падении, купить при росте)', correct: true },
+          { id: 'd', text: 'Регулярная ребалансировка раз в год', correct: false }
+        ]
+      }
+    ]
+  },
 
-// МОДУЛЬ 3 - КАРТОЧКА 2
-107: {
-  id: 107,
-  title: 'Налоговые вычеты',
-  description: 'Как вернуть часть уплаченных налогов',
-  maxPoints: 40,
-  totalQuestions: 4,
-  questions: [
-    {
-      id: 1,
-      text: 'Что такое налоговый вычет?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Дополнительный налог', correct: false },
-        { id: 'b', text: 'Возврат части уплаченного налога', correct: true },
-        { id: 'c', text: 'Штраф за неуплату', correct: false },
-        { id: 'd', text: 'Налоговая льгота для бизнеса', correct: false }
-      ]
-    },
-    {
-      id: 2,
-      text: 'Какой максимальный возврат по имущественному вычету?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: '100 000 ₽', correct: false },
-        { id: 'b', text: '260 000 ₽', correct: true },
-        { id: 'c', text: '500 000 ₽', correct: false },
-        { id: 'd', text: '1 000 000 ₽', correct: false }
-      ]
-    },
-    {
-      id: 3,
-      text: 'На какие цели можно получить социальный вычет?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Лечение и обучение', correct: true },
-        { id: 'b', text: 'Покупка автомобиля', correct: false },
-        { id: 'c', text: 'Путешествия', correct: false },
-        { id: 'd', text: 'Покупка квартиры', correct: false }
-      ]
-    },
-    {
-      id: 4,
-      text: 'Что нужно сделать, чтобы получить вычет?',
-      subtext: '(выберите один вариант)',
-      points: 10,
-      options: [
-        { id: 'a', text: 'Подать декларацию 3-НДФЛ', correct: true },
-        { id: 'b', text: 'Ничего, вычет приходит автоматически', correct: false },
-        { id: 'c', text: 'Обратиться в банк', correct: false },
-        { id: 'd', text: 'Обратиться в страховую компанию', correct: false }
-      ]
-    }
-  ]
-}
+  // СТАТЬЯ 7 - Горизонт инвестирования
+  107: {
+    id: 107,
+    title: 'Горизонт инвестирования',
+    description: 'Как выбрать стратегию в зависимости от срока',
+    maxPoints: 80,
+    totalQuestions: 8,
+    questions: [
+      {
+        id: 1,
+        text: 'Что такое горизонт инвестирования?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Это максимальная сумма, которую вы готовы потерять', correct: false },
+          { id: 'b', text: 'Это период времени, на который вы готовы вложить деньги без необходимости забирать их обратно', correct: true },
+          { id: 'c', text: 'Это количество активов в вашем портфеле', correct: false },
+          { id: 'd', text: 'Это доходность, которую вы ожидаете получить', correct: false }
+        ]
+      },
+      {
+        id: 2,
+        text: 'Какой инструмент НЕ подходит для короткого горизонта инвестирования (до 3 лет)?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Банковский вклад с фиксированной ставкой', correct: false },
+          { id: 'b', text: 'Короткие облигации с погашением в нужный срок', correct: false },
+          { id: 'c', text: 'Акции отдельных компаний (из-за высокой волатильности)', correct: true },
+          { id: 'd', text: 'Валюта для защиты от курсовых колебаний', correct: false }
+        ]
+      },
+      {
+        id: 3,
+        text: 'Почему на длинном горизонте (7+ лет) можно позволить себе более агрессивную стратегию?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Потому что есть время переждать временные просадки и колебания рынка', correct: true },
+          { id: 'b', text: 'Потому что на длинных отрезках акции исторически показывают доходность выше инфляции', correct: true },
+          { id: 'c', text: 'Потому что короткие просадки на длинном сроке сглаживаются', correct: true },
+          { id: 'd', text: 'Потому что длинный горизонт гарантирует отсутствие любых убытков', correct: false }
+        ]
+      },
+      {
+        id: 4,
+        text: 'Какой инструмент НЕ подходит для длинного горизонта инвестирования (7+ лет)?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Акции компаний и широкие фонды акций', correct: false },
+          { id: 'b', text: 'Инструменты с фиксированным низким доходом, которые не опережают инфляцию', correct: true },
+          { id: 'c', text: 'Международная диверсификация', correct: false },
+          { id: 'd', text: 'Регулярное пополнение портфеля', correct: false }
+        ]
+      },
+      {
+        id: 5,
+        text: 'Что нужно сделать в первую очередь, прежде чем инвестировать на любой горизонт?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Купить самые доходные акции', correct: false },
+          { id: 'b', text: 'Создать финансовую подушку безопасности (запас на 3-6 месяцев жизни)', correct: true },
+          { id: 'c', text: 'Открыть кредитную карту', correct: false },
+          { id: 'd', text: 'Продать все активы', correct: false }
+        ]
+      },
+      {
+        id: 6,
+        text: 'Что делать, если горизонт инвестирования сократился?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Снизить долю рискованных активов в портфеле', correct: true },
+          { id: 'b', text: 'Зафиксировать прибыль по выросшим позициям', correct: true },
+          { id: 'c', text: 'Перевести часть средств в более предсказуемые инструменты', correct: true },
+          { id: 'd', text: 'Вложить все деньги в высокорискованные криптовалюты', correct: false }
+        ]
+      },
+      {
+        id: 7,
+        text: 'С какой периодичностью рекомендуется пересматривать свои цели и горизонт инвестирования?',
+        subtext: '(выберите один вариант)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Каждый день', correct: false },
+          { id: 'b', text: 'Раз в год (или при значительном изменении жизненных обстоятельств)', correct: true },
+          { id: 'c', text: 'Раз в пять лет', correct: false },
+          { id: 'd', text: 'Никогда, план должен быть неизменным', correct: false }
+        ]
+      },
+      {
+        id: 8,
+        text: 'Какие ошибки часто совершают инвесторы, связанные с горизонтом инвестирования?',
+        subtext: '(выберите все верные)',
+        points: 10,
+        options: [
+          { id: 'a', text: 'Инвестиции "на всякий случай" без чётко определённого срока и цели', correct: true },
+          { id: 'b', text: 'Слишком консервативная стратегия на длинном сроке', correct: true },
+          { id: 'c', text: 'Эмоциональная смена стратегии при краткосрочных колебаниях рынка', correct: true },
+          { id: 'd', text: 'Регулярная ребалансировка портфеля раз в год', correct: false }
+        ]
+      }
+    ]
+  }
 };
+
 const allQuizzes = { ...generalQuizzes, ...moduleQuizzes };
 // Функция для подсчета завершенных викторин (всех)
 const getTotalCompletedCount = () => {
@@ -853,39 +1190,7 @@ const getTotalCompletedCount = () => {
 const getTotalQuizzesCount = () => {
   return Object.keys(generalQuizzes).length + Object.keys(moduleQuizzes).length;
 };
-  // Загрузка рейтинга из localStorage
-  useEffect(() => {
-    const loadRatingFromStorage = () => {
-      const savedRating = localStorage.getItem('quizRating');
-      if (savedRating) {
-        const parsedRating = JSON.parse(savedRating);
-        setUserRating(parsedRating);
-        // Если есть викторина в процессе, восстанавливаем её
-        if (parsedRating.inProgressQuiz) {
-          const progressData = parsedRating.quizProgress?.[parsedRating.inProgressQuiz];
-          if (progressData && !progressData.completed) {
-            setSelectedQuiz(allQuizzes[parsedRating.inProgressQuiz]);
-            setActiveQuizId(parsedRating.inProgressQuiz);
-            setCurrentQuestion(progressData.currentQuestion || 0);
-            setUserAnswers(progressData.userAnswers || {});
-          }
-        }
-      } else {
-const initialRating = {
-  totalPoints: 0,
-  completedQuizzes: 0,
-  totalQuizzes: 13, // ← измените с 6 на 13
-  quizResults: {},
-  inProgressQuiz: null,
-  quizProgress: {}
-};
-        localStorage.setItem('quizRating', JSON.stringify(initialRating));
-        setUserRating(initialRating);
-      }
-    };
-    
-    loadRatingFromStorage();
-  }, []);
+
 
   // Сохранение прогресса текущей викторины
   const saveCurrentProgress = () => {
@@ -915,6 +1220,162 @@ const initialRating = {
     }
   }, [currentQuestion, userAnswers, selectedQuiz, quizCompleted]);
 
+
+useEffect(() => {
+  console.log('🔵 QuizPage useEffect ЗАПУЩЕН');
+  
+const loadRatingFromStorage = () => {
+  const savedRating = localStorage.getItem('quizRating');
+  console.log('📁 quizRating из localStorage:', savedRating);
+  
+  if (savedRating) {
+    let parsedRating = JSON.parse(savedRating);
+    
+    // ПРОВЕРКА: если данные вложенные — извлекаем
+    if (parsedRating.quiz_rating && !parsedRating.quizResults) {
+      // Старый формат с вложенностью
+      parsedRating = parsedRating.quiz_rating;
+      // Исправляем localStorage
+      localStorage.setItem('quizRating', JSON.stringify(parsedRating));
+      console.log('🔄 Структура исправлена на плоскую');
+    }
+    
+    setUserRating(parsedRating);
+    
+    // Если есть викторина в процессе, восстанавливаем её
+    if (parsedRating.inProgressQuiz) {
+      const progressData = parsedRating.quizProgress?.[parsedRating.inProgressQuiz];
+      if (progressData && !progressData.completed) {
+        setSelectedQuiz(allQuizzes[parsedRating.inProgressQuiz]);
+        setActiveQuizId(parsedRating.inProgressQuiz);
+        setCurrentQuestion(progressData.currentQuestion || 0);
+        setUserAnswers(progressData.userAnswers || {});
+      }
+    }
+  } else {
+    const initialRating = {
+      totalPoints: 0,
+      completedQuizzes: 0,
+      totalQuizzes: 13,
+      quizResults: {},
+      inProgressQuiz: null,
+      quizProgress: {}
+    };
+    localStorage.setItem('quizRating', JSON.stringify(initialRating));
+    setUserRating(initialRating);
+    console.log('📁 Создан начальный quizRating');
+  }
+};
+
+  const sync = async () => {
+    const token = localStorage.getItem('access_token');
+    console.log('🔑 Токен:', token ? 'Есть' : 'Нет');
+    
+    if (!token) {
+      console.log('⚠️ Токена нет, грузим localStorage');
+      loadRatingFromStorage();
+      return;
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id_user;
+      console.log('👤 userId:', userId);
+
+      // ЛОГИН
+      const justLoggedIn = sessionStorage.getItem('justLoggedIn');
+      console.log('🏷️ justLoggedIn:', justLoggedIn);
+      
+      if (justLoggedIn) {
+        sessionStorage.removeItem('justLoggedIn');
+        console.log('📥 ЗАГРУЖАЕМ с сервера...');
+        
+        const res = await fetch(`/api/users/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        console.log('📡 Статус загрузки:', res.status);
+        
+        if (res.ok) {
+          const data = await res.json();
+          console.log('📦 Данные с сервера:', data);
+          
+          if (data.quiz_rating) {
+  localStorage.setItem('quizRating', JSON.stringify(data.quiz_rating));
+  console.log('✅ quizRating загружен с сервера', data.quiz_rating);
+          } else {
+            console.log('⚠️ quiz_rating отсутствует в ответе сервера');
+          }
+        }
+      }
+
+      // РЕГИСТРАЦИЯ
+      const justRegistered = sessionStorage.getItem('justRegistered');
+      console.log('🏷️ justRegistered:', justRegistered);
+      
+      if (justRegistered) {
+        sessionStorage.removeItem('justRegistered');
+        console.log('📤 ОТПРАВЛЯЕМ на сервер...');
+        
+        const qr = JSON.parse(localStorage.getItem('quizRating') || '{}');
+        console.log('📦 Отправляемые данные:', qr);
+        
+        const res = await fetch(`/api/users/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            points: qr.totalPoints || 0,
+            quiz_rating: qr
+          })
+        });
+        
+        console.log('📡 Статус отправки:', res.status);
+      }
+    } catch (error) {
+      console.error('❌ Ошибка синхронизации:', error);
+    }
+
+    loadRatingFromStorage();
+  };
+
+  sync();
+}, []);
+
+useEffect(() => {
+  const saveToBackend = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return; // Не авторизован — не сохраняем
+    
+    // Не сохраняем начальное состояние (все нули)
+    if (userRating.totalPoints === 0 && userRating.completedQuizzes === 0) return;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id_user;
+      
+      await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          points: userRating.totalPoints || 0,
+          quiz_rating: userRating
+        })
+      });
+      
+      console.log('💾 Автосохранено на бек:', userRating.totalPoints, 'очков');
+    } catch (error) {
+      console.error('❌ Ошибка автосохранения:', error);
+    }
+  };
+
+  saveToBackend();
+}, [userRating]);
   // Функция для сохранения завершения викторины
 const saveQuizProgress = (quizId, earnedPoints, totalPoints) => {
   const existingResult = userRating.quizResults[quizId];
@@ -1186,20 +1647,21 @@ const quizStats = {
 
   // Данные для модулей
 
+
 const module1Cards = [
-  { id: 1, title: 'Что такое финансовая грамотность?', description: 'Базовые понятия и принципы', status: getQuizStatus(101), questions: '4 вопросов', points: getQuizPoints(101), maxPoints: 40, quizId: 101, buttonLabel: getQuizStatus(101) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(101) === 'В процессе' ? 'Продолжить' : 'Пройти') },
-  { id: 2, title: 'Основы бюджетирования', description: 'Как планировать доходы и расходы', status: getQuizStatus(102), questions: '4 вопросов', points: getQuizPoints(102), maxPoints: 40, quizId: 102, buttonLabel: getQuizStatus(102) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(102) === 'В процессе' ? 'Продолжить' : 'Пройти') }
+  { id: 1, title: 'Введение в инвестиции', description: 'Базовые понятия и принципы', status: getQuizStatus(101), questions: '8 вопросов', points: getQuizPoints(101), maxPoints: 80, quizId: 101, buttonLabel: getQuizStatus(101) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(101) === 'В процессе' ? 'Продолжить' : 'Пройти') },
+  { id: 2, title: 'Основные виды активов', description: 'Какие бывают инвестиционные инструменты', status: getQuizStatus(102), questions: '8 вопросов', points: getQuizPoints(102), maxPoints: 80, quizId: 102, buttonLabel: getQuizStatus(102) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(102) === 'В процессе' ? 'Продолжить' : 'Пройти') }
 ];
 
 const module2Cards = [
-  { id: 1, title: 'Почему важно инвестировать?', description: 'Преимущества инвестирования', status: getQuizStatus(103), questions: '4 вопросов', points: getQuizPoints(103), maxPoints: 40, quizId: 103, buttonLabel: getQuizStatus(103) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(103) === 'В процессе' ? 'Продолжить' : 'Пройти') },
-  { id: 2, title: 'Виды инвестиций', description: 'Какие бывают инвестиционные инструменты', status: getQuizStatus(104), questions: '4 вопросов', points: getQuizPoints(104), maxPoints: 40, quizId: 104, buttonLabel: getQuizStatus(104) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(104) === 'В процессе' ? 'Продолжить' : 'Пройти') },
-  { id: 3, title: 'Как выбрать брокера?', description: 'Критерии выбора надежного брокера', status: getQuizStatus(105), questions: '4 вопросов', points: getQuizPoints(105), maxPoints: 40, quizId: 105, buttonLabel: getQuizStatus(105) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(105) === 'В процессе' ? 'Продолжить' : 'Пройти') }
+  { id: 1, title: 'Акции — подробный разбор', description: 'Как работают акции и дивиденды', status: getQuizStatus(103), questions: '8 вопросов', points: getQuizPoints(103), maxPoints: 80, quizId: 103, buttonLabel: getQuizStatus(103) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(103) === 'В процессе' ? 'Продолжить' : 'Пройти') },
+  { id: 2, title: 'Облигации — подробный разбор', description: 'Как работают облигации и купоны', status: getQuizStatus(104), questions: '8 вопросов', points: getQuizPoints(104), maxPoints: 80, quizId: 104, buttonLabel: getQuizStatus(104) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(104) === 'В процессе' ? 'Продолжить' : 'Пройти') },
+  { id: 3, title: 'Инвестиционные фонды (ETF и ПИФы)', description: 'Как работают фонды и их преимущества', status: getQuizStatus(105), questions: '8 вопросов', points: getQuizPoints(105), maxPoints: 80, quizId: 105, buttonLabel: getQuizStatus(105) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(105) === 'В процессе' ? 'Продолжить' : 'Пройти') }
 ];
 
 const module3Cards = [
-  { id: 1, title: 'Виды кредитов', description: 'Потребительский, ипотека, автокредит', status: getQuizStatus(106), questions: '4 вопросов', points: getQuizPoints(106), maxPoints: 40, quizId: 106, buttonLabel: getQuizStatus(106) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(106) === 'В процессе' ? 'Продолжить' : 'Пройти') },
-  { id: 2, title: 'Налоговые вычеты', description: 'Как вернуть часть уплаченных налогов', status: getQuizStatus(107), questions: '4 вопросов', points: getQuizPoints(107), maxPoints: 40, quizId: 107, buttonLabel: getQuizStatus(107) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(107) === 'В процессе' ? 'Продолжить' : 'Пройти') }
+  { id: 1, title: 'Как собрать инвестиционный портфель', description: 'Принципы формирования портфеля', status: getQuizStatus(106), questions: '8 вопросов', points: getQuizPoints(106), maxPoints: 80, quizId: 106, buttonLabel: getQuizStatus(106) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(106) === 'В процессе' ? 'Продолжить' : 'Пройти') },
+  { id: 2, title: 'Горизонт инвестирования', description: 'Как выбрать стратегию в зависимости от срока', status: getQuizStatus(107), questions: '8 вопросов', points: getQuizPoints(107), maxPoints: 80, quizId: 107, buttonLabel: getQuizStatus(107) === 'Пройдено' ? 'Перепройти' : (getQuizStatus(107) === 'В процессе' ? 'Продолжить' : 'Пройти') }
 ];
 
   return (
@@ -1374,7 +1836,7 @@ const module3Cards = [
                   </div>
                   
                   <button className={`quiz-action-btn ${quiz.status === 'Пройдено' ? 'completed' : quiz.status === 'В процессе' ? 'in-progress' : ''}`}>
-                    {quiz.status === 'Пройдено' ? 'Перепройти' : quiz.status === 'В процессе' ? 'Продолжить' : 'Пройти'}
+                    {quiz.status === 'Пройдено' ? 'Перепройти ↻' : quiz.status === 'В процессе' ? 'Продолжить' : 'Пройти'}
                   </button>
                 </div>
               ))}

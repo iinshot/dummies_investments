@@ -47,6 +47,7 @@ async def create_user(
         about=about
     )
 
+
 @router.put("/{id_user}")
 async def update_user(
         id_user: int,
@@ -56,21 +57,19 @@ async def update_user(
         phone: Optional[str] = None,
         about: Optional[str] = None,
         email: Optional[str] = None,
+        points: Optional[int] = None,          # ← ДОБАВИТЬ
+        quiz_rating: Optional[dict] = None,     # ← ДОБАВИТЬ
         db: AsyncSession = Depends(get_db)
 ):
     kwargs = {}
-    if name is not None:
-        kwargs["name"] = name
-    if surname is not None:
-        kwargs["surname"] = surname
-    if patronymic is not None:
-        kwargs["patronymic"] = patronymic
-    if phone is not None:
-        kwargs["phone"] = phone
-    if about is not None:
-        kwargs["about"] = about
-    if email is not None:
-        kwargs["email"] = email
+    if name is not None: kwargs["name"] = name
+    if surname is not None: kwargs["surname"] = surname
+    if patronymic is not None: kwargs["patronymic"] = patronymic
+    if phone is not None: kwargs["phone"] = phone
+    if about is not None: kwargs["about"] = about
+    if email is not None: kwargs["email"] = email
+    if points is not None: kwargs["points"] = points           # ← ДОБАВИТЬ
+    if quiz_rating is not None: kwargs["quiz_rating"] = quiz_rating  # ← ДОБАВИТЬ
 
     if not kwargs:
         raise HTTPException(status_code=400, detail="No fields to update")
@@ -130,3 +129,19 @@ async def get_progress(
         return {"id_article": id_article, "is_read": False, "last_checkpoint": 0 }
     
     return {"id_article": id_article, "is_read": user_article.is_read, "last_checkpoint": user_article.last_checkpoint }
+
+@router.get("/me")
+async def get_me(
+    user: User = Depends(get_current_user)
+):
+    """Получить данные текущего пользователя"""
+    return {
+        "id_user": user.id_user,
+        "name": user.name,
+        "email": user.email,
+        "points": user.points,
+        "surname": user.surname,
+        "patronymic": user.patronymic,
+        "phone": user.phone,
+        "about": user.about
+    }

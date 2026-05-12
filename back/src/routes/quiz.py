@@ -115,7 +115,17 @@ async def answer_question(
     db.add(user_quiz_answer)
     await db.commit()
     return {}
-
+@router.get("/{id_quiz}/questions")
+async def get_quiz_questions(
+    id_quiz: int,
+    db: AsyncSession = Depends(get_db)
+):
+    stmt = select(QuizQuestion).where(QuizQuestion.id_quiz == id_quiz).options(
+        selectinload(QuizQuestion.question)
+    )
+    result = await db.execute(stmt)
+    quiz_questions = result.scalars().all()
+    return [qq.question for qq in quiz_questions]
 @router.get("/get_next_question/{id_quiz}")
 async def get_next_question(
         id_quiz: int,

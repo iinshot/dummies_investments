@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { IconArrowLeft, IconCheck } from '@tabler/icons-react';
 import CircularProgress from '../components/CircularProgress';
 import QuizIcon from '../assets/icons/quiz.svg';
-import { setArticleProgress } from '../services/api';
 import CheckIcon from '../assets/icons/check.svg';
 import {  Рисунок1,Рисунок2,Рисунок3,Рисунок4,Рисунок10,Рисунок11,
     Рисунок12,Рисунок13,Рисунок14,Рисунок15,Рисунок16,Рисунок17,Рисунок18,Рисунок19,Рисунок20,Рисунок21,Рисунок22,Рисунок23,Рисунок24,Рисунок25,Рисунок26,Рисунок30,Рисунок31 } from '../assets/articleimage';
@@ -13,6 +12,8 @@ import ArrowRightIcon from '../assets/icons/arrow_right.svg';
 import './ArticleTypography.css';
 import './ArticlePage.css';
 import ArrowLeftIcon from '../assets/icons/arrow_left.svg'; 
+import { progressAPI, questionsAPI } from '../services/api';
+
 const ArticlePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -34,6 +35,9 @@ const ArticlePage = () => {
   const [animateDirection, setAnimateDirection] = useState('');
   const [isAnimating, setIsAnimating] = useState(false);
   const [resultsAnimation, setResultsAnimation] = useState(false);
+  // Состояния для вопросов с сервера
+const [serverQuestions, setServerQuestions] = useState([]);
+const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
 // Добавьте эту функцию после всех useState
 const isCurrentArticleCompleted = () => {
   const articleId = parseInt(id);
@@ -390,33 +394,82 @@ const quizzesData = {
 };
 
 // Получаем тест для текущей статьи
+// Получаем тест для текущей статьи (локальные данные как fallback)
 const currentQuiz = quizzesData[parseInt(id)] || quizzesData[1];
-const [totalQuestions, setTotalQuestions] = useState(currentQuiz.totalQuestions);
-const [questions, setQuestions] = useState(currentQuiz.questions);
+
+// Используем серверные вопросы, если есть, иначе локальные
+const effectiveQuestions = serverQuestions.length > 0 ? serverQuestions : currentQuiz.questions;
+const effectiveTotalQuestions = serverQuestions.length > 0 ? serverQuestions.length : currentQuiz.totalQuestions;
+
+const [totalQuestions, setTotalQuestions] = useState(effectiveTotalQuestions);
+const [questions, setQuestions] = useState(effectiveQuestions);
 const [quizOptions, setQuizOptions] = useState([]);
 const [savedAnswers, setSavedAnswers] = useState({});
+// Загрузка вопросов с сервера для текущей статьи
+// Замените существующий useEffect для загрузки вопросов на этот:
 
+// Загрузка вопросов с сервера для текущей статьи
+// В ArticlePage.js, замените useEffect для загрузки вопросов:
+
+useEffect(() => {
+  const loadQuizFromServer = async () => {
+    setIsLoadingQuestions(true);
+    try {
+      console.log(`🔄 Загружаем викторину для статьи ${id} с сервера...`);
+      
+      // Используем прямой запрос к вопросам по id_article
+      const quizData = await questionsAPI.getFullQuizForArticle(parseInt(id));
+      
+      if (quizData && quizData.questions.length > 0) {
+        console.log('📝 Вопросы с сервера:', quizData);
+        setServerQuestions(quizData.questions);
+        console.log('📝 serverQuestions (установлены):', quizData.questions);
+      } else {
+        console.log('ℹ️ Вопросы для этой статьи не найдены на сервере, используем локальные данные');
+        setServerQuestions([]);
+      }
+    } catch (error) {
+      console.error('❌ Ошибка загрузки викторины:', error);
+      setServerQuestions([]);
+    } finally {
+      setIsLoadingQuestions(false);
+    }
+  };
+  
+  loadQuizFromServer();
+}, [id]);
+
+useEffect(() => {
+  console.log('🔄 serverQuestions изменились:', serverQuestions);
+}, [serverQuestions]);
+
+useEffect(() => {
+  console.log('🔄 questions изменились:', questions);
+}, [questions]);
 // Эффект для сброса теста при смене статьи
 useEffect(() => {
-  const newQuiz = quizzesData[parseInt(id)] || quizzesData[1];
-  setTotalQuestions(newQuiz.totalQuestions);
-  setQuestions(newQuiz.questions);
-  // Сброс состояний теста
+  const newLocalQuiz = quizzesData[parseInt(id)] || quizzesData[1];
+  const useServer = serverQuestions.length > 0;
+  
+  setTotalQuestions(useServer ? serverQuestions.length : newLocalQuiz.totalQuestions);
+  setQuestions(useServer ? serverQuestions : newLocalQuiz.questions);
+  
   setCurrentQuestion(0);
   setQuizCompleted(false);
   setShowResults(false);
   setQuizScore(0);
   setResultsAnimation(false);
   setSavedAnswers({});
-  // Инициализируем пустые опции для первого вопроса
-  if (newQuiz.questions[0]) {
-    setQuizOptions(newQuiz.questions[0].options.map(opt => ({ 
+  
+  const firstQuestions = useServer ? serverQuestions : newLocalQuiz.questions;
+  if (firstQuestions && firstQuestions[0]) {
+    setQuizOptions(firstQuestions[0].options.map(opt => ({ 
       id: opt.id, 
       text: opt.text, 
       checked: false 
     })));
   }
-}, [id]);
+}, [id, serverQuestions]);
 
   // ============ ФУНКЦИИ ДЛЯ ПРОГРЕССА СТАТЕЙ ============
   
@@ -430,7 +483,88 @@ useEffect(() => {
     }
     return {};
   };
-
+// Загрузка прогресса с сервера при монтировании
+useEffect(() => {
+  const loadServerProgress = async () => {
+    const token = localStorage.getItem('access_token');
+    console.log('🔍 Токен авторизации:', token ? 'Есть' : 'Нет');
+    
+    if (!token) {
+      console.log('ℹ️ Пользователь не авторизован, используем только localStorage');
+      // Неавторизованный пользователь - берем данные из localStorage
+      const savedProgress = localStorage.getItem('articleProgress');
+      if (savedProgress) {
+        const progressData = JSON.parse(savedProgress);
+        setArticlesProgress(progressData);
+        
+        const currentProgress = progressData[parseInt(id)] || 0;
+        if (currentProgress > maxProgressRef.current) {
+          maxProgressRef.current = currentProgress;
+          setReadingProgress(currentProgress);
+        }
+      }
+      return;
+    }
+    
+    try {
+      console.log('🔄 Загружаем прогресс с сервера...');
+      const serverData = await progressAPI.getAllProgress();
+      console.log('📦 Данные с сервера:', serverData);
+      
+      // Парсим данные с сервера
+      const serverProgress = {};
+      if (serverData && serverData.articles && serverData.articles[0]) {
+        serverData.articles[0].forEach(article => {
+          if (article.is_read) {
+            serverProgress[article.id_article] = 100;
+          } else if (article.last_checkpoint > 0) {
+            serverProgress[article.id_article] = article.last_checkpoint;
+          }
+        });
+      }
+      
+      // Загружаем локальные данные
+      const savedLocalProgress = localStorage.getItem('articleProgress');
+      const localProgress = savedLocalProgress ? JSON.parse(savedLocalProgress) : {};
+      
+      // Серверные данные имеют ПРИОРИТЕТ (перекрывают локальные)
+      const mergedProgress = { ...localProgress, ...serverProgress };
+      
+      console.log('🔄 Объединенный прогресс (сервер приоритетнее):', mergedProgress);
+      
+      // Сохраняем в localStorage
+      localStorage.setItem('articleProgress', JSON.stringify(mergedProgress));
+      setArticlesProgress(mergedProgress);
+      
+      // Обновляем текущий прогресс статьи
+      const currentArticleProgress = mergedProgress[parseInt(id)] || 0;
+      if (currentArticleProgress > maxProgressRef.current) {
+        maxProgressRef.current = currentArticleProgress;
+        setReadingProgress(currentArticleProgress);
+        
+        // Прокручиваем к сохраненному прогрессу
+        if (currentArticleProgress > 0 && containerRef.current) {
+          const scrollHeight = containerRef.current.scrollHeight;
+          const clientHeight = containerRef.current.clientHeight;
+          const maxScroll = scrollHeight - clientHeight;
+          const targetScroll = (currentArticleProgress / 100) * maxScroll;
+          containerRef.current.scrollTop = targetScroll;
+        }
+      }
+      
+    } catch (error) {
+      console.error('❌ Ошибка загрузки прогресса с сервера:', error);
+      // При ошибке используем только локальные данные
+      const savedProgress = localStorage.getItem('articleProgress');
+      if (savedProgress) {
+        const progressData = JSON.parse(savedProgress);
+        setArticlesProgress(progressData);
+      }
+    }
+  };
+  
+  loadServerProgress();
+}, [id]); // Зависит от id, чтобы перезагружать при смене статьи
   // Сохраняем прогресс в localStorage
 const saveProgressToStorage = (articleId, progress) => {
   const savedProgress = localStorage.getItem('articleProgress');
@@ -459,18 +593,45 @@ const saveProgressToStorage = (articleId, progress) => {
     return progress;
   };
 
-  // Обновляем прогресс статьи
+const saveProgressToServer = async (articleId, progress) => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    
+    try {
+      const isRead = progress >= 100;
+      await progressAPI.setArticleProgress(articleId, progress, isRead);
+      console.log(`✅ Прогресс статьи ${articleId} отправлен на сервер: ${progress}%`);
+    } catch (error) {
+      console.error(`❌ Ошибка отправки прогресса статьи ${articleId}:`, error);
+    }
+  };
 
 
-const updateArticleProgress = (articleId, progress) => {
+const updateArticleProgress = async (articleId, progress) => {
   // Получаем текущий сохраненный прогресс
   const currentProgress = articlesProgress[articleId] || 0;
   
   // Сохраняем прогресс только если он увеличился или достиг 100%
   if (progress > currentProgress || progress === 100) {
+    console.log(`💾 Сохраняем прогресс статьи ${articleId}: ${progress}%`);
+    
+    // Сохраняем в localStorage
     saveProgressToStorage(articleId, progress);
     emitProgressUpdate(articleId, progress);
-  } else {
+    
+    // Отправляем на сервер, если пользователь авторизован
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      const isRead = progress >= 100;
+      try {
+        await progressAPI.setArticleProgress(articleId, progress, isRead);
+        console.log(`✅ Прогресс статьи ${articleId} отправлен на сервер: ${progress}%`);
+      } catch (error) {
+        console.error(`❌ Ошибка отправки прогресса статьи ${articleId} на сервер:`, error);
+      }
+    } else {
+      console.log(`💾 Прогресс сохранен только в localStorage (пользователь не авторизован)`);
+    }
   }
 };
   // Загружаем прогресс при монтировании
@@ -479,18 +640,21 @@ const updateArticleProgress = (articleId, progress) => {
   }, []);
 
   // Слушаем события обновления прогресса из других вкладок/компонентов
-  useEffect(() => {
-    const handleProgressUpdate = (event) => {
-      const { articleId, progress } = event.detail;
-      setArticlesProgress(prev => ({
-        ...prev,
-        [articleId]: progress
-      }));
-    };
-    
-    window.addEventListener('articleProgressUpdate', handleProgressUpdate);
-    return () => window.removeEventListener('articleProgressUpdate', handleProgressUpdate);
-  }, []);
+useEffect(() => {
+  const handleProgressUpdate = (event) => {
+    const { articleId, progress } = event.detail;
+    if (articleId === parseInt(id)) {
+      setReadingProgress(progress);
+      if (progress > maxProgressRef.current) {
+        maxProgressRef.current = progress;
+      }
+    }
+    setArticlesProgress(prev => ({ ...prev, [articleId]: progress }));
+  };
+  
+  window.addEventListener('articleProgressUpdate', handleProgressUpdate);
+  return () => window.removeEventListener('articleProgressUpdate', handleProgressUpdate);
+}, [id]);
 
   // ============ ФУНКЦИИ ДЛЯ ПРОГРЕССА ЧТЕНИЯ ТЕКУЩЕЙ СТАТЬИ ============
   
@@ -513,15 +677,16 @@ const updateArticleProgress = (articleId, progress) => {
 // Обработчик скролла для сохранения прогресса и определения активной секции
 useEffect(() => {
   const handleScroll = () => {
-    if (!containerRef.current) return;
-    
-    const progress = calculateReadingProgress();
+  if (!containerRef.current) return;
+  
+  const progress = calculateReadingProgress();
+  
+  // 🔥 Обновляем прогресс ТОЛЬКО если он вырос
+  if (progress > maxProgressRef.current) {
+    maxProgressRef.current = progress;
     setReadingProgress(progress);
-    
-    if (progress > maxProgressRef.current) {
-      maxProgressRef.current = progress;
-      updateArticleProgress(parseInt(id), progress);
-    }
+    updateArticleProgress(parseInt(id), progress);
+  }
     
     // Определение активной секции для CONTENTS
     const scrollTop = containerRef.current.scrollTop;
@@ -595,7 +760,46 @@ useEffect(() => {
       updateArticleProgress(parseInt(id), maxProgressRef.current);
     };
   }, [id]);
-
+// Синхронизация с сервером при загрузке страницы
+useEffect(() => {
+  const syncWithServer = async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return;
+    
+    try {
+      const serverProgress = await progressAPI.getAllProgress();
+      if (serverProgress && serverProgress.articles && serverProgress.articles[0]) {
+        const serverData = {};
+        serverProgress.articles[0].forEach(article => {
+          if (article.is_read) {
+            serverData[article.id_article] = 100;
+          } else if (article.last_checkpoint > 0) {
+            serverData[article.id_article] = article.last_checkpoint;
+          }
+        });
+        
+        // Объединяем с локальными данными (серверные данные приоритетнее)
+        const savedProgress = localStorage.getItem('articleProgress');
+        const localData = savedProgress ? JSON.parse(savedProgress) : {};
+        const mergedData = { ...localData, ...serverData };
+        
+        localStorage.setItem('articleProgress', JSON.stringify(mergedData));
+        setArticlesProgress(mergedData);
+        
+        // Обновляем максимальный прогресс для текущей статьи
+        const currentArticleProgress = mergedData[parseInt(id)] || 0;
+        if (currentArticleProgress > maxProgressRef.current) {
+          maxProgressRef.current = currentArticleProgress;
+          setReadingProgress(currentArticleProgress);
+        }
+      }
+    } catch (error) {
+      console.error('Ошибка синхронизации с сервером:', error);
+    }
+  };
+  
+  syncWithServer();
+}, [id]);
   // ============ ОСТАЛЬНЫЕ ФУНКЦИИ ============
   
   const handleBack = () => {
@@ -1208,7 +1412,15 @@ const getContentsItemType = (index) => {
       containerRef.current.scrollTo({ top: offsetTop, behavior: 'smooth' });
     }
   };
-
+// Добавьте прямо перед return (примерно в районе 1200-1300 строки)
+console.log('========== ОТЛАДКА ВИКТОРИНЫ ==========');
+console.log('questions:', questions);
+console.log('questions.length:', questions?.length);
+console.log('currentQuestion:', currentQuestion);
+console.log('currentQ:', questions?.[currentQuestion]);
+console.log('totalQuestions:', totalQuestions);
+console.log('quizCompleted:', quizCompleted);
+console.log('========================================');
   return (
     <div className="article-layout">
       {/* Левая часть - контент статьи */}
@@ -1426,13 +1638,15 @@ const getContentsItemType = (index) => {
                 <div className="module-article-title">{article.title}</div>
               </div>
             </div>
-            {isCompleted ? (
-              <div className="module-article-check completed">
-                <IconCheck size={14} className="check-icon" />
-              </div>
-            ) : (
-              <CircularProgress progress={articleProgress} size={20} completed={false} />
-            )}
+{isCompleted ? (
+  <div className="module-article-check completed">
+    <IconCheck size={14} className="check-icon" />
+  </div>
+) : article.id === parseInt(id) && readingProgress > 0 && readingProgress < 100 ? (
+  <CircularProgress progress={readingProgress} size={20} />
+) : (
+  <CircularProgress progress={articleProgress} size={20} />
+)}
           </div>
         );
       })}

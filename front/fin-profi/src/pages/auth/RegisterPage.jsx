@@ -24,61 +24,63 @@ const API_BASE_URL = '/api';
     setTimeout(() => setError(''), 3000);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      setError('Пароли не совпадают');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (password !== confirmPassword) {
+    setError('Пароли не совпадают');
+    clearError();
+    return;
+  }
+
+  if (password.length < 6) {
+    setError('Пароль должен содержать минимум 6 символов');
+    clearError();
+    return;
+  }
+
+  setIsLoading(true);
+  setError('');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: username,
+        email: email,
+        password: password,
+        phone: null,
+        surname: null,
+        patronymic: null,
+        about: null
+      }),
+      credentials: 'include'
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      saveTokens(data.access_token, data.refresh_token);
+      console.log('✅ Регистрация выполнена успешно');
+      
+      // 🔥 Ставим флаг "только что зарегистрировались"
+      sessionStorage.setItem('justRegistered', 'true');
+      
+      window.dispatchEvent(new CustomEvent('authChange', { detail: { isAuthenticated: true } }));
+      navigate('/');
+    } else {
+      setError(data.detail || 'Ошибка регистрации. Попробуйте другой email');
       clearError();
-      return;
     }
-
-    if (password.length < 6) {
-      setError('Пароль должен содержать минимум 6 символов');
-      clearError();
-      return;
-    }
-
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: username,
-          email: email,
-          password: password,
-          phone: null,
-          surname: null,
-          patronymic: null,
-          about: null
-        }),
-        credentials: 'include'
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        saveTokens(data.access_token, data.refresh_token);
-        // Отправляем событие об успешной авторизации
-        window.dispatchEvent(new CustomEvent('authChange', { detail: { isAuthenticated: true } }));
-        navigate('/');
-      } else {
-        setError(data.detail || 'Ошибка регистрации. Попробуйте другой email');
-        clearError();
-      }
-    } catch (err) {
-      console.error('Ошибка при регистрации:', err);
-      setError('Не удалось подключиться к серверу. Попробуйте позже.');
-      clearError();
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  } catch (err) {
+    console.error('Ошибка при регистрации:', err);
+    setError('Не удалось подключиться к серверу. Попробуйте позже.');
+    clearError();
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);

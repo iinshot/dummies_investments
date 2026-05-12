@@ -2,17 +2,22 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from crud import question as question_crud
 from db.session import get_db
+from typing import Optional
 from models.Question import QuestionType
 
 router = APIRouter(prefix="/questions", tags=["questions"])
 
 @router.get("/")
-async def get_all_questions(
-        skip: int = Query(0, ge=0),
-        limit: int = Query(100, ge=1, le=1000),
-        db: AsyncSession = Depends(get_db)
+async def get_questions(
+    id_article: Optional[int] = None,
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    db: AsyncSession = Depends(get_db)
 ):
-    questions = await question_crud.get_all_questions(db, skip=skip, limit=limit)
+    if id_article:
+        questions = await question_crud.get_questions_by_article(db, id_article=id_article, skip=skip, limit=limit)
+    else:
+        questions = await question_crud.get_all_questions(db, skip=skip, limit=limit)
     return questions
 
 @router.get("/{id_question}")
