@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, delete
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from crud import quiz as quiz_crud
@@ -65,11 +65,14 @@ async def start_quiz(id_quiz: int, user: User = Depends(get_current_user), db: A
         raise HTTPException(status_code=404, detail=f"Quiz {id_quiz} not found")
     user_quiz = await db.get(UserQuiz, (user.id_user, id_quiz))
     if(user_quiz):
-        raise HTTPException(status_code=400, detail=f"Quiz {id_quiz} had already been started")
-    user_quiz = UserQuiz(id_user = user.id_user, id_quiz = id_quiz)
-    db.add(user_quiz)
+        user_quiz.is_completed = False
+    else:
+        user_quiz = UserQuiz(id_user = user.id_user, id_quiz = id_quiz)
+        db.add(user_quiz)
+    stmt_qq = delete(UserQuizAnswer).where(UserQuizAnswer.id_user == user.id_user, UserQuizAnswer.id_quiz == id_quiz)
+    result_qq = await db.execute(stmt_qq)
     await db.commit()
-    return {user_quiz}
+    return {"user_quiz": user_quiz, "quiz": quiz}
 
 
 @router.post("/answer_question/{id_quiz}/{id_answer}")

@@ -11,6 +11,7 @@ from routes.quiz import router as module_quiz
 from routes.article import router as module_article
 from routes.user import router as module_user
 from routes.auth import router as module_auth
+from routes.calculator import router as calculator
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,7 +30,7 @@ origins = [
     "http://127.0.0.1:4200",
 ]
 
-app = FastAPI(lifespan=lifespan)  # Уберите root_path="/api"
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,7 +40,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ДОБАВЬТЕ ПРЕФИКС /api КО ВСЕМ РОУТЕРАМ
 app.include_router(module_module, prefix="/api")
 app.include_router(module_answer, prefix="/api")
 app.include_router(module_question, prefix="/api")
@@ -47,6 +47,7 @@ app.include_router(module_quiz, prefix="/api")
 app.include_router(module_article, prefix="/api")
 app.include_router(module_user, prefix="/api")
 app.include_router(module_auth, prefix="/api")
+app.include_router(calculator, prefix="/api")  # ДОБАВЛЕН КАЛЬКУЛЯТОР
 
 @app.get("/")
 async def root():
