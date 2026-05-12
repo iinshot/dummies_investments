@@ -63,6 +63,14 @@ async def update_user(session: AsyncSession, id_user: int, **kwargs) -> Optional
     await session.commit()
     await session.refresh(user)
     return user
+async def get_article(session: AsyncSession, id_article: int) -> Optional[Article]:
+    """Получение статьи по ID"""
+    query = select(Article).where(Article.id_article == id_article)
+    result = await session.execute(query)
+    return result.scalar_one_or_none()
+async def get_users_count(session: AsyncSession) -> int:
+    result = await session.execute(select(func.count()).select_from(User))
+    return result.scalar()
 
 async def delete_user(session: AsyncSession, id_user: int) -> bool:
     query = delete(User).where(User.id_user == id_user)

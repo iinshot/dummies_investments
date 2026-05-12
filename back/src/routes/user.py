@@ -22,7 +22,10 @@ async def get_me(user: User = Depends(get_current_user)):
         "surname": user.surname, "patronymic": user.patronymic,
         "phone": user.phone, "about": user.about
     }
-
+@router.get("/users_count")
+async def get_users_count_route(db: AsyncSession = Depends(get_db)):
+    count = await user_crud.get_users_count(db)
+    return {"count": count}
 @router.get("/get_total_progress/")
 async def get_total_progress(user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     stmt = select(UserArticle).where(UserArticle.id_user == user.id_user)
@@ -79,7 +82,11 @@ async def update_user(id_user: int, name: Optional[str] = None, surname: Optiona
     if about is not None: kwargs["about"] = about
     if email is not None: kwargs["email"] = email
     if points is not None: kwargs["points"] = points
-    if quiz_rating is not None: kwargs["quiz_rating"] = quiz_rating
+    if quiz_rating is not None:
+        kwargs["quiz_rating"] = quiz_rating
+        # 🔥 Если points не передан явно — берем из quiz_rating
+        if points is None:
+            kwargs["points"] = quiz_rating.get("points") or quiz_rating.get("totalPoints") or 0
     if not kwargs:
         raise HTTPException(status_code=400, detail="No fields to update")
     user = await user_crud.update_user(db, id_user=id_user, **kwargs)
@@ -118,3 +125,5 @@ async def get_user_activity(id_user: int, db: AsyncSession = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return await user_crud.get_user_activity(db, id_user=id_user)
+
+

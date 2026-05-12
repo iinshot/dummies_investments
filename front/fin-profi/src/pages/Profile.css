@@ -185,3 +185,13 @@
 .activity-card .points > svg {
     fill: var(--primary-yellow);
 }
+/* Отступ между контентом и сайдбаром */
+.content-container {
+    margin-right: 20px;
+}
+
+/* Или если используется flex/gap на родителе */
+.profile-layout,  /* или как называется родительский контейнер */
+.main-layout {
+    gap: 20px;
+}

@@ -1,7 +1,7 @@
 @import url('../constants/colors.css');
 
 .sidebar-container {
-    width: 300px;
+    width: 380px;
     border-radius: 30px;
     background-color: var(--background);
     display: flex;

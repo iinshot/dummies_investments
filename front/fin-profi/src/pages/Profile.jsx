@@ -14,6 +14,9 @@ export default function Profile() {
   const [isEditing, setIsEditing] = useState(false)
   const [credentials, setCredentials] = useState({})
   const [activity, setActivity] = useState(null)
+  const [totalUsers, setTotalUsers] = useState(0)
+  const [userPoints, setUserPoints] = useState(0)
+  const [quizPoints, setQuizPoints] = useState(0)
   const [statistics, setStatistics] = useState({
     articles: {
       user_progress: 0,
@@ -37,79 +40,124 @@ export default function Profile() {
   const nextUser = rating?.at(-2)
   const user = rating?.at(-1)
 
-  async function loadCredentials(id) {
-    try {
-      const response = await fetch(`${BASE_URL}/api/users/${id}`)
-      const data = await response.json()
+async function loadCredentials(id) {
+  try {
+    const response = await fetch(`/api/users/${id}`)
+    const data = await response.json()
+    setCredentials(data)
+  } catch (e) {
+    console.error(e)
+  }
+}
 
-      setCredentials(data)
-    } catch (e) {
-      console.error(e)
+async function updateCredentials(id) {
+  try {
+    const response = await fetch(`/api/users/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(credentials)
+    })
+  } catch (e) {
+    console.error(e)
+  }
+}
+async function loadActivity(id) {
+  try {
+    const response = await fetch(`/api/users/${id}/activity`)
+    const data = await response.json()
+    setActivity(data)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+async function loadStatistics(id) {
+  try {
+    const [statsRes, userRes] = await Promise.all([
+      fetch(`/api/users/${id}/statistics`),
+      fetch(`/api/users/${id}`)
+    ]);
+    const data = await statsRes.json();
+    const userData = await userRes.json();
+    
+    setStatistics(data);
+    
+    // 🔥 Очки ТОЛЬКО из quiz_rating и statistics (НЕ суммируем с user.points)
+    const quizPointsFromQR = userData.quiz_rating?.totalPoints || 
+                             userData.quiz_rating?.points || 
+                             data.quizzes.user_progress * POINTS_PER_QUIZ;
+    
+    const articlePoints = data.articles.user_progress * POINTS_PER_ARTICLE;
+    
+    setUserPoints(articlePoints + quizPointsFromQR);
+    setQuizPoints(quizPointsFromQR);
+    
+    // 🔥 НЕ обновляем БД здесь — это вызывает бесконечный рост
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function loadRating(id) {
+  try {
+    const response = await fetch(`/api/users/${id}/rating`)
+    const data = await response.json()
+    setRating(data.map((dataObj, index) => ({
+      id: dataObj.id_user,
+      name: dataObj.name,
+      points: dataObj.points
+    })))
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+useEffect(() => {
+  const id = userId || currentUserId;
+  
+  if (!id || id === 'undefined' || id === 'null') {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        loadCredentials(payload.id_user);
+        loadActivity(payload.id_user);
+        loadStatistics(payload.id_user);
+        loadRating(payload.id_user);
+      } catch(e) {}
+    }
+    return;
+  }
+
+  // Только загружаем данные, без синхронизации
+  loadCredentials(id);
+  loadActivity(id);
+  loadStatistics(id);
+  loadRating(id);
+}, [userId, currentUserId]);
+
+
+useEffect(() => {
+  fetch('/api/users/users_count')
+    .then(r => r.json())
+    .then(d => setTotalUsers(d.count))
+}, [])
+// В Profile.jsx добавьте этот useEffect:
+useEffect(() => {
+  const handleFocus = () => {
+    const id = userId || currentUserId || localStorage.getItem('id')
+    if (id) {
+      loadStatistics(id)
+      loadActivity(id)
+      loadRating(id)
     }
   }
 
-  async function updateCredentials(id) {
-    try {
-      const params = new URLSearchParams(credentials).toString()
-      const response = await fetch(`${BASE_URL}/api/users/${id}?${params}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  async function loadActivity(id) {
-    try {
-      const response = await fetch(`${BASE_URL}/api/users/${id}/activity`)
-      const data = await response.json()
-
-      setActivity(data)
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  async function loadStatistics(id) {
-    try {
-      const response = await fetch(`${BASE_URL}/api/users/${id}/statistics`)
-      const data = await response.json()
-
-      setStatistics(data)
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  async function loadRating(id) {
-    try {
-      const response = await fetch( `${BASE_URL}/api/users/${id}/rating`)
-      const data = await response.json()
-
-      setRating(data.map((dataObj, index) => {
-        return {
-          id: dataObj.id_user,
-          name: dataObj.name,
-          points: dataObj.points
-        }
-      }))
-    } catch (e) {
-      console.error(e)
-    }
-  }
-
-  useEffect(() => {
-    loadCredentials(userId)
-    loadActivity(userId)
-    loadStatistics(userId)
-    loadRating(currentUserId)
-
-    console.log(currentUserId)
-  }, [])
-
+  window.addEventListener('focus', handleFocus)
+  return () => window.removeEventListener('focus', handleFocus)
+}, [userId, currentUserId])
   useEffect(() => {
     if (!rating) return
 
@@ -145,7 +193,9 @@ export default function Profile() {
 
     return () => window.removeEventListener('keydown', handleEnterKey)
   }, [isEditing, credentials])
-
+console.log('📊 userPoints:', userPoints, 'quizPoints:', quizPoints, 
+            'articles:', statistics.articles.user_progress,
+            'sum:', (userPoints || 0) + (quizPoints || 0));
   return (
     <>
       <Content>
@@ -207,9 +257,9 @@ export default function Profile() {
             </div>
             :
             <div className="expand-button-group">
-              {userId == currentUserId && <ExpandButton
-                icon={<Exit />}
-                text="Выйти"
+{userId == currentUserId || (!userId && currentUserId) && <ExpandButton
+  icon={<Exit />}
+  text="Выйти"
                 onClick={() => {
                   localStorage.clear()
                   setAuth(AUTH.GUEST)
@@ -246,22 +296,22 @@ export default function Profile() {
           className="statistics"
           shrink
         >
-          <StatisticsCard
-            sectionProps={{
-              text: "Общий прогресс",
-              icon: <Energy height={10} width={10} />,
-              className: "quizes"
-            }}
-            progress={(statistics.articles.user_progress + statistics.quizzes.user_progress) / (statistics.articles.all_count + statistics.quizzes.all_count) * 100}
-            value={statistics.articles.user_progress + statistics.quizzes.user_progress}
-            data={[
-              {
-                text: "Всего очков",
-                value: statistics.articles.user_progress * POINTS_PER_ARTICLE + statistics.quizzes.user_progress * POINTS_PER_QUIZ
-              }
-            ]}
-            dark
-          />
+<StatisticsCard
+  sectionProps={{
+    text: "Общий прогресс",
+    icon: <Energy height={10} width={10} />,
+    className: "quizes"
+  }}
+  progress={(statistics.articles.user_progress + statistics.quizzes.user_progress) / (7 + 13) * 100}
+  value={statistics.articles.user_progress + statistics.quizzes.user_progress}
+  data={[
+    {
+      text: "Всего очков",
+      value: userPoints
+    }
+  ]}
+  dark
+/>  
 
           <StatisticsCard
             sectionProps={{
@@ -287,29 +337,29 @@ export default function Profile() {
             ]}
           />
 
-          <StatisticsCard
-            sectionProps={{
-              text: "Викторины",
-              icon: <CheckCircle height={10} width={10} />,
-              className: "quizes"
-            }}
-            progress={statistics.quizzes.user_progress / statistics.quizzes.all_count * 100}
-            value={statistics.quizzes.user_progress}
-            data={[
-              {
-                text: "Пройдено викторин",
-                value: statistics.quizzes.user_progress
-              },
-              {
-                text: "Осталось викторин",
-                value: statistics.quizzes.all_count - statistics.quizzes.user_progress
-              },
-              {
-                text: "Получено очков",
-                value: statistics.quizzes.user_progress * POINTS_PER_QUIZ
-              }
-            ]}
-          />
+<StatisticsCard
+  sectionProps={{
+    text: "Викторины",
+    icon: <CheckCircle height={10} width={10} />,
+    className: "quizes"
+  }}
+  progress={statistics.quizzes.user_progress / 13 * 100}  // ← всего 13 викторин
+  value={statistics.quizzes.user_progress}
+  data={[
+    {
+      text: "Пройдено викторин",
+      value: statistics.quizzes.user_progress
+    },
+    {
+      text: "Осталось викторин",
+      value: 13 - statistics.quizzes.user_progress  // ← 13 вместо statistics.quizzes.all_count
+    },
+    {
+      text: "Получено очков",
+      value: quizPoints
+    }
+  ]}
+/>
         </Section>
 
         <NamedSection
@@ -341,17 +391,17 @@ export default function Profile() {
         >
           <div className="rank-list">
             {rating && rating.slice(0, 8).map((user, index) => (
-              <RankCard
-                key={user.id}
-                highlight={
-                  clsx(
-                    index === 0 && "leader",
-                    index === rating.length - 1 && "you"
-                  )
-                }
-                index={index + 1}
-                user={user}
-                delay={0.025 * index}
+  <RankCard
+    key={user.id}
+    highlight={
+      clsx(
+        index === 0 && "leader",
+        String(user.id) === String(currentUserId) && "you"  // ← СРАВНИВАЕМ ID
+      )
+    }
+    index={index + 1}
+    user={user}
+    delay={0.025 * index}
               />
             ))}
 
@@ -384,10 +434,7 @@ export default function Profile() {
               style={{ color: COLORS.TEXT }}
               className="body"
             >Вы на {rating && rating.length}-м месте</span>
-            <span
-              style={{ color: COLORS.MID_GRAY }}
-              className="small"
-            >из 1 847 участников</span>
+            <span className="small">из {totalUsers} участников</span>
           </div>
         </NamedSection>
 

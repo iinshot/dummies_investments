@@ -1377,7 +1377,7 @@ useEffect(() => {
   saveToBackend();
 }, [userRating]);
   // Функция для сохранения завершения викторины
-const saveQuizProgress = (quizId, earnedPoints, totalPoints) => {
+const saveQuizProgress = async (quizId, earnedPoints, totalPoints) => {
   const existingResult = userRating.quizResults[quizId];
   const wasAlreadyCompleted = existingResult?.completed === true;
   const oldPoints = existingResult?.points || 0;
@@ -1387,20 +1387,16 @@ const saveQuizProgress = (quizId, earnedPoints, totalPoints) => {
   let bestPoints = earnedPoints;
   
   if (wasAlreadyCompleted) {
-    // Если викторина уже была пройдена, берем ЛУЧШИЙ результат
     bestPoints = Math.max(oldPoints, earnedPoints);
     const pointsDifference = bestPoints - oldPoints;
     
     if (pointsDifference > 0) {
-      // Если новый результат лучше, добавляем разницу
       newTotalPoints = userRating.totalPoints + pointsDifference;
     } else {
-      // Если новый результат хуже или равен, очки не меняются
       newTotalPoints = userRating.totalPoints;
     }
-    newCompletedQuizzes = userRating.completedQuizzes; // счетчик не меняется
+    newCompletedQuizzes = userRating.completedQuizzes;
   } else {
-    // Если викторина не была пройдена - просто добавляем очки
     newTotalPoints = userRating.totalPoints + earnedPoints;
     newCompletedQuizzes = userRating.completedQuizzes + 1;
   }
@@ -1434,8 +1430,45 @@ const saveQuizProgress = (quizId, earnedPoints, totalPoints) => {
   localStorage.setItem('quizRating', JSON.stringify(newRating));
   setUserRating(newRating);
   
-  // Для отладки
   console.log(`Викторина ${quizId}: старые очки=${oldPoints}, новые=${earnedPoints}, лучшие=${bestPoints}`);
+
+  // 🔥 Автоматическая синхронизация с бекендом
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id_user;
+
+      // 1. Начинаем викторину (игнорируем ошибку, если уже начата)
+      await fetch(`/api/quizzes/start_quiz/${quizId}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).catch(() => {});
+
+      // 2. Завершаем викторину (создает запись в UserQuiz)
+      await fetch(`/api/quizzes/end_quiz/${quizId}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      // 3. Сохраняем очки и quiz_rating в User
+      await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          points: newTotalPoints,
+          quiz_rating: newRating
+        })
+      });
+
+      console.log('✅ Все данные сохранены на бекенде');
+    } catch (error) {
+      console.error('❌ Ошибка синхронизации:', error);
+    }
+  }
 };
 
   // Список викторин для отображения

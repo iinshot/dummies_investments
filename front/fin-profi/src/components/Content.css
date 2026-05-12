@@ -10,7 +10,6 @@
     gap: 20px;
     flex: 1;
 }
-
 .content-container::-webkit-scrollbar {
     display: none;
 }
