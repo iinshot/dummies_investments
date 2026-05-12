@@ -9,7 +9,7 @@ export default function Register() {
   return (
     <Link
       onClick={() => {
-        localStorage.setItem("id", 2)
+        localStorage.setItem("id", 10)
         setAuth(AUTH.AUTHORIZED)
       }}
       to="/"
