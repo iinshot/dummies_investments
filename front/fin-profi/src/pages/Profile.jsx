@@ -1,24 +1,41 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useId, useRef, useState } from 'react'
 import { useAuth } from '../hooks'
-import { AUTH, BASE_URL, COLORS } from '../constants'
+import { AUTH, BASE_URL, COLORS, POINTS_PER_ARTICLE, POINTS_PER_QUIZ } from '../constants'
 import { Content, Section, NamedSection, SideBar, ContinueSection, ProgressBar, RankCard, ExpandButton, ProgressCircle, StatisticsCard, ActivityCard } from '../components'
-import { Cup, Invest, Pencil, Play, ProfileCircle, Star, Share, Check, X, CheckCircle, Article, Energy } from '../assets/icons'
-import { points, ranking, statistics, activity } from "../assets/data"
+import { Cup, Invest, Pencil, Play, ProfileCircle, Star, Share, Check, X, CheckCircle, Article, Energy, Exit } from '../assets/icons'
 import "./Profile.css"
 import clsx from 'clsx'
 import { delay } from 'framer-motion'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 export default function Profile() {
   const [auth, setAuth] = useAuth()
   const [copied, setCopied] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [credentials, setCredentials] = useState({})
+  const [activity, setActivity] = useState(null)
+  const [statistics, setStatistics] = useState({
+    articles: {
+      user_progress: 0,
+      all_count: 0
+    },
+    quizzes: {
+      user_progress: 0,
+      all_count: 0
+    }
+  })
+  const [rating, setRating] = useState(null)
   const scrollRef = useRef(null)
-  const { userId } = useParams()
 
-  const nextUser = ranking.at(-2)
-  const user = ranking.at(-1)
+  const activityContainerRef = useRef(null)
+  const [shouldShrink, setShouldShrink] = useState(false)
+
+  const { userId } = useParams()
+  const currentUserId = localStorage.getItem("id")
+  const navigate = useNavigate()
+
+  const nextUser = rating?.at(-2)
+  const user = rating?.at(-1)
 
   async function loadCredentials(id) {
     try {
@@ -40,8 +57,45 @@ export default function Profile() {
           "Content-Type": "application/json"
         }
       })
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
-      console.log(await response.json())
+  async function loadActivity(id) {
+    try {
+      const response = await fetch(`${BASE_URL}/api/users/${id}/activity`)
+      const data = await response.json()
+
+      setActivity(data)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  async function loadStatistics(id) {
+    try {
+      const response = await fetch(`${BASE_URL}/api/users/${id}/statistics`)
+      const data = await response.json()
+
+      setStatistics(data)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  async function loadRating(id) {
+    try {
+      const response = await fetch( `${BASE_URL}/api/users/${id}/rating`)
+      const data = await response.json()
+
+      setRating(data.map((dataObj, index) => {
+        return {
+          id: dataObj.id_user,
+          name: dataObj.name,
+          points: dataObj.points
+        }
+      }))
     } catch (e) {
       console.error(e)
     }
@@ -49,6 +103,15 @@ export default function Profile() {
 
   useEffect(() => {
     loadCredentials(userId)
+    loadActivity(userId)
+    loadStatistics(userId)
+    loadRating(currentUserId)
+
+    console.log(currentUserId)
+  }, [])
+
+  useEffect(() => {
+    if (!rating) return
 
     setTimeout(() => {
       const container = scrollRef.current
@@ -58,14 +121,22 @@ export default function Profile() {
         behavior: "smooth"
       })
     }, 333)
-  }, [])
+  }, [rating])
+  
+  useEffect(() => {
+    if (!activity) return
+    
+    const { scrollHeight, clientHeight } = activityContainerRef.current
+  
+    setShouldShrink(scrollHeight > clientHeight)
+  }, [activity])
 
   useEffect(() => {
     if (isEditing == false) return
 
     const handleEnterKey = async (event) => {
       if (event.key === "Enter") {
-        await updateCredentials(2)
+        await updateCredentials(currentUserId)
         setIsEditing(false)
       }
     }
@@ -99,7 +170,7 @@ export default function Profile() {
               />
             </div>
 
-            {user.id == userId && <div className="email">
+            {userId == currentUserId && <div className="email">
               <input
                 name="email"
                 type="text"
@@ -136,9 +207,20 @@ export default function Profile() {
             </div>
             :
             <div className="expand-button-group">
+              {userId == currentUserId && <ExpandButton
+                icon={<Exit />}
+                text="Выйти"
+                onClick={() => {
+                  localStorage.clear()
+                  setAuth(AUTH.GUEST)
+                  navigate("/")
+                }}
+              />}
+
               <ExpandButton
                 icon={copied ? <Check /> : <Share />}
                 text={copied ? "Скопировано" : "Поделиться"}
+                delay={0.1}
                 onClick={async () => {
                   await navigator.clipboard.writeText(`${BASE_URL}/profile/${userId}`)
 
@@ -148,10 +230,10 @@ export default function Profile() {
                 }}
               />
 
-              {user.id == userId && <ExpandButton
+              {userId == currentUserId && <ExpandButton
                 icon={<Pencil />}
                 text="Редактировать"
-                delay={0.1}
+                delay={0.2}
                 onClick={() => setIsEditing(true)}
                 primary
               />}
@@ -170,12 +252,12 @@ export default function Profile() {
               icon: <Energy height={10} width={10} />,
               className: "quizes"
             }}
-            progress={(statistics.articles.progress + statistics.quizes.progress) / (statistics.articles.count + statistics.quizes.count) * 100}
-            value={statistics.articles.progress + statistics.quizes.progress}
+            progress={(statistics.articles.user_progress + statistics.quizzes.user_progress) / (statistics.articles.all_count + statistics.quizzes.all_count) * 100}
+            value={statistics.articles.user_progress + statistics.quizzes.user_progress}
             data={[
               {
                 text: "Всего очков",
-                value: statistics.articles.progress * points.points_per_article + statistics.quizes.progress * points.points_per_quiz
+                value: statistics.articles.user_progress * POINTS_PER_ARTICLE + statistics.quizzes.user_progress * POINTS_PER_QUIZ
               }
             ]}
             dark
@@ -187,20 +269,20 @@ export default function Profile() {
               icon: <Article height={10} width={10} />,
               className: "articles" 
             }}
-            progress={statistics.articles.progress / statistics.articles.count * 100}
-            value={statistics.articles.progress}
+            progress={statistics.articles.user_progress / statistics.articles.all_count * 100}
+            value={statistics.articles.user_progress}
             data={[
               {
                 text: "Прочитано статей",
-                value: statistics.articles.progress
+                value: statistics.articles.user_progress
               },
               {
                 text: "Осталось статей",
-                value: statistics.articles.count - statistics.articles.progress
+                value: statistics.articles.all_count - statistics.articles.user_progress
               },
               {
                 text: "Получено очков",
-                value: statistics.articles.progress * points.points_per_article
+                value: statistics.articles.user_progress * POINTS_PER_ARTICLE
               }
             ]}
           />
@@ -211,20 +293,20 @@ export default function Profile() {
               icon: <CheckCircle height={10} width={10} />,
               className: "quizes"
             }}
-            progress={statistics.quizes.progress / statistics.quizes.count * 100}
-            value={statistics.quizes.progress}
+            progress={statistics.quizzes.user_progress / statistics.quizzes.all_count * 100}
+            value={statistics.quizzes.user_progress}
             data={[
               {
                 text: "Пройдено викторин",
-                value: statistics.quizes.progress
+                value: statistics.quizzes.user_progress
               },
               {
                 text: "Осталось викторин",
-                value: statistics.quizes.count - statistics.quizes.progress
+                value: statistics.quizzes.all_count - statistics.quizzes.user_progress
               },
               {
                 text: "Получено очков",
-                value: statistics.quizes.progress * points.points_per_quiz
+                value: statistics.quizzes.user_progress * POINTS_PER_QUIZ
               }
             ]}
           />
@@ -236,9 +318,10 @@ export default function Profile() {
           padding="32px 40px"
           gap="24px"
           className="activity"
-          shrink
+          ref={activityContainerRef}
+          shrink={shouldShrink}
         >
-          {activity.map((activityObj, index) => (
+          {activity && activity.map((activityObj, index) => (
             <ActivityCard
               key={index}
               {...activityObj}
@@ -257,13 +340,13 @@ export default function Profile() {
           ref={scrollRef}
         >
           <div className="rank-list">
-            {ranking.slice(0, 8).map((user, index) => (
+            {rating && rating.slice(0, 8).map((user, index) => (
               <RankCard
                 key={user.id}
                 highlight={
                   clsx(
                     index === 0 && "leader",
-                    index === ranking.length - 1 && "you"
+                    index === rating.length - 1 && "you"
                   )
                 }
                 index={index + 1}
@@ -272,7 +355,7 @@ export default function Profile() {
               />
             ))}
 
-            {ranking.length > 8 && <>
+            {rating && rating.length > 8 && <>
               <div className="divider">
                 <div className="dashed-line"></div>
                 <span style={{ color: COLORS.BACKGROUND }} className="label">•••</span>
@@ -281,14 +364,14 @@ export default function Profile() {
 
               <RankCard
                 key={nextUser.id}
-                index={ranking.length - 1}
+                index={rating.length - 1}
                 user={nextUser}
                 delay={0.025 * 8}
               />
 
               <RankCard
                 key={user.id}
-                index={ranking.length}
+                index={rating.length}
                 highlight="you"
                 user={user}
                 delay={0.025 * 9}
@@ -300,7 +383,7 @@ export default function Profile() {
             <span
               style={{ color: COLORS.TEXT }}
               className="body"
-            >Вы на {ranking.length}-м месте</span>
+            >Вы на {rating && rating.length}-м месте</span>
             <span
               style={{ color: COLORS.MID_GRAY }}
               className="small"
@@ -308,7 +391,7 @@ export default function Profile() {
           </div>
         </NamedSection>
 
-        {ranking.length > 1 && <NamedSection
+        {rating && rating.length > 1 && <NamedSection
           icon={<Star />}
           text="До следующего места"
           gap="8px"
@@ -320,7 +403,7 @@ export default function Profile() {
               <span
                 style={{ color: COLORS.TEXT }}
                 className="digits"
-              >{nextUser.score - user.score}</span>
+              >{nextUser.points - user.points}</span>
 
               <span
                 style={{ color: COLORS.MID_GRAY }}
@@ -332,7 +415,7 @@ export default function Profile() {
               <span
                 style={{ color: COLORS.TEXT }}
                 className="body"
-              >{ranking.length - 1}-е место</span>
+              >{rating.length - 1}-е место</span>
 
               <span
                 style={{ color: COLORS.MID_GRAY }}
@@ -342,7 +425,7 @@ export default function Profile() {
           </div>
 
           <ProgressBar
-            value={user.score / nextUser.score * 100}
+            value={user.points / nextUser.points * 100}
             height={8}
           />
 
@@ -352,7 +435,7 @@ export default function Profile() {
               textAlign: "center"
             }}
             className="small"
-          >{user.score} / {nextUser.score} очков</span>
+          >{user.points} / {nextUser.points} очков</span>
         </NamedSection>}
 
         <ContinueSection

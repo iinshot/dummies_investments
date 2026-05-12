@@ -34,5 +34,6 @@ import Shield from './shield.svg?react'
 import Show from './show.svg?react'
 import Star from './star.svg?react'
 import X from './x.svg?react'
+import Exit from './exit.svg?react'
 
-export { ArrowLeft, ArrowRight, ArrowVertical, Article, Bank, Calc, CheckCircle, Check, Crown, Cup, Email, Energy, Exclam, Fire, Hide, Home, Invest, Link, Login, Map, Money, Password, Pencil, Percent, Pie, Play, ProfileCircle, Profile, Quiz, Restart, Search, Share, Shield, Show, Star, X }
+export { ArrowLeft, ArrowRight, ArrowVertical, Article, Bank, Calc, CheckCircle, Check, Crown, Cup, Email, Energy, Exclam, Fire, Hide, Home, Invest, Link, Login, Map, Money, Password, Pencil, Percent, Pie, Play, ProfileCircle, Profile, Quiz, Restart, Search, Share, Shield, Show, Star, X, Exit }

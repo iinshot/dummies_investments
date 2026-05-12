@@ -1,16 +1,23 @@
 import React from 'react'
 import { Article, CheckCircle, Energy } from '../assets/icons'
 import { clsx } from 'clsx'
-import { points } from '../assets/data'
-import { COLORS } from '../constants'
+import { COLORS, POINTS_PER_ARTICLE, POINTS_PER_QUIZ } from '../constants'
 import { motion } from 'framer-motion'
 
-export default function ActivityCard({ type, name, days_ago, delay }) {
+export default function ActivityCard({ type, name, created_at, delay }) {
   const animation = {
     initial: { scale: 0.95, opacity: 0 },
     animate: { scale: 1, opacity: 1 },
     transition: { delay: 0.33 + (delay ?? 0) }
   }
+
+  const date = new Date(created_at)
+  data.setHours(0, 0, 0, 0)
+
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const days_ago = Math.round((date - today) / (1000 * 60 * 60 * 24))
 
   return (
     <motion.div
@@ -34,7 +41,7 @@ export default function ActivityCard({ type, name, days_ago, delay }) {
           className="body"
           style={{ color: COLORS.TEXT }}
         >
-          +{points[`points_per_${type}`]} очков
+          +{type === "quiz" ? POINTS_PER_QUIZ : POINTS_PER_ARTICLE} очков
         </span>
       </div>
 

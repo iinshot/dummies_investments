@@ -31,7 +31,7 @@ export default function RankCard({ index, user, highlight, delay }) {
         <span
           style={{ color: COLORS.MID_GRAY }}
           className="small score"
-        >{user.score} очков</span>
+        >{user.points} очков</span>
       </div>
 
       {highlight == "leader" && <Crown width={14} height={14} />}
