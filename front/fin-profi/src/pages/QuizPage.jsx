@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IconChartPieFilled, IconArrowDown } from '@tabler/icons-react';
 import './QuizPage.css';
 import QuizIcon from '../assets/icons/quiz.svg';
@@ -1300,10 +1300,10 @@ const loadRatingFromStorage = () => {
           const data = await res.json();
           console.log('📦 Данные с сервера:', data);
           
-          if (data.quiz_rating) {
+if (data.quiz_rating) {
   localStorage.setItem('quizRating', JSON.stringify(data.quiz_rating));
   console.log('✅ quizRating загружен с сервера', data.quiz_rating);
-          } else {
+} else {
             console.log('⚠️ quiz_rating отсутствует в ответе сервера');
           }
         }
@@ -1328,7 +1328,6 @@ const loadRatingFromStorage = () => {
           },
           body: JSON.stringify({
             points: qr.totalPoints || 0,
-            quiz_rating: qr
           })
         });
         
@@ -1347,9 +1346,8 @@ const loadRatingFromStorage = () => {
 useEffect(() => {
   const saveToBackend = async () => {
     const token = localStorage.getItem('access_token');
-    if (!token) return; // Не авторизован — не сохраняем
+    if (!token) return;
     
-    // Не сохраняем начальное состояние (все нули)
     if (userRating.totalPoints === 0 && userRating.completedQuizzes === 0) return;
     
     try {
@@ -1364,7 +1362,6 @@ useEffect(() => {
         },
         body: JSON.stringify({
           points: userRating.totalPoints || 0,
-          quiz_rating: userRating
         })
       });
       
@@ -1381,6 +1378,7 @@ const saveQuizProgress = async (quizId, earnedPoints, totalPoints) => {
   const existingResult = userRating.quizResults[quizId];
   const wasAlreadyCompleted = existingResult?.completed === true;
   const oldPoints = existingResult?.points || 0;
+  
   
   let newTotalPoints = userRating.totalPoints;
   let newCompletedQuizzes = userRating.completedQuizzes;
@@ -1438,6 +1436,8 @@ const saveQuizProgress = async (quizId, earnedPoints, totalPoints) => {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const userId = payload.id_user;
+      const articleProgress = JSON.parse(localStorage.getItem('articleProgress') || '{}');
+const readArticles = Object.values(articleProgress).filter(p => p >= 100).length;
 
       // 1. Начинаем викторину (игнорируем ошибку, если уже начата)
       await fetch(`/api/quizzes/start_quiz/${quizId}`, {
@@ -1458,12 +1458,12 @@ const saveQuizProgress = async (quizId, earnedPoints, totalPoints) => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          points: newTotalPoints,
-          quiz_rating: newRating
+body: JSON.stringify({
+  points: newTotalPoints,
+  total_points: readArticles * 200 + newTotalPoints
+  
         })
       });
-
       console.log('✅ Все данные сохранены на бекенде');
     } catch (error) {
       console.error('❌ Ошибка синхронизации:', error);
@@ -1494,19 +1494,26 @@ const quizzesList = Object.values(generalQuizzes).map(quiz => ({
   isActive: activeQuizId === quiz.id,
   isInProgress: userRating.inProgressQuiz === quiz.id && !userRating.quizResults[quiz.id]?.completed
 }));
-
+const mainRef = useRef(null);
+const scrollToTop = () => {
+  setTimeout(() => {
+    const quizMain = document.querySelector('.quiz-main');
+    if (quizMain) {
+      quizMain.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, 150);
+};
+// убрать setTimeout полностью
   // Выбор викторины
 const handleSelectQuiz = (quizId) => {
   if (activeQuizId === quizId) return;
   
-  // Ищем викторину в allQuizzes
   const quiz = allQuizzes[quizId];
   if (!quiz) return;
   
   setSelectedQuiz(quiz);
   setActiveQuizId(quizId);
   
-  // Восстанавливаем прогресс, если есть
   const savedProgress = userRating.quizProgress?.[quizId];
   if (savedProgress && !savedProgress.completed) {
     setCurrentQuestion(savedProgress.currentQuestion || 0);
@@ -1519,8 +1526,10 @@ const handleSelectQuiz = (quizId) => {
   setQuizCompleted(false);
   setQuizScore(0);
   setResultsAnimation(false);
+  
+  // Прокрутка страницы вверх
+  scrollToTop();
 };
-
   const handleCloseQuiz = () => {
     if (selectedQuiz && !quizCompleted) {
       saveCurrentProgress();
@@ -1660,15 +1669,17 @@ const quizStats = {
     }, 300);
   };
 
-  const handleRetryQuiz = () => {
-    setResultsAnimation(false);
-    setTimeout(() => {
-      setCurrentQuestion(0);
-      setQuizCompleted(false);
-      setUserAnswers({});
-      setQuizScore(0);
-    }, 300);
-  };
+const handleRetryQuiz = () => {
+  setResultsAnimation(false);
+  setTimeout(() => {
+    setCurrentQuestion(0);
+    setQuizCompleted(false);
+    setUserAnswers({});
+    setQuizScore(0);
+    // Прокрутка страницы вверх
+    scrollToTop();
+  }, 300);
+};
 
   const size = 120;
   const strokeWidth = 8;
@@ -1700,7 +1711,7 @@ const module3Cards = [
   return (
     <div className="quiz-layout">
       {/* Центральный блок */}
-      <div className="quiz-main">
+      <div className="quiz-main" ref={mainRef}>
         {/* КАРТОЧКА 1: Текущая викторина */}
         <div className="quiz-module-card">
           {!selectedQuiz ? (
@@ -2070,9 +2081,6 @@ const module3Cards = [
         {/* Блок "Продолжить" - ВНУТРИ quiz-sidebar */}
         {isContinueVisible && (
           <div className="continue-block">
-            <div className="continue-close" onClick={handleCloseContinue}>
-              <div className="close-icon"></div>
-            </div>
             <div className="continue-content">
               <div className="continue-play">
                 <div className="play-button">
@@ -2097,7 +2105,7 @@ const module3Cards = [
                 className="continue-button" 
                 onClick={() => handleContinueClick(currentArticle.id)}
               >
-                Продолжить <span className="arrow">→</span>
+                Продолжить <img src={ArrowRightIcon} alt="→" className="btn-icon" />
               </button>
             </div>
           </div>

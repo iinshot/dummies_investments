@@ -1422,3 +1422,10 @@
 .continue-close:hover .close-icon::after {
   background-color: #FFFFFF;
 }
+.quiz-main {
+  scroll-margin-top: 0;
+}
+
+.quiz-module-card:first-child {
+  scroll-margin-top: 0;
+}

@@ -14,7 +14,7 @@ import DynamicDottedLine from './components/DynamicDottedLine';
 import Logo from './components/Logo';
 import { Calc, Home, Login, Profile, Quiz } from '././assets/icons';
 import { progressAPI } from './services/api';
-
+import ArrowRightIcon from './assets/icons/arrow_right.svg'; 
 
 // Компонент главной страницы 
 const MainPage = () => {
@@ -1075,9 +1075,7 @@ const ModuleCardWithTwo = ({ moduleData, articles, containerRefPass, circleRefs,
 
         {currentArticleData && currentArticleData.progress < 100 && (
 <div className={`continue-block ${!isContinueVisible ? 'hidden' : ''}`}>
-      <div className="continue-close" onClick={handleCloseContinue}>
-        <div className="close-icon"></div>
-      </div>
+
       <div className="continue-content">
         <div className="continue-play">
           <div className="play-button">
@@ -1102,7 +1100,7 @@ const ModuleCardWithTwo = ({ moduleData, articles, containerRefPass, circleRefs,
           className="continue-button" 
           onClick={() => handleContinueClick()}
         >
-          Продолжить <span className="arrow">→</span>
+          Продолжить <img src={ArrowRightIcon} alt="→" className="btn-icon" />
         </button>
       </div>
     </div>

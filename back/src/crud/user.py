@@ -54,6 +54,9 @@ async def get_all_users(session: AsyncSession, skip: int = 0, limit: int = 100) 
     return result.scalars().all()
 
 async def update_user(session: AsyncSession, id_user: int, **kwargs) -> Optional[User]:
+
+    kwargs.pop('quiz_rating', None)
+    
     user = await session.get(User, id_user)
     if not user:
         return None
@@ -79,7 +82,7 @@ async def delete_user(session: AsyncSession, id_user: int) -> bool:
     return result.rowcount > 0
 
 async def get_users_above(session: AsyncSession, points: int) -> List[User]:
-    query = select(User).where(User.points >= points).order_by(User.points.desc())
+    query = select(User).where(User.total_points >= points).order_by(User.total_points.desc())
     result = await session.execute(query)
     return result.scalars().all()
 
@@ -108,8 +111,18 @@ async def get_user_activity(session: AsyncSession, id_user: int) -> list:
     user_quizzes = quizzes_result.scalars().all()
     activity = []
     for ua in user_articles:
-        activity.append({"type": "article", "name": ua.article.name, "created_at": ua.created_at})
+        activity.append({
+            "type": "article", 
+            "name": ua.article.name, 
+            "created_at": ua.created_at,
+            "is_read": ua.is_read,
+            "last_checkpoint": ua.last_checkpoint 
+        })
     for uq in user_quizzes:
-        activity.append({"type": "quiz", "name": uq.quiz.name, "created_at": uq.created_at})
+        activity.append({
+            "type": "quiz", 
+            "name": uq.quiz.name, 
+            "created_at": uq.created_at
+        })
     activity.sort(key=lambda x: x["created_at"])
     return activity

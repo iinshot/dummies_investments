@@ -73,6 +73,7 @@ async def create_user(name: str, email: str, password: str, points: Optional[int
 async def update_user(id_user: int, name: Optional[str] = None, surname: Optional[str] = None,
     patronymic: Optional[str] = None, phone: Optional[str] = None, about: Optional[str] = None,
     email: Optional[str] = None, points: Optional[int] = None, quiz_rating: Optional[dict] = None,
+    total_points: Optional[int] = None,  # ← ДОБАВИТЬ
     db: AsyncSession = Depends(get_db)):
     kwargs = {}
     if name is not None: kwargs["name"] = name
@@ -82,11 +83,8 @@ async def update_user(id_user: int, name: Optional[str] = None, surname: Optiona
     if about is not None: kwargs["about"] = about
     if email is not None: kwargs["email"] = email
     if points is not None: kwargs["points"] = points
-    if quiz_rating is not None:
-        kwargs["quiz_rating"] = quiz_rating
-        # 🔥 Если points не передан явно — берем из quiz_rating
-        if points is None:
-            kwargs["points"] = quiz_rating.get("points") or quiz_rating.get("totalPoints") or 0
+    if total_points is not None: kwargs["total_points"] = total_points  # ← ДОБАВИТЬ
+    if quiz_rating is not None: kwargs["quiz_rating"] = quiz_rating
     if not kwargs:
         raise HTTPException(status_code=400, detail="No fields to update")
     user = await user_crud.update_user(db, id_user=id_user, **kwargs)
@@ -110,7 +108,7 @@ async def get_rating(id_user: int, db: AsyncSession = Depends(get_db)):
     top8 = top8[:8]
     if any(u.id_user == id_user for u in top8):
         return top8
-    return await user_crud.get_users_above(db, points=user.points)
+    return await user_crud.get_users_above(db, points=user.total_points)
 
 @router.get("/{id_user}/statistics")
 async def get_user_progress(id_user: int, db: AsyncSession = Depends(get_db)):

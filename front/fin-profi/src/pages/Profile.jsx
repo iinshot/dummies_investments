@@ -17,6 +17,7 @@ export default function Profile() {
   const [totalUsers, setTotalUsers] = useState(0)
   const [userPoints, setUserPoints] = useState(0)
   const [quizPoints, setQuizPoints] = useState(0)
+  const [currentArticleData, setCurrentArticleData] = useState(null);
   const [statistics, setStatistics] = useState({
     articles: {
       user_progress: 0,
@@ -55,12 +56,13 @@ async function updateCredentials(id) {
     const response = await fetch(`/api/users/${id}`, {
       method: "PUT",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${localStorage.getItem('access_token')}`
       },
       body: JSON.stringify(credentials)
-    })
+    });
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
 }
 async function loadActivity(id) {
@@ -84,36 +86,78 @@ async function loadStatistics(id) {
     
     setStatistics(data);
     
-    // 🔥 Очки ТОЛЬКО из quiz_rating и statistics (НЕ суммируем с user.points)
-    const quizPointsFromQR = userData.quiz_rating?.totalPoints || 
-                             userData.quiz_rating?.points || 
-                             data.quizzes.user_progress * POINTS_PER_QUIZ;
+    // Очки викторин из localStorage
+    const localQuizRating = JSON.parse(localStorage.getItem('quizRating') || '{}');
+    const quizPts = localQuizRating.totalPoints || 0;
+    const articlePts = data.articles.user_progress * POINTS_PER_ARTICLE;
+    const totalPoints = articlePts + quizPts;
     
-    const articlePoints = data.articles.user_progress * POINTS_PER_ARTICLE;
+    setUserPoints(totalPoints);
+    setQuizPoints(quizPts);
     
-    setUserPoints(articlePoints + quizPointsFromQR);
-    setQuizPoints(quizPointsFromQR);
+    fetch(`/api/users/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      },
+      body: JSON.stringify({ total_points: totalPoints })
+    }).catch(() => {});
     
-    // 🔥 НЕ обновляем БД здесь — это вызывает бесконечный рост
   } catch (e) {
     console.error(e);
   }
 }
 
+
 async function loadRating(id) {
   try {
-    const response = await fetch(`/api/users/${id}/rating`)
-    const data = await response.json()
-    setRating(data.map((dataObj, index) => ({
+    const ratingRes = await fetch(`/api/users/${id}/rating`);
+    const ratingData = await ratingRes.json();
+    
+    setRating(ratingData.map((dataObj) => ({
       id: dataObj.id_user,
       name: dataObj.name,
-      points: dataObj.points
-    })))
+      points: dataObj.total_points || 0
+    })));
   } catch (e) {
-    console.error(e)
+    console.error(e);
   }
 }
 
+useEffect(() => {
+  const articleProgress = JSON.parse(localStorage.getItem('articleProgress') || '{}');
+  for (let i = 1; i <= 7; i++) {
+    const progress = articleProgress[i];
+    if (!progress || progress < 100) {
+      const titles = {
+        1: 'Что такое инвестиции?',
+        2: 'Виды активов',
+        3: 'Акции',
+        4: 'Облигации',
+        5: 'ETF и фонды',
+        6: 'Инвестиционный портфель',
+        7: 'Горизонт инвестирования'
+      };
+      const modules = {
+        1: 'Модуль 1 — Основы инвестиций',
+        2: 'Модуль 1 — Основы инвестиций',
+        3: 'Модуль 2 — Инвестиционные инструменты',
+        4: 'Модуль 2 — Инвестиционные инструменты',
+        5: 'Модуль 2 — Инвестиционные инструменты',
+        6: 'Модуль 3 — Принципы инвестирования',
+        7: 'Модуль 3 — Принципы инвестирования'
+      };
+      setCurrentArticleData({
+        title: titles[i],
+        module: modules[i],
+        progress: progress || 0,
+        id: i
+      });
+      break;
+    }
+  }
+}, []);
 useEffect(() => {
   const id = userId || currentUserId;
   
@@ -195,7 +239,8 @@ useEffect(() => {
   }, [isEditing, credentials])
 console.log('📊 userPoints:', userPoints, 'quizPoints:', quizPoints, 
             'articles:', statistics.articles.user_progress,
-            'sum:', (userPoints || 0) + (quizPoints || 0));
+            'quizzes:', statistics.quizzes.user_progress,
+            'displayTotal:', userPoints);
   return (
     <>
       <Content>
@@ -485,12 +530,37 @@ console.log('📊 userPoints:', userPoints, 'quizPoints:', quizPoints,
           >{user.points} / {nextUser.points} очков</span>
         </NamedSection>}
 
-        <ContinueSection
-          name="Название статьи"
-          id={2}
-          module="Название модуля"
-          progress={80}
-        />
+{currentArticleData && currentArticleData.progress < 100 && (
+  <div className="continue-block">
+    <div className="continue-content">
+      <div className="continue-play">
+        <div className="play-button">
+          <div className="play-triangle"></div>
+        </div>
+        <span className="continue-label">Продолжить</span>
+      </div>
+      <div className="continue-article">
+        <div className="continue-article-title">{currentArticleData.title}</div>
+        <div className="continue-article-module">{currentArticleData.module}</div>
+      </div>
+      <div className="progress-section">
+        <div className="progress-bar-bg">
+          <div className="progress-bar-fill" style={{ width: `${currentArticleData.progress}%` }}></div>
+        </div>
+        <div className="progress-stats">
+          <span className="progress-completed">завершено</span>
+          <span className="progress-percent">{currentArticleData.progress}%</span>
+        </div>
+      </div>
+      <button 
+        className="continue-button" 
+        onClick={() => navigate(`/article/${currentArticleData.id}`)}
+      >
+        Продолжить <span className="arrow">→</span>
+      </button>
+    </div>
+  </div>
+)}
       </SideBar>
     </>
   )
