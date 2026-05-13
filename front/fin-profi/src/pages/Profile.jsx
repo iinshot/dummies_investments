@@ -41,7 +41,7 @@ export default function Profile() {
 
   const nextUser = rating?.at(-2)
   const user = rating?.at(-1)
-const ratingUser = {}
+  const ratingUser = {}
   async function loadCredentials(id) {
     try {
       const response = await fetch(`/api/users/${id}`)
@@ -53,13 +53,14 @@ const ratingUser = {}
   }
 
   async function updateCredentials(id) {
+    const urlParams = new URLSearchParams(credentials).toString()
+
     try {
-      const response = await fetch(`/api/users/${id}`, {
+      const response = await fetch(`/api/users/${id}?${urlParams}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json"
-        },
-        body: JSON.stringify(credentials)
+        }
       })
     } catch (e) {
       console.error(e)
@@ -120,11 +121,11 @@ const ratingUser = {}
         return {
           id: dataObj.id_user,
           name: dataObj.name,
-          points: dataObj.points + data_1.articles.user_progress * POINTS_PER_ARTICLE
+          points: dataObj.total_points
         }
       }))
 
-      console.log(r)
+      r.sort((a, b) => b.total_points - a.total_points)
 
       setRating(r)
     } catch (e) {
@@ -292,7 +293,7 @@ const ratingUser = {}
                 text="Принять"
                 primary
                 onClick={async () => {
-                  await updateCredentials(2)
+                  await updateCredentials(currentUserId)
                   setIsEditing(false)
                 }}
               />
@@ -349,7 +350,7 @@ const ratingUser = {}
             data={[
               {
                 text: "Всего очков",
-                value: userPoints
+                value: credentials.total_points
               }
             ]}
             dark
@@ -398,7 +399,7 @@ const ratingUser = {}
               },
               {
                 text: "Получено очков",
-                value: quizPoints
+                value: credentials.points
               }
             ]}
           />
@@ -470,17 +471,9 @@ const ratingUser = {}
               />
             </>}
           </div>
-
-          <div className="rank-info">
-            <span
-              style={{ color: COLORS.TEXT }}
-              className="body"
-            >Вы на {rating && rating.length}-м месте</span>
-            <span className="small">из {totalUsers} участников</span>
-          </div>
         </NamedSection>
-
-        {rating && rating.length > 1 && <NamedSection
+{/* 
+        {rating && rating[0].id != currentUserId && rating.length > 1 && <NamedSection
           icon={<Star />}
           text="До следующего места"
           gap="8px"
@@ -525,10 +518,10 @@ const ratingUser = {}
             }}
             className="small"
           >{user.points} / {nextUser.points} очков</span>
-        </NamedSection>}
+        </NamedSection>} */}
 
         {currentArticle && (
-          <div className="continue-block">
+          <div className="continue-block" style={{ marginTop: 0 }}>
             <div className="continue-content">
               <div className="continue-play">
                 <div className="play-button">

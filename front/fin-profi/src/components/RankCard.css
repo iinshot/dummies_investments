@@ -25,11 +25,6 @@
 
 .rank-card .user-data .username {
     color: var(--text);
-    cursor: pointer;
-}
-
-.rank-card .user-data .username:hover {
-    text-decoration: underline;
 }
 
 /* Leader */

@@ -23,11 +23,9 @@ export default function RankCard({ index, user, highlight, delay }) {
       <ProfileCircle width={28} height={28} />
 
       <div className="user-data">
-        <Link to={`/profile/${user.id}`} >
-          <span className="body username">
-            {user.name}
-          </span>
-        </Link>
+        <span className="body username">
+          {user.name}
+        </span>
         <span
           style={{ color: COLORS.MID_GRAY }}
           className="small score"

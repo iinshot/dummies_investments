@@ -46,7 +46,7 @@ export const progressAPI = {
   getAllProgress: async () => {
     const token = localStorage.getItem('access_token');
     if (!token) return null;
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/users/get_total_progress/`, {
         method: 'GET',
@@ -72,7 +72,7 @@ export const progressAPI = {
   setArticleProgress: async (articleId, lastCheckpoint, isRead = false) => {
     const token = localStorage.getItem('access_token');
     if (!token) return false;
-    
+
     const response = await fetch(`${API_BASE_URL}/users/set_progress/${articleId}?last_checkpoint=${lastCheckpoint}&is_read=${isRead}`, {
       method: 'POST',
       headers: getHeaders(),
@@ -87,6 +87,8 @@ export const progressAPI = {
       promises.push(progressAPI.setArticleProgress(parseInt(articleId), progress, isRead));
     }
     await Promise.all(promises);
+
+    console.log("DHFSDLKF")
   }
 };
 
@@ -136,37 +138,37 @@ export const questionsAPI = {
   },
 
 
-getFullQuizForArticle: async (articleId) => {
-  try {
-    const qRes = await fetch(`${API_BASE_URL}/questions/?id_article=${articleId}`, { headers: getHeaders() });
-    const questions = qRes.ok ? await qRes.json() : [];
-    
-    if (!questions.length) return null;
-    
-    const questionsWithAnswers = await Promise.all(
-      questions.map(async (q) => {
-        const aRes = await fetch(`${API_BASE_URL}/answers/?id_question=${q.id_question}`, { headers: getHeaders() });
-        const answers = aRes.ok ? await aRes.json() : [];
-        
-        return {
-          id: q.id_question,
-          text: q.question_text,
-          subtext: q.question_type === 'RADIO' ? '(выберите один вариант)' : '(выберите все верные)',
-          options: answers.map(a => ({
-            id: a.id_answer,
-            text: a.answer_text,
-            isCorrect: a.is_correct
-          }))
-        };
-      })
-    );
-    
-    return { totalQuestions: questionsWithAnswers.length, questions: questionsWithAnswers };
-  } catch (error) {
-    console.error('Ошибка:', error);
-    return null;
+  getFullQuizForArticle: async (articleId) => {
+    try {
+      const qRes = await fetch(`${API_BASE_URL}/questions/?id_article=${articleId}`, { headers: getHeaders() });
+      const questions = qRes.ok ? await qRes.json() : [];
+
+      if (!questions.length) return null;
+
+      const questionsWithAnswers = await Promise.all(
+        questions.map(async (q) => {
+          const aRes = await fetch(`${API_BASE_URL}/answers/?id_question=${q.id_question}`, { headers: getHeaders() });
+          const answers = aRes.ok ? await aRes.json() : [];
+
+          return {
+            id: q.id_question,
+            text: q.question_text,
+            subtext: q.question_type === 'RADIO' ? '(выберите один вариант)' : '(выберите все верные)',
+            options: answers.map(a => ({
+              id: a.id_answer,
+              text: a.answer_text,
+              isCorrect: a.is_correct
+            }))
+          };
+        })
+      );
+
+      return { totalQuestions: questionsWithAnswers.length, questions: questionsWithAnswers };
+    } catch (error) {
+      console.error('Ошибка:', error);
+      return null;
+    }
   }
-}
 };
 
 // Управление викторинами
@@ -224,11 +226,15 @@ export const syncService = {
     if (!token) return false;
     const quizRating = JSON.parse(localStorage.getItem('quizRating') || '{}');
     try {
+      const urlParams = URLSearchParams({
+        points: quizRating.totalPoints || 0,
+        quiz_rating: quizRating
+      }).toString()
+
       const payload = JSON.parse(atob(token.split('.')[1]));
       const userId = payload.id_user;
-      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
-        method: 'PUT', headers: getHeaders(),
-        body: JSON.stringify({ points: quizRating.totalPoints || 0, quiz_rating: quizRating })
+      const response = await fetch(`${API_BASE_URL}/users/${userId}?${urlParams}`, {
+        method: 'PUT', headers: getHeaders()
       });
       return response.ok;
     } catch (error) { return false; }
@@ -255,13 +261,13 @@ export const syncService = {
 export const calculatorAPI = {
   calculate: async (params) => {
     const queryString = new URLSearchParams(params).toString();
-    
+
     try {
       const response = await fetch(`${API_BASE_URL}/calculator/?${queryString}`, {
         method: 'GET',
         // БЕЗ getHeaders() — калькулятор доступен всем
       });
-      
+
       if (response.ok) {
         return await response.json();
       }
