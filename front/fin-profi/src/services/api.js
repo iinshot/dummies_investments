@@ -9,68 +9,6 @@ const getHeaders = () => {
   };
 };
 
-let isRefreshing = false;
-let failedQueue = [];
-
-const processQueue = (error, token = null) => {
-  failedQueue.forEach(prom => {
-    if (error) prom.reject(error);
-    else prom.resolve(token);
-  });
-  failedQueue = [];
-};
-
-const fetchWithAuth = async (url, options = {}) => {
-  const token = localStorage.getItem('access_token');
-  
-  if (token) {
-    options.headers = {
-      ...options.headers,
-      'Authorization': `Bearer ${token}`
-    };
-  }
-  
-  let response = await fetch(url, options);
-  
-  if (response.status === 401 && token) {
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject });
-      }).then(token => {
-        options.headers['Authorization'] = `Bearer ${token}`;
-        return fetch(url, options);
-      });
-    }
-    
-    isRefreshing = true;
-    
-    try {
-      const refreshRes = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include'
-      });
-      
-      if (refreshRes.ok) {
-        const data = await refreshRes.json();
-        localStorage.setItem('access_token', data.access_token);
-        options.headers['Authorization'] = `Bearer ${data.access_token}`;
-        response = await fetch(url, options);
-        processQueue(null, data.access_token);
-      } else {
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('id');
-        processQueue(new Error('Refresh failed'), null);
-      }
-    } catch (e) {
-      processQueue(e, null);
-    } finally {
-      isRefreshing = false;
-    }
-  }
-  
-  return response;
-};
-
 // Авторизация
 export const authAPI = {
   login: async (email, password) => {
@@ -91,95 +29,225 @@ export const authAPI = {
       credentials: 'include'
     });
     return response.json();
+  },
+
+  logout: async () => {
+    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      headers: getHeaders(),
+      credentials: 'include'
+    });
+    return response.ok;
   }
 };
 
 // Прогресс статей
 export const progressAPI = {
   getAllProgress: async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/users/get_total_progress/`);
-    if (response.ok) return await response.json();
-    return null;
+    const token = localStorage.getItem('access_token');
+    if (!token) return null;
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/get_total_progress/`, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+      if (response.ok) return await response.json();
+      return null;
+    } catch (error) {
+      console.error('Ошибка запроса:', error);
+      return null;
+    }
   },
 
   getArticleProgress: async (articleId) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/users/get_progress/${articleId}`);
+    const response = await fetch(`${API_BASE_URL}/users/get_progress/${articleId}`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
     if (response.ok) return response.json();
     return { id_article: articleId, is_read: false, last_checkpoint: 0 };
   },
 
   setArticleProgress: async (articleId, lastCheckpoint, isRead = false) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/users/set_progress/${articleId}?last_checkpoint=${lastCheckpoint}&is_read=${isRead}`, {
-      method: 'POST'
+    const token = localStorage.getItem('access_token');
+    if (!token) return false;
+    
+    const response = await fetch(`${API_BASE_URL}/users/set_progress/${articleId}?last_checkpoint=${lastCheckpoint}&is_read=${isRead}`, {
+      method: 'POST',
+      headers: getHeaders(),
     });
     return response.ok;
   },
 
   syncLocalProgress: async (localProgress) => {
+    const promises = [];
     for (const [articleId, progress] of Object.entries(localProgress)) {
-      await progressAPI.setArticleProgress(parseInt(articleId), progress, progress >= 100);
+      const isRead = progress >= 100;
+      promises.push(progressAPI.setArticleProgress(parseInt(articleId), progress, isRead));
     }
+    await Promise.all(promises);
   }
 };
 
 // Викторины
 export const quizAPI = {
   getQuizById: async (quizId) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/quizzes/${quizId}`);
-    return response.ok ? await response.json() : null;
+    try {
+      const response = await fetch(`${API_BASE_URL}/quizzes/${quizId}`, { headers: getHeaders() });
+      if (response.ok) return await response.json();
+      return null;
+    } catch (error) { return null; }
+  },
+
+  getQuestionsByQuizId: async (quizId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/quizzes/${quizId}/questions`, { headers: getHeaders() });
+      if (response.ok) return await response.json();
+      return [];
+    } catch (error) { return []; }
+  },
+
+  getAnswersByQuestionId: async (questionId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/answers/?id_question=${questionId}`, { headers: getHeaders() });
+      if (response.ok) return await response.json();
+      return [];
+    } catch (error) { return []; }
   }
 };
 
 // Вопросы
 export const questionsAPI = {
   getQuestionsByArticleId: async (articleId) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/questions/?id_article=${articleId}`);
-    return response.ok ? await response.json() : [];
+    try {
+      const response = await fetch(`${API_BASE_URL}/questions/?id_article=${articleId}`, { headers: getHeaders() });
+      if (response.ok) return await response.json();
+      return [];
+    } catch (error) { return []; }
+  },
+
+  getAnswersByQuestionId: async (questionId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/answers/?id_question=${questionId}`, { headers: getHeaders() });
+      if (response.ok) return await response.json();
+      return [];
+    } catch (error) { return []; }
+  },
+
+
+getFullQuizForArticle: async (articleId) => {
+  try {
+    const qRes = await fetch(`${API_BASE_URL}/questions/?id_article=${articleId}`, { headers: getHeaders() });
+    const questions = qRes.ok ? await qRes.json() : [];
+    
+    if (!questions.length) return null;
+    
+    const questionsWithAnswers = await Promise.all(
+      questions.map(async (q) => {
+        const aRes = await fetch(`${API_BASE_URL}/answers/?id_question=${q.id_question}`, { headers: getHeaders() });
+        const answers = aRes.ok ? await aRes.json() : [];
+        
+        return {
+          id: q.id_question,
+          text: q.question_text,
+          subtext: q.question_type === 'RADIO' ? '(выберите один вариант)' : '(выберите все верные)',
+          options: answers.map(a => ({
+            id: a.id_answer,
+            text: a.answer_text,
+            isCorrect: a.is_correct
+          }))
+        };
+      })
+    );
+    
+    return { totalQuestions: questionsWithAnswers.length, questions: questionsWithAnswers };
+  } catch (error) {
+    console.error('Ошибка:', error);
+    return null;
   }
+}
 };
 
 // Управление викторинами
 export const quizzesAPI = {
   getAllQuizzes: async () => {
-    const response = await fetch(`${API_BASE_URL}/quizzes/`);
-    return response.ok ? await response.json() : [];
+    try {
+      const response = await fetch(`${API_BASE_URL}/quizzes/`, { headers: { 'Content-Type': 'application/json' } });
+      if (response.ok) return await response.json();
+      return [];
+    } catch (error) { return []; }
   },
 
   startQuiz: async (quizId) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/quizzes/start_quiz/${quizId}`, { method: 'POST' });
-    return response.ok;
+    try {
+      const response = await fetch(`${API_BASE_URL}/quizzes/start_quiz/${quizId}`, {
+        method: 'POST', headers: getHeaders()
+      });
+      if (response.ok) return await response.json();
+      return null;
+    } catch (error) { return null; }
+  },
+
+  answerQuestion: async (quizId, answerId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/quizzes/answer_question/${quizId}/${answerId}`, {
+        method: 'POST', headers: getHeaders()
+      });
+      return response.ok;
+    } catch (error) { return false; }
+  },
+
+  getNextQuestion: async (quizId) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/quizzes/get_next_question/${quizId}`, { headers: getHeaders() });
+      if (response.ok) return await response.json();
+      return null;
+    } catch (error) { return null; }
   },
 
   endQuiz: async (quizId) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/quizzes/end_quiz/${quizId}`, { method: 'POST' });
-    return response.ok;
+    try {
+      const response = await fetch(`${API_BASE_URL}/quizzes/end_quiz/${quizId}`, {
+        method: 'POST', headers: getHeaders()
+      });
+      if (response.ok) return await response.json();
+      return null;
+    } catch (error) { return null; }
   }
 };
 
 // Синхронизация
 export const syncService = {
   syncOnRegister: async () => {
+    const token = localStorage.getItem('access_token');
+    if (!token) return false;
     const quizRating = JSON.parse(localStorage.getItem('quizRating') || '{}');
-    const payload = JSON.parse(atob(localStorage.getItem('access_token').split('.')[1]));
-    const response = await fetchWithAuth(`${API_BASE_URL}/users/${payload.id_user}`, {
-      method: 'PUT',
-      body: JSON.stringify({ points: quizRating.totalPoints || 0 })
-    });
-    return response.ok;
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userId = payload.id_user;
+      const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
+        method: 'PUT', headers: getHeaders(),
+        body: JSON.stringify({ points: quizRating.totalPoints || 0, quiz_rating: quizRating })
+      });
+      return response.ok;
+    } catch (error) { return false; }
   },
 
   loadOnLogin: async () => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/users/me`);
-    if (response.ok) {
-      const userData = await response.json();
-      if (userData.quiz_rating) {
-        const clean = { ...userData.quiz_rating };
-        delete clean.total_points;
-        localStorage.setItem('quizRating', JSON.stringify(clean));
+    const token = localStorage.getItem('access_token');
+    if (!token) return null;
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/me`, { headers: getHeaders() });
+      if (response.ok) {
+        const userData = await response.json();
+        if (userData.quiz_rating) {
+          localStorage.setItem('quizRating', JSON.stringify(userData.quiz_rating));
+        }
+        return userData;
       }
-      return userData;
-    }
-    return null;
+      return null;
+    } catch (error) { return null; }
   }
 };
 
@@ -187,7 +255,20 @@ export const syncService = {
 export const calculatorAPI = {
   calculate: async (params) => {
     const queryString = new URLSearchParams(params).toString();
-    const response = await fetch(`${API_BASE_URL}/calculator/?${queryString}`);
-    return response.ok ? await response.json() : null;
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/calculator/?${queryString}`, {
+        method: 'GET',
+        // БЕЗ getHeaders() — калькулятор доступен всем
+      });
+      
+      if (response.ok) {
+        return await response.json();
+      }
+      return null;
+    } catch (error) {
+      console.error('Ошибка расчета:', error);
+      return null;
+    }
   }
 };

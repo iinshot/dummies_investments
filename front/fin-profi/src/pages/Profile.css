@@ -195,8 +195,3 @@
 .main-layout {
     gap: 20px;
 }
-
-.ranking + .continue-block,
-.next-rank + .continue-block {
-  margin-top: -2px;
-}

@@ -1,10 +1,10 @@
 import React from 'react'
-import { Article, CheckCircle } from '../assets/icons'
+import { Article, CheckCircle, Energy } from '../assets/icons'
 import { clsx } from 'clsx'
-import { COLORS } from '../constants'
+import { COLORS, POINTS_PER_ARTICLE, POINTS_PER_QUIZ } from '../constants'
 import { motion } from 'framer-motion'
 
-export default function ActivityCard({ type, name, created_at, delay, is_read }) {
+export default function ActivityCard({ type, name, created_at, delay }) {
   const animation = {
     initial: { scale: 0.95, opacity: 0 },
     animate: { scale: 1, opacity: 1 },
@@ -12,7 +12,7 @@ export default function ActivityCard({ type, name, created_at, delay, is_read })
   }
 
   const date = new Date(created_at)
-  date.setHours(0, 0, 0, 0)
+  date.setHours(0, 0, 0, 0)  // ← ИСПРАВЛЕНО: data → date
 
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -30,14 +30,11 @@ export default function ActivityCard({ type, name, created_at, delay, is_read })
         <Article width={16} height={16} />
       }
 
-  <h4 style={{ flex: 1 }} >
-    {type === "quiz" 
-      ? "Пройдена викторина" 
-      : is_read 
-        ? "Прочитана статья" 
-        : "Начата статья"
-    } «{name}»
-  </h4>
+      <h4 style={{ flex: 1 }} >
+        {type === "quiz" ? "Пройдена викторина" : "Прочитана статья"} «{name}»
+      </h4>
+
+
 
       <span
         className="body"

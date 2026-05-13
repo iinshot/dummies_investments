@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { IconChartLine, IconTrophy } from '@tabler/icons-react';
 import './CalculatorPage.css';
 import { Invest } from '../assets/icons';  
 import investIcon from '../assets/icons/invest.svg'; // импорт как URL
 import cupIcon from '../assets/icons/cup.svg'; // импорт как URL
 import { calculatorAPI } from '../services/api';
-import ArrowRightIcon from '../assets/icons/arrow_right.svg'; 
+import { useNavigate } from 'react-router-dom';
+import ArrowRightIcon from '../assets/icons/arrow_right.svg';  
 
 const CalculatorPage = () => {
   const [initialAmount, setInitialAmount] = useState(700000);
@@ -26,9 +26,10 @@ const CalculatorPage = () => {
   const [interestProgress, setInterestProgress] = useState(((16 - 1) / 29) * 100);
 const [durationProgress, setDurationProgress] = useState(((20 - 1) / 49) * 100);
 const navigate = useNavigate();
-const [currentArticleData, setCurrentArticleData] = useState(null);
+const [currentArticle, setCurrentArticle] = useState(null);
+  
 
-  // Список калькуляторов для правого сайдбара
+// Список калькуляторов для правого сайдбара
   const calculators = [
     { id: 1, title: "Калькулятор доходности", description: "Расчет прибыли от инвестиций" },
     { id: 2, title: "Кредитный калькулятор", description: "Расчет переплаты по кредиту" },
@@ -118,39 +119,6 @@ const handleCalculate = async () => {
     });
   }
 };
-useEffect(() => {
-  const articleProgress = JSON.parse(localStorage.getItem('articleProgress') || '{}');
-  for (let i = 1; i <= 7; i++) {
-    const progress = articleProgress[i];
-    if (!progress || progress < 100) {
-      const titles = {
-        1: 'Что такое инвестиции?',
-        2: 'Виды активов',
-        3: 'Акции',
-        4: 'Облигации',
-        5: 'ETF и фонды',
-        6: 'Инвестиционный портфель',
-        7: 'Горизонт инвестирования'
-      };
-      const modules = {
-        1: 'Модуль 1 — Основы инвестиций',
-        2: 'Модуль 1 — Основы инвестиций',
-        3: 'Модуль 2 — Инвестиционные инструменты',
-        4: 'Модуль 2 — Инвестиционные инструменты',
-        5: 'Модуль 2 — Инвестиционные инструменты',
-        6: 'Модуль 3 — Принципы инвестирования',
-        7: 'Модуль 3 — Принципы инвестирования'
-      };
-      setCurrentArticleData({
-        title: titles[i],
-        module: modules[i],
-        progress: progress || 0,
-        id: i
-      });
-      break;
-    }
-  }
-}, []);
 
   const getCalculatorCardClass = (calculatorId) => {
     if (selectedCalculator === calculatorId) {
@@ -158,7 +126,34 @@ useEffect(() => {
     }
     return 'calculator-card-inactive';
   };
+useEffect(() => {
+  const articlesData = [
+    { id: 1, title: 'Что такое инвестиции?', module: 'Модуль 1 — Основы инвестиций' },
+    { id: 2, title: 'Виды активов', module: 'Модуль 1 — Основы инвестиций' },
+    { id: 3, title: 'Акции', module: 'Модуль 2 — Инвестиционные инструменты' },
+    { id: 4, title: 'Облигации', module: 'Модуль 2 — Инвестиционные инструменты' },
+    { id: 5, title: 'ETF и фонды', module: 'Модуль 2 — Инвестиционные инструменты' },
+    { id: 6, title: 'Инвестиционный портфель', module: 'Модуль 3 — Принципы инвестирования' },
+    { id: 7, title: 'Горизонт инвестирования', module: 'Модуль 3 — Принципы инвестирования' }
+  ];
 
+  const savedProgress = localStorage.getItem('articleProgress');
+  if (savedProgress) {
+    const progress = JSON.parse(savedProgress);
+    for (let i = 1; i <= 7; i++) {
+      if (!progress[i] || progress[i] < 100) {
+        const article = articlesData.find(a => a.id === i);
+        if (article) {
+          setCurrentArticle({
+            ...article,
+            progress: progress[i] || 0
+          });
+        }
+        break;
+      }
+    }
+  }
+}, []);
   return (
     <div className="calculator-layout">
       {/* Центральный блок */}
@@ -408,74 +403,76 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Правый сайдбар - список калькуляторов */}
-      <div className="calculator-sidebar">
-        <div className="sidebar-calculators">
-          <div className="calculators-header">
-            <h3 className="calculators-title">ВЫБЕРИТЕ КАЛЬКУЛЯТОР</h3>
+
+{/* Правый сайдбар - список калькуляторов */}
+{/* Правый сайдбар */}
+<div className="calculator-sidebar">
+  <div className="sidebar-calculators">
+    <div className="calculators-header">
+      <h3 className="calculators-title">ВЫБЕРИТЕ КАЛЬКУЛЯТОР</h3>
+    </div>
+    <div className="calculators-list">
+      {calculators.map((calculator) => (
+        <button
+          key={calculator.id}
+          className={getCalculatorCardClass(calculator.id)}
+          onClick={() => setSelectedCalculator(calculator.id)}
+        >
+          <div className="calculator-card-content">
+            <div className="calculator-card-icon">
+              {selectedCalculator === calculator.id ? (
+                <div className="active-icon-wrapper">
+                  <img src={investIcon} alt="invest" width={20} height={20} className="invest-icon-active" />
+                </div>
+              ) : (
+                <div className="inactive-icon-wrapper">
+                  <img src={investIcon} alt="invest" width={20} height={20} className="invest-icon-inactive" />
+                </div>
+              )}
+            </div>
+            <div className="calculator-card-info">
+              <h4 className="calculator-card-title">{calculator.title}</h4>
+              <p className="calculator-card-description">{calculator.description}</p>
+            </div>
           </div>
-          <div className="calculators-list">
-            {calculators.map((calculator) => (
-              <button
-                key={calculator.id}
-                className={getCalculatorCardClass(calculator.id)}
-                onClick={() => setSelectedCalculator(calculator.id)}
-              >
-<div className="calculator-card-content">
-  <div className="calculator-card-icon">
-    {selectedCalculator === calculator.id ? (
-      <div className="active-icon-wrapper">
-        <img src={investIcon} alt="invest" width={20} height={20} className="invest-icon-active" />
-      </div>
-    ) : (
-      <div className="inactive-icon-wrapper">
-      <img src={investIcon} alt="invest" width={20} height={20} className="invest-icon-inactive" />
-      </div>
-    )}
-  </div>
-  <div className="calculator-card-info">
-    <h4 className="calculator-card-title">{calculator.title}</h4>
-    <p className="calculator-card-description">{calculator.description}</p>
-  </div>
-</div>
-              </button>
-            ))}
-          </div>
-        </div>
-            {/* Блок Продолжить */}
-{currentArticleData && currentArticleData.progress < 100 && (
-  <div className="continue-block">
-    <div className="continue-content">
-      <div className="continue-play">
-        <div className="play-button">
-          <div className="play-triangle"></div>
-        </div>
-        <span className="continue-label">Продолжить</span>
-      </div>
-      <div className="continue-article">
-        <div className="continue-article-title">{currentArticleData.title}</div>
-        <div className="continue-article-module">{currentArticleData.module}</div>
-      </div>
-      <div className="progress-section">
-        <div className="progress-bar-bg">
-          <div className="progress-bar-fill" style={{ width: `${currentArticleData.progress}%` }}></div>
-        </div>
-        <div className="progress-stats">
-          <span className="progress-completed">завершено</span>
-          <span className="progress-percent">{currentArticleData.progress}%</span>
-        </div>
-      </div>
-      <button 
-        className="continue-button" 
-        onClick={() => navigate(`/article/${currentArticleData.id}`)}
-      >
-        Продолжить <img src={ArrowRightIcon} alt="→" className="btn-icon" />
-      </button>
+        </button>
+      ))}
     </div>
   </div>
-)}
-      </div>
 
+  {/* 🔥 Блок "Продолжить" — такой же как на главной */}
+  {currentArticle && (
+    <div className="continue-block">
+      <div className="continue-content">
+        <div className="continue-play">
+          <div className="play-button">
+            <div className="play-triangle"></div>
+          </div>
+          <span className="continue-label">Продолжить</span>
+        </div>
+        <div className="continue-article">
+          <div className="continue-article-title">{currentArticle.title}</div>
+          <div className="continue-article-module">{currentArticle.module}</div>
+        </div>
+        <div className="progress-section">
+          <div className="progress-bar-bg">
+            <div className="progress-bar-fill" style={{ width: `${currentArticle.progress}%` }}></div>
+          </div>
+          <div className="progress-stats">
+            <span className="progress-completed">завершено</span>
+            <span className="progress-percent">{currentArticle.progress}%</span>
+          </div>
+        </div>
+        <button 
+          className="continue-button" 
+          onClick={() => navigate(`/article/${currentArticle.id}`)}
+        >
+          Продолжить <img src={ArrowRightIcon} alt="→" className="btn-icon" />
+        </button>
+      </div>
+    </div>
+  )}
+</div>
     </div>
   );
 };

@@ -103,7 +103,7 @@ async def get_user_progress(session: AsyncSession, id_user: int) -> dict:
     }
 
 async def get_user_activity(session: AsyncSession, id_user: int) -> list:
-    articles_query = select(UserArticle).where(UserArticle.id_user == id_user).options(selectinload(UserArticle.article))
+    articles_query = select(UserArticle).where(UserArticle.id_user == id_user,UserArticle.is_read == True).options(selectinload(UserArticle.article))
     quizzes_query = select(UserQuiz).where(UserQuiz.id_user == id_user).options(selectinload(UserQuiz.quiz))
     articles_result = await session.execute(articles_query)
     quizzes_result = await session.execute(quizzes_query)
